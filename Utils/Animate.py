@@ -82,7 +82,7 @@ def run_pi_eq(state):
 
 #### Runners ####  
 def animate_hist():
-    fl = open ("border.txt")
+    fl = open ("test/border.txt")
     lines = fl.readlines()#.split()
     fl.close()
     #lines = [int(l) for l in lines]
@@ -257,5 +257,5 @@ def animate_mixture(state, raw=False, pi_eq=False):
         # plt.show()
     # plt.savefig("%s_tern.pdf"%state)
     # plt.close()
-animate_mixture("states", False, True)
+# animate_mixture("states", False, True)
 animate_hist()
