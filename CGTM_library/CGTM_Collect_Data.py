@@ -8,13 +8,11 @@ Created on Tue Aug 17 16:24:30 2021
 
 import pandas as pd
 import numpy as np
-import all_possible_states as all_possible_states
+import all_possible_states as aps
 
 class CGTM_Collect_Data:
     def __init__(self,start_sys, end_sys, ref_frame, counting):
         '''
-        
-
         Parameters
         ----------
         start_sys : int
@@ -87,7 +85,7 @@ class CGTM_Collect_Data:
         # up = np.loadtxt("upp.dat")
         # lo = np.loadtxt("low.dat")
         
-        possible_states = all_possible_states()
+        possible_states = aps.all_possible_states()
         
         frames = self.ref_frame
         #resids = np.arange(1,1184+1, 1)
@@ -191,7 +189,7 @@ class CGTM_Collect_Data:
         # up = np.loadtxt("upp.dat")
         # lo = np.loadtxt("low.dat")
         
-        possible_states = all_possible_states()
+        possible_states = aps.all_possible_states()
         
         lipid_list = ["CHL1",
                            "DPPC", "LSM", "NSM", "OAPE", "OAPS", "PAPC", "PAPS",
@@ -355,5 +353,5 @@ class CGTM_Collect_Data:
         S.to_csv("data/States%s.csv"%ending)
       
         
-test = CGTM_Collect_Data(0,1,[0],'charge')
-#test.build_ternary_charge_states()
+# test = CGTM_Collect_Data(0,1,[0],'charge')
+# test.build_ternary_charge_states()
