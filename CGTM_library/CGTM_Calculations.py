@@ -99,4 +99,28 @@ class CGTM_Calculations:
             pi_sig.append(pi_eq)
         sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
         return sig_
+    
+    def build_CGTM_series(self):
+        states = pd.read_csv("/Censere/UDel/resources/test_vor/data/%s%s.csv"%(self.leaflet_in,self.kind),index_col=0).T   
+        pi_eq = []
+        eigs = []
+        for state in states.T:
+            TM_norm = self.build_TM(states.T[state])
+            pi_tmp, eigs_tmp = self.solve_pi_eq(TM_norm)
+            pi_eq.append(pi_tmp)
+            eigs.append(eigs_tmp)
+        return np.asarray(pi_eq),eigs
+
+    def series_weighted_avg(self):
         
+        wsa = []
+        
+        pi_eq, eigs = self.build_CGTM_series()
+        all_states = aps.all_possible_states()
+        for pi in pi_eq:
+            tmp_wsa = [np.sum((pi*all_states[:,0])),np.sum((pi*all_states[:,1])),np.sum((pi*all_states[:,2]))]
+            wsa.append(tmp_wsa)
+        return np.asarray(wsa)
+
+test = CGTM_Calculations("SU",1,"sat")
+wsa = test.series_weighted_avg()

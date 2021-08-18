@@ -328,9 +328,9 @@ class CGTM_Collect_Data:
         SL = pd.DataFrame(index=np.arange(0,602))
         ind = 0
         flInd = []
-        for frm in [0,100,105]:
-            for i in range(0,8):
-                for j in range(0,8):
+        for frm in self.ref_frame:
+            for i in range(self.start_sys,self.end_sys):
+                for j in range(self.start_sys,self.end_sys):
                     fl = '/home/liam/UDel/resources/test_vor/data/states/States'
                     try:
                         tmp_u = pd.read_csv("%sU_%i_%i%i%s.csv"%(fl,frm,i,j,ending),index_col=0,header=0)
