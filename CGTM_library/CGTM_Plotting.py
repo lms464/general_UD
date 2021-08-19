@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import all_possible_states as aps
+import choose_path as chp
 
 def plot_CGTM(pi_eq, TM_norm, leaflet_in, kind):
     states = pd.read_csv("/Censere/UDel/resources/test_vor/data/%s%s.csv"%(leaflet_in,kind),index_col=0).T   
@@ -45,6 +46,158 @@ def plot_sigConverge(sigSU, sigSL):
     plt.savefig("Convergence.pdf")
     plt.close()
 
+def Ternary_Heat_Map(leaflet_in):
+
+    import matplotlib.tri as tri
+
+    def plot_ticks(start, stop, tick, n, offset=(.0, .0)):
+        r = np.linspace(0, 1, n+1)
+        x = start[0] * (1 - r) + stop[0] * r
+        x = np.vstack((x, x + tick[0]))
+        y = start[1] * (1 - r) + stop[1] * r
+        y = np.vstack((y, y + tick[1]))
+        plt.plot(x, y, 'k', lw=1)
+        
+        # add tick labels
+        for xx, yy, rr in zip(x[1], y[1], r):
+            plt.text(xx+offset[0], yy+offset[1], "{:.2}".format(rr))
+    def get_raw(leaflet_in):
+        states = pd.read_csv("%s/%s.csv"%(chp.choose_path(),leaflet_in),index_col=0).T   
+        return states       
+    def get_hist(states):
+        hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,217))
+        return hist/hist.sum(),edge
+    
+    def run_pi_eq(state):
+        states_r = get_raw(state).values[0]
+        states = np.asarray(aps.all_possible_states())
+        return  states,states_r 
+    
+    def run_raw(state):
+        ## Should be removed...
+        states_r = get_raw(state)
+        hist ,edge = get_hist(states_r)
+        states = np.asarray(aps.all_possible_states())
+        return states, hist
+    
+    def run_ternary(state):
+        n = 4
+        tick_size = 0.1
+        margin = 0.05
+        
+        # define corners of triangle    
+        left = np.r_[0, 0]
+        right = np.r_[1, 0]
+        top = np.r_[0.5,  np.sqrt(2.3)*0.576]
+        triangle = np.c_[left, right, top, left]
+        
+        # define vectors for ticks
+        bottom_tick = 0.8264*tick_size * (right - top) / n
+        right_tick = 0.8264*tick_size * (top - left) / n
+        left_tick = 0.8264*tick_size * (left - right) / n
+        
+        # state = "pi_sl"#"StatesL_I"
+        hist = 0
+        states = 0
+        # if raw == True:
+        #     states, hist = run_raw(state)    
+        
+        # elif pi_eq == True:
+        states, hist = run_pi_eq(state)    
+        
+        # elif pi_eq == False and raw == False:
+        #     print("Please set raw or pi_eq to True")
+        #     return 0
+        
+        STATES = []
+        
+        for si, s in enumerate(states):
+            STATES.append(np.append(s,hist[si]))
+        STATES = np.asarray(STATES)
+        
+        
+        #Define twin axis
+        fig, ax = plt.subplots()
+        # Note that the ordering from start to stop is important for the tick labels
+        plot_ticks(right, left, bottom_tick, n, offset=(0, -0.04))
+        plot_ticks(left, top, left_tick, n, offset=(-0.06, -0.0))
+        plot_ticks(top, right, right_tick, n,offset=(0,.01))
+        # fig, tax = ternary.figure(scale=100)
+        # fig.set_size_inches(5, 4.5)
+        # tax.scatter(pd.DataFrame(states)[[0,1,2]].values)
+        # tax.gridlines(multiple=20)
+        # tax.get_axes().axis('off')
+        
+        
+        
+        a = states[:,0]
+        b = states[:,1]
+        c = states[:,2]
+        
+        # # values is stored in the last column
+        v = hist
+        # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
+        # X,Y = [], []
+        # for s in states:
+        #     R = t.dot(s)
+        #     X.append(R[0]), Y.append(R[1])
+        
+        # # translate the data to cartesian corrds
+        x = 0.5 * ( 2.*b+c ) / ( a+b+c )
+        y = 0.5*np.sqrt(3) * c / (a+b+c)
+        
+        
+        # # create a triangulation out of these points
+        T = tri.Triangulation(x,y)
+        
+        # # plot the contour
+        plt.tricontourf(x,y,T.triangles,v,cmap='RdBu_r')
+        
+        
+        # create the grid
+        corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
+        triangle = tri.Triangulation(corners[:, 0], corners[:, 1])
+        
+        # creating the grid
+        refiner = tri.UniformTriRefiner(triangle)
+        trimesh = refiner.refine_triangulation(subdiv=3)
+        
+        # plt.axis('off')
+        
+        
+        
+        #plotting the mesh and caliberate the axis
+        plt.triplot(trimesh,'k--')
+        #plt.title('Binding energy peratom of Al-Ti-Ni clusters')
+        # ax.set_xlabel('Al-Ti',fontsize=12,color='black')
+        # ax.set_ylabel('Ti-Ni',fontsize=12,color='black')
+        # ax2 = ax.twinx()
+        # ax2.set_ylabel('Al-Ni',fontsize=12,color='black')
+        # Corners
+        fig.text(0.15, 0.065, 'Chol', fontsize=12, color='black')
+        fig.text(0.92, 0.19, 'Neutral', fontsize=12, color='black')
+        fig.text(0.40, 0.89, 'Anionic', fontsize=12, color='black')
+        
+        # Connections
+        # fig.text(0.47, 0.05, 'Ti-Al', fontsize=12, color='black')  # Note: not sure about
+        # fig.text(0.72, 0.50, 'Al-Ni', fontsize=12, color='black')  # the nomenclature;
+        # fig.text(0.25, 0.50, 'Ti-Ni', fontsize=12, color='black')  # might be switched
+        
+        
+        #set scale for axis
+        # ax.set_xlim(1, 0)
+        # ax.set_ylim(0, 1)
+        # ax2.set_ylim(1, 0)
+        ax.set_axis_off()
+        cax = plt.axes([0.75, 0.55, 0.055, 0.3])
+        plt.colorbar(cax=cax,format='%.3f')
+        plt.show()
+        #plt.savefig("%s_tern.pdf"%state)
+        #plt.close()
+        
+    run_ternary(leaflet_in)
+        
+
 def Ternary_Scatter(kind, data1, data2=None):
     
     import ternary
@@ -61,3 +214,5 @@ def Ternary_Scatter(kind, data1, data2=None):
     tax.get_axes().axis('off')
     tax.savefig("Ternary_Scatter_%s"%kind)
     tax.close()
+    
+Ternary_Heat_Map("pi_su")
