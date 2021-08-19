@@ -44,3 +44,20 @@ def plot_sigConverge(sigSU, sigSL):
     plt.legend()
     plt.savefig("Convergence.pdf")
     plt.close()
+
+def Ternary_Scatter(kind, data1, data2=None):
+    
+    import ternary
+
+    figure, tax = ternary.figure(scale=1)
+    figure.set_size_inches(10, 10)
+    tax.scatter(data1)
+    if data2 is not None:
+        tax.scatter(data2)
+    tax.boundary(linewidth=2.0)
+    tax.gridlines(multiple=1, color="blue")
+    tax.ticks(axis='lbr', linewidth=.5, multiple=1)
+    tax.clear_matplotlib_ticks()
+    tax.get_axes().axis('off')
+    tax.savefig("Ternary_Scatter_%s"%kind)
+    tax.close()

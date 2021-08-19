@@ -33,7 +33,6 @@ class CGTM_Collect_Data:
         self.end_sys = end_sys
         self.ref_frame = ref_frame
         self.counting = counting
-        self.check_counting_method()
 
     def check_counting_method(self):
         if self.counting == "sat" or self.counting == "saturation":
@@ -331,9 +330,9 @@ class CGTM_Collect_Data:
         for frm in self.ref_frame:
             for i in range(self.start_sys,self.end_sys):
                 for j in range(self.start_sys,self.end_sys):
-                    fl = '/home/liam/UDel/resources/test_vor/data/states/States'
+                    fl = '/home/liam/UDel/resources/test_vor/data/states/'
                     try:
-                        tmp_u = pd.read_csv("%sU_%i_%i%i%s.csv"%(fl,frm,i,j,ending),index_col=0,header=0)
+                        tmp_u = pd.read_csv("%sStatesU_%i_%i%i%s.csv"%(fl,frm,i,j,ending),index_col=0,header=0)
                     except:
                         continue
                     if tmp_u.values[int(len(tmp_u)*3/4):].sum() == 0:
@@ -341,17 +340,17 @@ class CGTM_Collect_Data:
                         print( tmp_u.values[int(len(tmp_u)*3/4):].sum())
                         continue
                     else:
-                        tmp_l =  pd.read_csv("%sL_%i_%i%s%s.csv"%(fl,frm,i,j,ending),index_col=0,header=0)
+                        tmp_l =  pd.read_csv("%sStatesL_%i_%i%s%s.csv"%(fl,frm,i,j,ending),index_col=0,header=0)
                         SU[ind] = tmp_u
                         SL[ind] = tmp_l
                         ind += 1
                         flInd.append("%i%i_%i"%(i,j,frm))
         SU.columns, SL.columns = flInd, flInd
-        SU.to_csv("data/SU%s.csv"%ending,columns=flInd)
-        SL.to_csv("data/SL%s.csv"%ending,columns=flInd)
+        SU.to_csv("%s/SU%s.csv"%(fl,ending),columns=flInd)
+        SL.to_csv("%s/SL%s.csv"%(fl,ending),columns=flInd)
         S = pd.concat([SU,SL],axis=1)
-        S.to_csv("data/States%s.csv"%ending)
+        S.to_csv("%sStates%s.csv"%(fl,ending))
       
         
-# test = CGTM_Collect_Data(0,1,[0],'charge')
-# test.build_ternary_charge_states()
+build = CGTM_Collect_Data(0,8,[0,100,105],"sat")
+build.cat_states()

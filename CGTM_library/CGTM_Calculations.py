@@ -114,7 +114,6 @@ class CGTM_Calculations:
     def series_weighted_avg(self):
         
         wsa = []
-        
         pi_eq, eigs = self.build_CGTM_series()
         all_states = aps.all_possible_states()
         for pi in pi_eq:
@@ -122,5 +121,22 @@ class CGTM_Calculations:
             wsa.append(tmp_wsa)
         return np.asarray(wsa)
 
-test = CGTM_Calculations("SU",1,"sat")
-wsa = test.series_weighted_avg()
+test1 = CGTM_Calculations("SU",1,"sat")
+data1 = test1.series_weighted_avg()
+test2 = CGTM_Calculations("SL",1,"sat")
+data2 = test2.series_weighted_avg()
+import ternary
+import matplotlib.pyplot as plt
+
+
+figure, tax = ternary.figure(scale=1)
+figure.set_size_inches(10, 10)
+tax.scatter(data1)
+# tax.scatter(data2)
+tax.boundary(linewidth=2.0)
+tax.gridlines(multiple=.1, color="blue")
+tax.ticks(axis='lbr', linewidth=.5, multiple=1)
+tax.clear_matplotlib_ticks()
+tax.get_axes().axis('off')
+tax.savefig("sat.pdf")
+tax.close()
