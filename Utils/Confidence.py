@@ -44,7 +44,7 @@ def check_states(data_frm, possible_states):
     return out
 
 
-fl = open ("/home/liam/lms464/Inactive3/borders.txt",'r')
+fl = open ("/home/liam/lms464/Active3/borders.txt",'r')
 lines = fl.readlines()#.split()
 fl.close()
 #lines = [int(l) for l in lines]
@@ -97,9 +97,9 @@ for i in range(0,len(shell),tau):
     #z,p = ztest(N,n1)
     #Z.append(z)
     #P.append(p)
-    
+np.savetxt("Active_cumulative.dat",Z)
 plt.plot(np.linspace(0,10,len(Z)),Z,'o')
-plt.savefig("Inactive.pdf")
+plt.savefig("Active.pdf")
 plt.close()
     # print(tmp)
     #plt.plot(i,tmp[0]/0.00259,"bo--")
