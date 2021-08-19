@@ -9,6 +9,7 @@ Created on Tue Aug 17 16:24:30 2021
 import pandas as pd
 import numpy as np
 import all_possible_states as aps
+import choose_path as chp
 
 class CGTM_Collect_Data:
     def __init__(self,start_sys, end_sys, ref_frame, counting):
@@ -33,6 +34,8 @@ class CGTM_Collect_Data:
         self.end_sys = end_sys
         self.ref_frame = ref_frame
         self.counting = counting
+        self.path = chp.choose_path()
+
 
     def check_counting_method(self):
         if self.counting == "sat" or self.counting == "saturation":
@@ -85,7 +88,6 @@ class CGTM_Collect_Data:
         # lo = np.loadtxt("low.dat")
         
         possible_states = aps.all_possible_states()
-        
         frames = self.ref_frame
         #resids = np.arange(1,1184+1, 1)
     
@@ -101,11 +103,11 @@ class CGTM_Collect_Data:
                     # This looks within a single file
                     
                     try: 
-                        up = np.loadtxt("/Censere/UDel/resources/test_vor/data/resids/upp2_%i%i%i.dat"%(i,j,frm_))
-                        lo = np.loadtxt("/Censere/UDel/resources/test_vor/data/resids/low2_%i%i%i.dat"%(i,j,frm_))
-                        resids = [np.loadtxt('/Censere/UDel/resources/test_vor/data/resids/CHL1_%i%i%i.dat'%(i,j,frm_),dtype='int'),
-                              np.loadtxt('/Censere/UDel/resources/test_vor/data/resids/neutral_%i%i%i.dat'%(i,j,frm_),dtype='int'),
-                              np.loadtxt('/Censere/UDel/resources/test_vor/data/resids/anionic_%i%i%i.dat'%(i,j,frm_),dtype='int')]
+                        up = np.loadtxt("%s/resids/upp2_%i%i%i.dat"%(self.path,i,j,frm_))
+                        lo = np.loadtxt("%s/resids/low2_%i%i%i.dat"%(self.path,i,j,frm_))
+                        resids = [np.loadtxt('%s/resids/CHL1_%i%i%i.dat'%(self.path,i,j,frm_),dtype='int'),
+                              np.loadtxt('%s/resids/neutral_%i%i%i.dat'%(self.path,i,j,frm_),dtype='int'),
+                              np.loadtxt('%s/resids/anionic_%i%i%i.dat'%(self.path,i,j,frm_),dtype='int')]
                     except:
                         continue
                     
@@ -117,7 +119,7 @@ class CGTM_Collect_Data:
     
                     # for lip in ["anionic", "neutral", "CHOL"]:
                     try:
-                        dat = open("/Censere/UDel/resources/test_vor/data/vor/shells_%i%i%i.update.log"%(i,j,frm_),'r')
+                        dat = open("%s/vor/shells_%i%i%i.update.log"%(self.path,i,j,frm_),'r')
                         d_read = dat.readlines()[::3]
                         if len(d_read) < 300:
                             continue
@@ -170,8 +172,8 @@ class CGTM_Collect_Data:
                                                    , possible_states))
                     
                     # fl_comp.close()
-                    pd.DataFrame(states_u).to_csv("/Censere/UDel/resources/test_vor/data/states/StatesU_%i_%i%iNew2.csv"%(frm_,i,j))
-                    pd.DataFrame(states_l).to_csv("/Censere/UDel/resources/test_vor/data/states/StatesL_%i_%i%iNew2.csv"%(frm_,i,j))    
+                    pd.DataFrame(states_u).to_csv("%s/states/StatesU_%i_%i%iNew2.csv"%(self.path,frm_,i,j))
+                    pd.DataFrame(states_l).to_csv("%s/states/StatesL_%i_%i%iNew2.csv"%(self.path,frm_,i,j))    
     
     def build_ternary_saturation_states(self):
         
@@ -220,9 +222,9 @@ class CGTM_Collect_Data:
                     # This looks within a single file
                     
                     try: 
-                        up = np.loadtxt("/Censere/UDel/resources/test_vor/data/resids/upp2_%i%i%i.dat"%(i,j,frm_))
-                        lo = np.loadtxt("/Censere/UDel/resources/test_vor/data/resids/low2_%i%i%i.dat"%(i,j,frm_))
-                        resids = [np.loadtxt('/Censere/UDel/resources/test_vor/data/resids/%s_%i%i%i.dat'%(lip,i,j,frm_),dtype='int') for lip in lipid_list ]
+                        up = np.loadtxt("%s/resids/upp2_%i%i%i.dat"%(self.path,i,j,frm_))
+                        lo = np.loadtxt("%s/resids/low2_%i%i%i.dat"%(self.path,i,j,frm_))
+                        resids = [np.loadtxt('%s/resids/%s_%i%i%i.dat'%(self.path,lip,i,j,frm_),dtype='int') for lip in lipid_list ]
                         _count_ = _count_ + 1
     
                     except:
@@ -236,7 +238,7 @@ class CGTM_Collect_Data:
     
                     # for lip in ["anionic", "neutral", "CHOL"]:
                     try:
-                        dat = open("/Censere/UDel/resources/test_vor/data/vor/shells_%i%i%i.update.log"%(i,j,frm_),'r')
+                        dat = open("%s/vor/shells_%i%i%i.update.log"%(self.path,i,j,frm_),'r')
                         d_read = dat.readlines()[::3]
                         if len(d_read) < 300:
                             continue
@@ -309,8 +311,8 @@ class CGTM_Collect_Data:
                         states_l.append(self.check_states(low_1.iloc[frm_id,:].divide(low_1.iloc[frm_id,:].sum())
                                                    , possible_states))
                     
-                    pd.DataFrame(states_u).to_csv("/Censere/UDel/resources/test_vor/data/states/StatesU_%i_%i%iChainsT.csv"%(frm_,i,j))
-                    pd.DataFrame(states_l).to_csv("/Censere/UDel/resources/test_vor/data/states/StatesL_%i_%i%iChainsT.csv"%(frm_,i,j))
+                    pd.DataFrame(states_u).to_csv("%s/states/StatesU_%i_%i%iChainsT.csv"%(self.path,frm_,i,j))
+                    pd.DataFrame(states_l).to_csv("%s/states/StatesL_%i_%i%iChainsT.csv"%(self.path,frm_,i,j))
     
     def cat_states(self):
         # import glob    
@@ -330,7 +332,7 @@ class CGTM_Collect_Data:
         for frm in self.ref_frame:
             for i in range(self.start_sys,self.end_sys):
                 for j in range(self.start_sys,self.end_sys):
-                    fl = '/home/liam/UDel/resources/test_vor/data/states/'
+                    fl = self.path+'/states/'
                     try:
                         tmp_u = pd.read_csv("%sStatesU_%i_%i%i%s.csv"%(fl,frm,i,j,ending),index_col=0,header=0)
                     except:

@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 import scipy.sparse.linalg as sla
 import all_possible_states as aps
+import choose_path as chp
+
 
 class CGTM_Calculations:
     def __init__(self, leaflet_in, dt, kind):
@@ -18,7 +20,8 @@ class CGTM_Calculations:
         self.leaflet_in = leaflet_in
         self.dt = dt
         self.kind = None
-        
+        self.path = chp.choose_path()
+
         if kind == "sat" or kind == "chain":
             self.kind = "CH"
         elif kind == "chg" or kind == "charge":
@@ -66,13 +69,13 @@ class CGTM_Calculations:
     
     def build_CGTM(self):
     
-        states = pd.read_csv("/Censere/UDel/resources/test_vor/data/%s%s.csv"%(self.leaflet_in,self.kind),index_col=0).T   
+        states = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
         return pi_eq, eigs, TM_norm
         
     def develop_lag(self, dt_max,step):
-        flin = pd.read_csv("./data/%s%s.csv"%(self.leaflet_in,self.kind),index_col=0).T   
+        flin = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         dts = [1,5,10,20,50,100,200,300,400,500,600]#np.arange(1,dt_max)
         pi = []
         eig = []
@@ -88,7 +91,7 @@ class CGTM_Calculations:
         return sig_pi
     
     def sigConverge(self):
-        states = pd.read_csv("/Censere/UDel/resources/test_vor/data/%s%s.csv"%(self.leaflet_in,self.kind),index_col=0).T   
+        states = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         TM_norm = self.build_TM(states.iloc[0,::self.dt])
         pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
         pi_sig = []
@@ -101,7 +104,7 @@ class CGTM_Calculations:
         return sig_
     
     def build_CGTM_series(self):
-        states = pd.read_csv("/Censere/UDel/resources/test_vor/data/%s%s.csv"%(self.leaflet_in,self.kind),index_col=0).T   
+        states = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         pi_eq = []
         eigs = []
         for state in states.T:
