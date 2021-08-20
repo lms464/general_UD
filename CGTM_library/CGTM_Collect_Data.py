@@ -128,7 +128,9 @@ class CGTM_Collect_Data:
                         continue
                     #frm is the frame of the "local" simulation
                     # loop through the file and strip data
+                    n_res = []
                     for frm, dr in enumerate(d_read):
+                        tmp_res = 0
                         # an_check = []
                         res = dr.split()[1::2]
                         shell = dr.split()[0::2]
@@ -136,6 +138,7 @@ class CGTM_Collect_Data:
                             s = int(s)
                             r = int(r)
                             if s==1:
+                                tmp_res = tmp_res + 1
                                 #if lip in ["neutral","pl","sm"]:
                                     # resids[0] ONLY contain cholesterol
                                     # 1 for neutral and 2 for anionic
@@ -144,23 +147,19 @@ class CGTM_Collect_Data:
                                 if r in resids[0]:
                                     if r in lo:
                                         low_1["CHOL"][frm] += 1
-                                    if r in up:
+                                    elif r in up:
                                         upp_1["CHOL"][frm] += 1
                                 elif r in resids[1]:
                                     if r in lo:
                                         low_1["neutral"][frm] += 1
-                                    if r in up:
-                                        upp_1["neutral"][frm] +=1
-                                #elif lip == "anionic":
+                                    elif r in up:
+                                        upp_1["neutral"][frm] += 1
                                 elif r in resids[2]:
                                     if r in lo:
-                                        low_1["anionic"][frm] +=1
-                                        #print("lo",r)
-                                        # an_check.append(1)
+                                        low_1["anionic"][frm] += 1
                                     elif r in up:
-                                        upp_1["anionic"][frm] +=1
-                                        #print("up",r)
-                                        # an_check.append(-1)
+                                        upp_1["anionic"][frm] += 1
+                        n_res.append(tmp_res)
                         # print()
                         #upp_1.iloc[frm,:] = upp_1.iloc[frm,:].divide(upp_1.iloc[frm,:].sum()) 
                     # fl_comp = open("check_comp.dat","w")
@@ -201,8 +200,11 @@ class CGTM_Collect_Data:
                            "POPE":[0,1], "PSM":[0,0], "SAPI":[0,4], "SAPS":[0,4], "SOPC":[0,1]}
         
         saturation = pd.DataFrame(saturation.values(),index=saturation.keys()).astype(float)
-        unsat = saturation[(saturation>0).all(axis=1)]
-        sat = saturation[(saturation==0).all(axis=1)]
+        unsat = saturation[(saturation.sum(axis=1)>0)]
+        sat = saturation[(saturation.sum(axis=1)==0)]
+        ## remove chol from sat
+        sat = sat.drop(["CHL1"])
+        
         frames = self.ref_frame
         
         _count_ = 0
@@ -218,7 +220,7 @@ class CGTM_Collect_Data:
         for frm_ in frames:
             for i in range(self.start_sys,self.end_sys):
                 for j in range(self.start_sys,self.end_sys):
-                    sat_list = []
+                    #sat_list = []
                     # This looks within a single file
                     
                     try: 
@@ -230,6 +232,8 @@ class CGTM_Collect_Data:
                     except:
                         continue
                     resids = pd.DataFrame(resids,index=lipid_list).fillna(-1).T.astype(int)
+                    sat_id = resids[sat.index].values[resids[sat.index] > 0]
+                    unsat_id = resids[unsat.index].values[resids[unsat.index] > 0]
                     print("Calculatings States for system:  %i%i %i..."%(i,j,frm_))
                     states_u = []
                     states_l = []
@@ -247,8 +251,10 @@ class CGTM_Collect_Data:
                         continue
                     #frm is the frame of the "local" simulation
                     # loop through the file and strip data
+                    n_rid = []
                     for frm, dr in enumerate(d_read):
-                        tmp_list = []
+                        tmp_rid = 0
+                        #tmp_list = []
                         tmp_low = []
                         tmp_upp = []
     
@@ -256,9 +262,15 @@ class CGTM_Collect_Data:
                         res = dr.split()[1::2]
                         shell = dr.split()[0::2]
                         for r,s in zip(res,shell):
+                            
                             s = int(s)
                             r = int(r)
                             if s==1:
+                                # if r in resids:
+                                #     print(True)
+                                # else:
+                                #     print(False)
+                                tmp_rid = tmp_rid + 1
                                 #if lip in ["neutral","pl","sm"]:
                                     # resids[0] ONLY contain cholesterol
                                     # 1 for neutral and 2 for anionic
@@ -268,32 +280,31 @@ class CGTM_Collect_Data:
                                     qed=chain_sel(r,resids,sat,saturation)
                                     tmp_low.append(saturation.T[qed].values[0])
                                     tmp_low.append(saturation.T[qed].values[1])
-                                if r in up:
+                                elif r in up:
                                     qed=chain_sel(r,resids,sat,saturation)
                                     tmp_upp.append(saturation.T[qed].values[0])
                                     tmp_upp.append(saturation.T[qed].values[1])
                                 # qed=chain_sel(r,resids,sat,saturation)
                                 # tmp_list.append(saturation.T[qed].values[0])
-                                if r in resids["CHL1"]:
+                                if r in resids["CHL1"].values:
                                     if r in lo:
                                         low_1["CHOL"][frm] += 1
-                                    if r in up:
+                                    elif r in up:
                                         upp_1["CHOL"][frm] += 1
                                         
-                                elif r in resids[sat.index].values:
-                                    
+                                elif r in sat_id: 
                                     if r in lo:
                                         low_1["sat"][frm] += 1
-                                    if r in up:
-                                        upp_1["sat"][frm] +=1
+                                    elif r in up:
+                                        upp_1["sat"][frm] += 1  
                                         
-                                        
-                                elif r in resids[unsat.index].values:
+                                elif r in unsat_id:
                                     if r in lo:
-                                        low_1["unsat"][frm] +=1
+                                        low_1["unsat"][frm] += 1
     
                                     elif r in up:
-                                        upp_1["unsat"][frm] +=1
+                                        upp_1["unsat"][frm] += 1
+                        n_rid.append(tmp_rid)
                         #sat_list.append(np.histogram(tmp_list,range(0,10))[0])
                         upper_sat.append(tmp_upp)
                         lower_sat.append(tmp_low)
@@ -355,4 +366,5 @@ class CGTM_Collect_Data:
       
         
 build = CGTM_Collect_Data(0,8,[0,100,105],"sat")
-build.cat_states()
+# build.build_ternary_charge_states()
+build.build_ternary_saturation_states()
