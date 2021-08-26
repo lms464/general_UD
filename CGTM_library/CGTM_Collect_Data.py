@@ -327,7 +327,7 @@ class CGTM_Collect_Data:
                     
                     pd.DataFrame(states_u).to_csv("%s/states/StatesU_%i_%i%iChainsT.csv"%(self.path,frm_,i,j))
                     pd.DataFrame(states_l).to_csv("%s/states/StatesL_%i_%i%iChainsT.csv"%(self.path,frm_,i,j))
-    
+                    
     def cat_states(self):
         # import glob    
         
@@ -366,9 +366,55 @@ class CGTM_Collect_Data:
         SL.to_csv("%s/SL%s.csv"%(fl,ending),columns=flInd)
         S = pd.concat([SU,SL],axis=1)
         S.to_csv("%s/States%s.csv"%(fl,ending))
-      
         
-build = CGTM_Collect_Data(0,8,[0,100,105],"sat")
+    def build_simplified(self):
+        all_states = []
+        for frm_ in self.ref_frame:
+            for i in range(self.start_sys,self.end_sys):
+                for j in range(self.start_sys,self.end_sys):
+                    try:
+                        fl =open("%s/vor/shells_%i%i%i_simplified.update.log"%(self.path,i,j,frm_),'r')
+                        lines = fl.readlines()#.split()
+                        fl.close()
+                    except:
+                        continue   
+                    #lines = [int(l) for l in lines]
+                    shell = []
+                    for l in lines[1::3]:
+                    	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+                    shell_arr = np.array(shell)
+                    shell_arr = np.array([[sh[0]/sh.sum(),sh[1]/sh.sum(),sh[2]/sh.sum()] for sh in shell_arr])
+                    possible_states = aps.all_possible_states()
+                    
+                    states = []
+                    
+                    for s in shell_arr:
+                    	states.append(self.check_states(s,possible_states))
+                    all_states.append(states)
+                    
+        pd.DataFrame(all_states).to_csv("%s/simplified_raw.csv"%self.path)
+        # hist, edge = np.histogram(states,range(0,len(possible_states)+1),normed=True)
+        # # plt.bar(edge[:-1],hist)
+        # # plt.show()
+        # # np.savetxt("states_short_raw.txt",states,fmt="%i")
+        # pd.DataFrame(hist).to_csv("%s/simplified_raw.csv"%self.path)
+        # dt = 500
+        # shell_con = (shell_arr.T/ shell_arr.sum(axis = 1)).T
+        # dppc,dp_var = [],[]
+        # chol,ch_var = [],[]
+        # dopc,do_var = [],[]
+        # for frm in range(0,len(shell_con),dt):
+        #     dppc.append(shell_con[frm:frm+dt,0].mean()), dp_var.append(shell_con[frm:frm+dt,0].var())
+        #     chol.append(shell_con[frm:frm+dt,1].mean()), ch_var.append(shell_con[frm:frm+dt,1].var())
+        #     dopc.append(shell_con[frm:frm+dt,2].mean()), do_var.append(shell_con[frm:frm+dt,2].var())
+        # print("DPPC:  %f"%(hist * possible_states[:,0]).sum())
+        # print("DOPC:  %f"%(hist * possible_states[:,1]).sum())
+        # print("CHOL:  %f"%(hist * possible_states[:,2]).sum())
+        # return hist,edge
+        
+build = CGTM_Collect_Data(0,8,[0,100,105],"")
+# build.analysis_multi_raw()
+build.build_simplified()
 # build.build_ternary_charge_states()
-build.cat_states()
+#build.cat_states()
 

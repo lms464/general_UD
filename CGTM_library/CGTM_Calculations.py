@@ -95,7 +95,29 @@ class CGTM_Calculations:
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
         return pi_eq, eigs, TM_norm
+
+    def build_simplified_CGTM(self):
+    
+        states = pd.read_csv("%s/simplified_raw.csv"%self.path,index_col=0).T
+        states = states.fillna(0)
+        states_use = pd.DataFrame()
+        for s in states:
+            if states[s][250:].sum() == 0:
+                continue
+            else:
+                states_use[s] = states[s]
+        TM_norm = self.build_TM(states.iloc[:,::self.dt])
+        pi_eq, eigs = self.solve_pi_eq(TM_norm)
+        print("DPPC:  %f"%(pi_eq * aps.all_possible_states()[:,0]).sum())
+        print("DOPC:  %f"%(pi_eq * aps.all_possible_states()[:,1]).sum())
+        print("CHOL:  %f\n\n"%(pi_eq * aps.all_possible_states()[:,2]).sum())
         
+        hist,edge = np.histogram(states_use,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+        print("DPPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,0]).sum())
+        print("DOPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,1]).sum())
+        print("CHOL:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,2]).sum())        
+        return pi_eq, eigs, TM_norm        
+
     def develop_lag(self, dt_max,step):
         flin = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         dts = [1,5,10,20,50,100,200,300,400,500,600]#np.arange(1,dt_max)
@@ -156,8 +178,8 @@ class CGTM_Calculations:
         pi_raw = self.build_raw()[0]
         pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
 
-# test1 = CGTM_Calculations("SU",1,"charge")
-# # test1.build_CGTM()
+test1 = CGTM_Calculations("SU",1,"charge")
+out = test1.build_simplified_CGTM()
 # test1.write_pi_eq()
 # test1.write_pi_raw()
 
