@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools 
+import scipy.sparse.linalg as sla
 
 
 def all_possible_states():
@@ -79,6 +80,133 @@ def analysis(path,out):
     print("DPPC: %f"%np.mean(dppc[int(len(dppc)/2):]))
     print("DOPC: %f"%np.mean(dopc[int(len(dppc)/2):]))
     print("CHOL: %f"%np.mean(chol[int(len(dppc)/2):]))
+    return hist,edge
 
-analysis("/home/sharplm/Active3","active")
-analysis("/home/sharplm/Inactive3","inactive")
+def build_TM(states):
+    all_states = all_possible_states()
+    TM_m = np.zeros((len(all_states),len(all_states)))
+    # norm_t = []
+    
+    if np.ndim(states) == 1:
+        for si in range(1, len(states)):
+            TM_m[int(states[si]),int(states[si-1])] += 1 
+    else:
+        for S in states:
+            for si in range(1, len(states[S])):
+                TM_m[int(states[S][si]),int(states[S][si-1])] += 1 
+    TM_sym = 1/2 * (TM_m + TM_m.T)
+    norm = TM_m.sum(axis=1)
+    TM_norm = np.zeros(np.shape(TM_sym))
+    for i,j in enumerate(TM_m):
+        TM_norm[i] = j / norm[i]
+    
+    #TM_norm = np.divide(TM_m, norm)
+    TM_norm = np.nan_to_num(TM_norm)
+    # TM_test = np.nan_to_num(np.divide(TM_m, norm))
+    return TM_norm    
+
+
+def solve_pi_eq(P):
+    evals, evecs = sla.eigs(P.T, k = 1, which='LM')
+    evecs = np.real(evecs)
+    pi_eg = (evecs/evecs.sum()).real
+    pi_eg[pi_eg < 10**(-7)] = 0 #TODO wait... why?
+    pi_EG = np.array([e[0] for e in pi_eg])
+    pi_eg = pi_EG
+    return pi_eg, np.linalg.eig(P.T)            
+
+def build_CGTM(path):
+
+    states = pd.read_csv("%s/%s%s.csv"%(path),index_col=0).T   
+    TM_norm = build_TM(states)
+    pi_eq, eigs = solve_pi_eq(TM_norm)
+    pd.DataFrame(pi_eq).to_csv("%s/pi_%s_%s.csv"%(path))
+    pd.DataFrame(TM_norm).to_csv("%s/CGTM_%s_%s.csv"%(path))
+    #return pi_eq, eigs, TM_norm
+
+
+def analysis_multi_cgtm(path,init,fint):
+    
+    full_states = []
+    for i in range(init,fint+1):
+        fl = open (path+"%i/borders.txt"%i)
+        lines = fl.readlines()#.split()
+        fl.close()
+        #lines = [int(l) for l in lines]
+        shell = []
+        for l in lines[1::3]:
+        	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+        shell_arr = np.array(shell)
+        
+        possible_states = all_possible_states()
+        
+        states = []
+        
+        for s in shell:
+        	states.append(check_states(s,possible_states))
+        full_states.append(states)
+        
+    TM_norm = build_TM(pd.DataFrame(full_states))
+    pi_eq, eigs = solve_pi_eq(TM_norm)
+    plt.bar(range(0,len(all_possible_states()),len(all_possible_states())),pi_eq)
+    plt.show()
+    np.savetxt("states_short_raw.txt",states,fmt="%i")
+    pd.DataFrame(pi_eq).to_csv("states_short_raw.csv")
+    print("DPPC:  %f"%(pi_eq * all_possible_states()[:,0]).sum())
+    print("DOPC:  %f"%(pi_eq * all_possible_states()[:,1]).sum())
+    print("CHOL:  %f"%(pi_eq * all_possible_states()[:,2]).sum())
+    return pi_eq
+    
+
+def analysis_multi_raw(path,init,fint):
+    
+    for i in range(init,fint+1):
+        fl = open (path+"%i/borders.txt"%i)
+        lines = fl.readlines()#.split()
+        fl.close()
+        #lines = [int(l) for l in lines]
+        shell = []
+        for l in lines[1::3]:
+        	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+        shell_arr = np.array(shell)
+        
+        possible_states = all_possible_states()
+        
+        states = []
+        
+        for s in shell:
+        	states.append(check_states(s,possible_states))
+        states = np.array(states)
+    hist, edge = np.histogram(states,range(0,len(possible_states)+1),normed=True)
+    plt.bar(edge[:-1],hist)
+    plt.show()
+    np.savetxt("states_short_raw.txt",states,fmt="%i")
+    pd.DataFrame(hist).to_csv("states_short_raw.csv")
+    dt = 500
+    shell_con = (shell_arr.T/ shell_arr.sum(axis = 1)).T
+    dppc,dp_var = [],[]
+    chol,ch_var = [],[]
+    dopc,do_var = [],[]
+    for frm in range(0,len(shell_con),dt):
+        dppc.append(shell_con[frm:frm+dt,0].mean()), dp_var.append(shell_con[frm:frm+dt,0].var())
+        chol.append(shell_con[frm:frm+dt,1].mean()), ch_var.append(shell_con[frm:frm+dt,1].var())
+        dopc.append(shell_con[frm:frm+dt,2].mean()), do_var.append(shell_con[frm:frm+dt,2].var())
+    print("DPPC: %f"%np.mean(dppc[int(len(dppc)/2):]))
+    print("DOPC: %f"%np.mean(dopc[int(len(dppc)/2):]))
+    print("CHOL: %f"%np.mean(chol[int(len(dppc)/2):]))
+    return hist,edge
+
+pi_eq = analysis_multi_cgtm("/home/sharplm/shot_inactive",2,10)
+hist,edge=analysis_multi_raw("/home/sharplm/shot_inactive",2,10)
+#hist,edge = analysis("/home/sharplm/Inactive3","inactive")
+
+dif = pi_eq - hist
+plt.bar(edge[:-1],pi_eq)
+plt.savefig("Inactive_pi_eq.pdf")
+plt.close()
+plt.bar(edge[:-1],hist)
+plt.savefig("Inactive_Long.pdf")
+plt.close()
+plt.bar(edge[:-1],dif)
+plt.savefig("Inactive_diff.pdf")
+plt.close()

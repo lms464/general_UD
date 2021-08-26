@@ -176,13 +176,14 @@ class CGTM_Collect_Data:
     
     def build_ternary_saturation_states(self):
         
-        def chain_sel(r, resids, ref_list, sat_list):
-        	tmp = 0
-        	test = resids[r==resids.values]
-        	for c in test.columns:
-        	    if r in test[c].values:
-        	        tmp = c
-        	return tmp
+        def chain_sel(r, resids, sat_list):
+            tmp = 0
+            # resids = resids.T.drop(["CHL1"]).T
+            test = resids[r==resids.values]
+            for c in test.columns:
+                if r in test[c].values:
+            	    tmp = c
+            return tmp
         
         # Initialize resid's assumption there isn't a lot of movement 
         # due to the amount of time that has passed (30ns)
@@ -277,13 +278,15 @@ class CGTM_Collect_Data:
                                     # lo are resids in the upper leaflet (sim is upside down)
                                     # and up is the lwoer leaflet
                                 if r in lo:
-                                    qed=chain_sel(r,resids,sat,saturation)
-                                    tmp_low.append(saturation.T[qed].values[0])
-                                    tmp_low.append(saturation.T[qed].values[1])
+                                    if r not in resids["CHL1"]:
+                                        qed=chain_sel(r,resids,saturation)
+                                        tmp_low.append(saturation.T[qed].values[0])
+                                        tmp_low.append(saturation.T[qed].values[1])
                                 elif r in up:
-                                    qed=chain_sel(r,resids,sat,saturation)
-                                    tmp_upp.append(saturation.T[qed].values[0])
-                                    tmp_upp.append(saturation.T[qed].values[1])
+                                    if r not in resids["CHL1"]:
+                                        qed=chain_sel(r,resids,saturation)
+                                        tmp_upp.append(saturation.T[qed].values[0])
+                                        tmp_upp.append(saturation.T[qed].values[1])
                                 # qed=chain_sel(r,resids,sat,saturation)
                                 # tmp_list.append(saturation.T[qed].values[0])
                                 if r in resids["CHL1"].values:
@@ -362,9 +365,10 @@ class CGTM_Collect_Data:
         SU.to_csv("%s/SU%s.csv"%(fl,ending),columns=flInd)
         SL.to_csv("%s/SL%s.csv"%(fl,ending),columns=flInd)
         S = pd.concat([SU,SL],axis=1)
-        S.to_csv("%sStates%s.csv"%(fl,ending))
+        S.to_csv("%s/States%s.csv"%(fl,ending))
       
         
 build = CGTM_Collect_Data(0,8,[0,100,105],"sat")
 # build.build_ternary_charge_states()
-build.build_ternary_saturation_states()
+build.cat_states()
+

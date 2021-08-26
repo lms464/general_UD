@@ -23,9 +23,9 @@ class CGTM_Calculations:
         self.path = chp.choose_path()
 
         if kind == "sat" or kind == "chain":
-            self.kind = "CH"
+            self.kind = "ChainsT"
         elif kind == "chg" or kind == "charge":
-            self.kind = "NEW2"
+            self.kind = "New2"
         
     def __get_leaflet__(self):
         return self.leaflet_in
@@ -33,6 +33,28 @@ class CGTM_Calculations:
     def __get_kind__(self):
         return self.kind
     
+    def build_raw(self):
+        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+        # plt.bar(edge[:-1],hist/hist.sum())
+        # plt.savefig("%s_state_raw_%s.pdf"%(nm,kind))
+        # plt.close()
+        return hist/np.sum(hist),edge
+
+    def get_frame_state_composition(self,sel_frm=0):
+        
+        out = []
+        
+        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T[sel_frm]
+        all_states = aps.all_possible_states()
+        for s in states:
+            out.append(all_states[s])
+        #hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+        # plt.bar(edge[:-1],hist/hist.sum())
+        # plt.savefig("%s_state_raw_%s.pdf"%(nm,kind))
+        # plt.close()
+        return np.array(out)
+
     
     def build_TM(self,states):
         all_states = aps.all_possible_states()
@@ -62,20 +84,20 @@ class CGTM_Calculations:
         evals, evecs = sla.eigs(P.T, k = 1, which='LM')
         evecs = np.real(evecs)
         pi_eg = (evecs/evecs.sum()).real
-        pi_eg[pi_eg < 10**(-7)] = 0 #TODO wait... why?
+        pi_eg[pi_eg < 10**(-12)] = 0 
         pi_EG = np.array([e[0] for e in pi_eg])
         pi_eg = pi_EG
         return pi_eg, np.linalg.eig(P.T)            
     
     def build_CGTM(self):
     
-        states = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
         return pi_eq, eigs, TM_norm
         
     def develop_lag(self, dt_max,step):
-        flin = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        flin = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         dts = [1,5,10,20,50,100,200,300,400,500,600]#np.arange(1,dt_max)
         pi = []
         eig = []
@@ -91,7 +113,7 @@ class CGTM_Calculations:
         return sig_pi
     
     def sigConverge(self):
-        states = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         TM_norm = self.build_TM(states.iloc[0,::self.dt])
         pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
         pi_sig = []
@@ -103,16 +125,18 @@ class CGTM_Calculations:
         sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
         return sig_
     
-    def build_CGTM_series(self):
-        states = pd.read_csv("%s/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
-        pi_eq = []
-        eigs = []
-        for state in states.T:
-            TM_norm = self.build_TM(states.T[state])
-            pi_tmp, eigs_tmp = self.solve_pi_eq(TM_norm)
-            pi_eq.append(pi_tmp)
-            eigs.append(eigs_tmp)
-        return np.asarray(pi_eq),eigs
+    # def build_CGTM_series(self):
+    # THIS SHOULDN'T BE
+    #
+    #     states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+    #     pi_eq = []
+    #     eigs = []
+    #     for state in states.T:
+    #         TM_norm = self.build_TM(states.T[state])
+    #         pi_tmp, eigs_tmp = self.solve_pi_eq(TM_norm)
+    #         pi_eq.append(pi_tmp)
+    #         eigs.append(eigs_tmp)
+    #     return np.asarray(pi_eq),eigs
 
     def series_weighted_avg(self):
         
@@ -124,23 +148,38 @@ class CGTM_Calculations:
             wsa.append(tmp_wsa)
         return np.asarray(wsa)
 
-test1 = CGTM_Calculations("SU",1,"sat")
-data1 = test1.series_weighted_avg()
-test2 = CGTM_Calculations("SL",1,"sat")
-data2 = test2.series_weighted_avg()
+    def write_pi_eq(self):
+        pi_eq = self.build_CGTM()[0]
+        pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
+        
+    def write_pi_raw(self):
+        pi_raw = self.build_raw()[0]
+        pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
 
-import ternary
-import matplotlib.pyplot as plt
+# test1 = CGTM_Calculations("SU",1,"charge")
+# # test1.build_CGTM()
+# test1.write_pi_eq()
+# test1.write_pi_raw()
+
+# test1 = CGTM_Calculations("SL",1,"charge")
+# test1.build_CGTM()
+# test1.write_pi_eq()
+# test1.write_pi_raw()
+
+# data1 = test1.series_weighted_avg()
+
+# import ternary
+# import matplotlib.pyplot as plt
 
 
-figure, tax = ternary.figure(scale=1)
-figure.set_size_inches(10, 10)
-tax.scatter(data1)
-tax.scatter(data2)
-tax.boundary(linewidth=2.0)
-tax.gridlines(multiple=.1, color="blue")
-tax.ticks(axis='lbr', linewidth=.5, multiple=1)
-tax.clear_matplotlib_ticks()
-tax.get_axes().axis('off')
-tax.savefig("sat.pdf")
-tax.close()
+# figure, tax = ternary.figure(scale=1)
+# figure.set_size_inches(10, 10)
+# tax.scatter(data1)
+# # tax.scatter(data2)
+# tax.boundary(linewidth=2.0)
+# tax.gridlines(multiple=.1, color="blue")
+# tax.ticks(axis='lbr', linewidth=.5, multiple=1)
+# tax.clear_matplotlib_ticks()
+# tax.get_axes().axis('off')
+# # tax.savefig("sat.pdf")
+# # tax.close()
