@@ -30,7 +30,6 @@ class MidpointNormalize(mcol.Normalize):
 		return np.ma.masked_array(np.interp(value, x, y), np.isnan(value))
 
 def plot_CGTM(pi_eq, TM_norm, leaflet_in, kind):
-    states = pd.read_csv("/Censere/UDel/resources/test_vor/data/%s%s.csv"%(leaflet_in,kind),index_col=0).T   
 
     plt.bar(np.arange(0,len(aps.all_possible_states())),pi_eq)
     plt.ylabel("Prob of State")
@@ -45,28 +44,32 @@ def plot_CGTM(pi_eq, TM_norm, leaflet_in, kind):
     plt.savefig("%s_TMCG_%s.pdf"%(leaflet_in,kind))
     plt.close()
     
-    plt.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=220)
-    plt.xlabel("Simulation")
-    plt.ylabel("Frame")
-    plt.colorbar(label="State")
-    plt.savefig("%s_State_Change_Sims%s.pdf"%(leaflet_in,kind))
-    plt.close()
-
-def diff_plot(pi,raw, nm,kind, ax):
+    try:
+        states = pd.read_csv("/Censere/UDel/resources/test_vor/data/states/%s%s.csv"%(leaflet_in,kind),index_col=0).T   
+    
+        plt.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=220)
+        plt.xlabel("Simulation")
+        plt.ylabel("Frame")
+        plt.colorbar(label="State")
+        plt.savefig("%s_State_Change_Sims%s.pdf"%(leaflet_in,kind))
+        plt.close()
+    except:
+        pass
+def diff_plot(pi,raw, ax):
     dpi = pi - raw
     #fig, ax = plt.subplots()
     line = ax.bar(np.arange(0,len(aps.all_possible_states())), dpi)
     return line
 
 
-def plot_sigConverge(sigSU, sigSL):
+def plot_sigConverge(sigSU, sigSL,kind):
     sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
     plt.plot(sim_list,sigSU,"o--",label="Outer Leaflet")
     plt.plot(sim_list,sigSL,"+--",label="Inner Leaflet")
     plt.ylabel(r"$\sigma_{\pi}$")
     plt.xlabel("Simulations Used")
     plt.legend()
-    plt.savefig("Convergence.pdf")
+    plt.savefig("Convergence_%s.pdf"%kind)
     plt.close()
 
 def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
@@ -88,7 +91,7 @@ def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
         states = pd.read_csv("%s/%s.csv"%(chp.choose_path(),leaflet_in),index_col=0).T   
         return states       
     def get_hist(states):
-        hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,217))
+        hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
         return hist/hist.sum(),edge
     
     def run_pi_eq(state):

@@ -33,6 +33,30 @@ class CGTM_Calculations:
     def __get_kind__(self):
         return self.kind
     
+    def __test__(self):
+        def get_A(P):
+            I = np.eye(len(P))
+            row_1 = np.ones((len(P)))
+            A = np.vstack([P.T-I,row_1])
+            return A
+        def get_B(A):
+            B = np.zeros(np.shape(A)[0])
+            B[-1] = 1.0
+            return B
+        def LinSolve(A,B):
+            return np.linalg.solve(A.T.dot(A),A.T.dot(B)) 
+        
+        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        TM_norm = self.build_TM(states.iloc[:,::self.dt])
+        A = get_A(TM_norm)
+        B = get_B(A)
+        pi_lin = LinSolve(A, B)
+        pi_lin[pi_lin < 10**(-12)] = 0
+        pi_lin = pi_lin / pi_lin.sum()
+        pi_eig, eigs = self.solve_pi_eq(TM_norm)
+        return pi_lin, pi_eig, np.allclose(pi_lin, pi_eig), TM_norm
+
+    
     def build_raw(self):
         states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
@@ -62,18 +86,21 @@ class CGTM_Calculations:
         # norm_t = []
         
         if np.ndim(states) == 1:
-            for si in range(1, len(states)):
-                TM_m[int(states[si]),int(states[si-1])] += 1 
+            import os
+            print("Your states matrix has one row. This does not work")
+            os.exit()
+            # for si in range(1, len(states)):
+            #     TM_m[int(states[si]),int(states[si-1])] += 1 
         else:
             for S in states:
                 for si in range(1, len(states[S])):
                     TM_m[int(states[S][si]),int(states[S][si-1])] += 1 
-        TM_sym = 1/2 * (TM_m + TM_m.T)
         norm = TM_m.sum(axis=1)
-        TM_norm = np.zeros(np.shape(TM_sym))
+        TM_norm = np.zeros(np.shape(TM_m))
         for i,j in enumerate(TM_m):
             TM_norm[i] = j / norm[i]
-        
+        # TM_sym = 1/2 * (TM_norm + TM_norm.T)
+
         #TM_norm = np.divide(TM_m, norm)
         TM_norm = np.nan_to_num(TM_norm)
         # TM_test = np.nan_to_num(np.divide(TM_m, norm))
@@ -83,18 +110,36 @@ class CGTM_Calculations:
     def solve_pi_eq(self, P):
         evals, evecs = sla.eigs(P.T, k = 1, which='LM')
         evecs = np.real(evecs)
+        evecs[np.abs(evecs) < 10**(-12)] = 0
         pi_eg = (evecs/evecs.sum()).real
-        pi_eg[pi_eg < 10**(-12)] = 0 
+        #pi_eg[pi_eg < 10**(-12)] = 0 
         pi_EG = np.array([e[0] for e in pi_eg])
         pi_eg = pi_EG
         return pi_eg, np.linalg.eig(P.T)            
     
     def build_CGTM(self):
-    
+        
+        def get_A(P):
+            I = np.eye(len(P))
+            row_1 = np.ones((len(P)))
+            A = np.vstack([P.T-I,row_1])
+            return A
+        def get_B(A):
+            B = np.zeros(np.shape(A)[0])
+            B[-1] = 1.0
+            return B
+        def LinSolve(A,B):
+            return np.linalg.solve(A.T.dot(A),A.T.dot(B)) 
+        
         states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
-        return pi_eq, eigs, TM_norm
+        A = get_A(TM_norm)
+        B = get_B(A)
+        pi_lin = LinSolve(A,B)
+        
+        
+        return pi_eq, eigs, TM_norm, pi_lin
 
     def build_simplified_CGTM(self):
     
@@ -116,7 +161,7 @@ class CGTM_Calculations:
         print("DPPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,0]).sum())
         print("DOPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,1]).sum())
         print("CHOL:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,2]).sum())        
-        return pi_eq, eigs, TM_norm        
+        return pi_eq, eigs, TM_norm,hist        
 
     def develop_lag(self, dt_max,step):
         flin = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
@@ -136,7 +181,7 @@ class CGTM_Calculations:
     
     def sigConverge(self):
         states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
-        TM_norm = self.build_TM(states.iloc[0,::self.dt])
+        TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
         pi_sig = []
         sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
@@ -178,8 +223,9 @@ class CGTM_Calculations:
         pi_raw = self.build_raw()[0]
         pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
 
-test1 = CGTM_Calculations("SU",1,"charge")
-out = test1.build_simplified_CGTM()
+# test1 = CGTM_Calculations("SL",1,"charge")
+# test1.build_simplified_CGTM()
+#pi_lin, pi_eig, comp, TM = test1.__test__()
 # test1.write_pi_eq()
 # test1.write_pi_raw()
 

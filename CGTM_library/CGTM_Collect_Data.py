@@ -128,6 +128,8 @@ class CGTM_Collect_Data:
                         continue
                     #frm is the frame of the "local" simulation
                     # loop through the file and strip data
+                    
+                    # n_res counds the number of lipids in the first shell ~40-45
                     n_res = []
                     for frm, dr in enumerate(d_read):
                         tmp_res = 0
@@ -393,28 +395,10 @@ class CGTM_Collect_Data:
                     all_states.append(states)
                     
         pd.DataFrame(all_states).to_csv("%s/simplified_raw.csv"%self.path)
-        # hist, edge = np.histogram(states,range(0,len(possible_states)+1),normed=True)
-        # # plt.bar(edge[:-1],hist)
-        # # plt.show()
-        # # np.savetxt("states_short_raw.txt",states,fmt="%i")
-        # pd.DataFrame(hist).to_csv("%s/simplified_raw.csv"%self.path)
-        # dt = 500
-        # shell_con = (shell_arr.T/ shell_arr.sum(axis = 1)).T
-        # dppc,dp_var = [],[]
-        # chol,ch_var = [],[]
-        # dopc,do_var = [],[]
-        # for frm in range(0,len(shell_con),dt):
-        #     dppc.append(shell_con[frm:frm+dt,0].mean()), dp_var.append(shell_con[frm:frm+dt,0].var())
-        #     chol.append(shell_con[frm:frm+dt,1].mean()), ch_var.append(shell_con[frm:frm+dt,1].var())
-        #     dopc.append(shell_con[frm:frm+dt,2].mean()), do_var.append(shell_con[frm:frm+dt,2].var())
-        # print("DPPC:  %f"%(hist * possible_states[:,0]).sum())
-        # print("DOPC:  %f"%(hist * possible_states[:,1]).sum())
-        # print("CHOL:  %f"%(hist * possible_states[:,2]).sum())
-        # return hist,edge
         
-build = CGTM_Collect_Data(0,8,[0,100,105],"")
+build = CGTM_Collect_Data(0,8,[0,100,105],"charge")
 # build.analysis_multi_raw()
-build.build_simplified()
-# build.build_ternary_charge_states()
+# build.build_simplified()
+build.build_ternary_charge_states()
 #build.cat_states()
 
