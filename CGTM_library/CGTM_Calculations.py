@@ -46,7 +46,21 @@ class CGTM_Calculations:
         def LinSolve(A,B):
             return np.linalg.solve(A.T.dot(A),A.T.dot(B)) 
         
+        def detailed_balance(states):
+            Tij = self.build_TM(states)
+            Tji = self.build_TM(states.T)
+            pi_ij = self.solve_pi_eq(Tij)[0]
+            pi_ji = self.solve_pi_eq(Tji)[0]
+            
+            print(np.allclose(pi_ij@Tij, pi_ji@Tji))
+            
+            
+            
+            
+        
+        
         states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        detailed_balance(states)
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         A = get_A(TM_norm)
         B = get_B(A)
@@ -204,7 +218,40 @@ class CGTM_Calculations:
     #         pi_eq.append(pi_tmp)
     #         eigs.append(eigs_tmp)
     #     return np.asarray(pi_eq),eigs
-
+    def calc_confidence(self,tau=1):
+        # tau can be played with, but 1 and 2 work best
+        
+        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        possible_states = aps.all_possible_states()
+        # states = []
+        # for s in shell:
+        #     states.append(self.check_states(s,possible_states))
+        # states = np.array(states)
+        n1, bins1 = np.histogram(states, bins=len(possible_states),range=(0,len(possible_states)))
+        pi1 = self.build_CGTM()[0]
+        n1 = n1/np.sum(n1)
+        Z = []
+        Zp = []
+        Pat = []
+        Rat = []
+        tau = 1
+        # bit of a hack, the states.T lets me run through time
+        for i in range(0,len(states.T),tau):
+            print(i)
+            n, bins = np.histogram(states.T[:i*tau+tau], bins=len(possible_states),range=(0,len(possible_states)))
+            n = n/np.sum(n)
+            TM = self.build_TM(states.T[:i*tau+tau].T)
+            pi = self.solve_pi_eq(TM)[0]
+            Pat.append(n)
+            ratio= n/n1
+            ratio=np.nan_to_num(ratio,0)
+            Rat.append(ratio)
+            ratio_sum = np.sum(ratio)/len(n1[n1>0])
+            ratio_pi = pi/pi1
+            ratio_pi_sum = (np.sum(ratio_pi)/len(pi1[pi1>0]))
+            Z.append(ratio_sum)
+            Zp.append(ratio_pi_sum)
+        return Z,Zp
     def series_weighted_avg(self):
         
         wsa = []
@@ -223,8 +270,11 @@ class CGTM_Calculations:
         pi_raw = self.build_raw()[0]
         pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
 
-# test1 = CGTM_Calculations("SL",1,"charge")
-# test1.build_simplified_CGTM()
+test1 = CGTM_Calculations("SL",1,"charge")
+# test1.sigConverge()
+import CGTM_Plotting as cgp
+cgp.plot_sigConverge( CGTM_Calculations("SU",1,"charge").sigConverge(),CGTM_Calculations("SL",1,"charge").sigConverge(),test1.__get_kind__())
+# zed = test1.calc_confidence()
 #pi_lin, pi_eig, comp, TM = test1.__test__()
 # test1.write_pi_eq()
 # test1.write_pi_raw()

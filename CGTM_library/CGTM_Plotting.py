@@ -69,7 +69,7 @@ def plot_sigConverge(sigSU, sigSL,kind):
     plt.ylabel(r"$\sigma_{\pi}$")
     plt.xlabel("Simulations Used")
     plt.legend()
-    plt.savefig("Convergence_%s.pdf"%kind)
+    plt.savefig("Convergence_%s.jpg"%kind)
     plt.close()
 
 def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):

@@ -9,11 +9,15 @@ import os
 # import sys
 
 def choose_path():
-    censere = "/Censere/UDel/resources/test_vor/data"
-    deebo = '/home/sharplm/Asym/data/'
-    if os.path.isdir(censere):
+    censere_asym = "/Censere/UDel/resources/test_vor/data"
+    censere_cg = None #needs path
+    censere = [censere_asym, censere_cg]
+    deebo_asym = '/home/sharplm/Asym/data/'
+    deebo_cg = "/home/sharplm"
+    deebo = [deebo_asym,deebo_cg]
+    if os.path.isdir(censere_asym):
         return censere
-    elif os.path.isdir(deebo):
+    elif os.path.isdir(deebo_asym) or os.path.isdir(deebo_cg):
         return deebo
     else:
         print("Your are using a computer not yet added to this list!")

@@ -12,7 +12,7 @@ import all_possible_states as aps
 import choose_path as chp
 
 class CGTM_Collect_Data:
-    def __init__(self,start_sys, end_sys, ref_frame, counting):
+    def __init__(self,start_sys, end_sys, ref_frame, counting, act=None):
         '''
         Parameters
         ----------
@@ -35,18 +35,29 @@ class CGTM_Collect_Data:
         self.ref_frame = ref_frame
         self.counting = counting
         self.path = chp.choose_path()
+        self.act = act
+        # choosing location of directory
+        if self.counting == "cg":
+            self.path = self.path[1]
+        else:
+            self.path = self.path[0]
 
+    def update_act(self,act):
+        self.act = act
 
     def check_counting_method(self):
+        '''Redundant confirm you can delete'''
         if self.counting == "sat" or self.counting == "saturation":
             self.build_ternary_charge_states()
         elif self.counting == "chg" or self.counting == "charge":
             self.build_ternary_saturation_states()
+        elif self.counting == "cg":
+            print("Implement parse_hop!")
         else:
-            print(">>> For now, self.counting must be sat or chg")
+            print(">>> For now, self.counting must be sat, chg, cg")
             return None
-        self.cat_states()
-            
+        self.cat_states()            
+    
 
     def check_states(self, data_frm, possible_states,fl_comp=None):
         '''
@@ -80,6 +91,61 @@ class CGTM_Collect_Data:
             pass
         return out
 
+    def build_cg_long_states(self):
+        # act is active or inactve
+        if self.act == "act":
+            self.update_act("Active")
+        elif self.act == "in" or self.act == "inact":
+            self.update_act("Inactive")
+
+        
+        fl = open ("%s/%s3/borders.txt"%(self.path,self.act))
+        lines = fl.readlines()#.split()
+        fl.close()
+        #lines = [int(l) for l in lines]
+        shell = []
+        for l in lines[1::3]:
+        	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+        shell_arr = np.array(shell)
+        
+        possible_states = aps.all_possible_states()
+        
+        states = []
+        
+        for s in shell:
+        	states.append(self.check_states(s,possible_states))
+        states = np.array(states)
+        
+        pd.DataFrame(states).to_csv("%s/long_%s"%(self.path, self.act))
+
+    def build_cg_short_states(self):
+        
+        if self.act == "act" or self.act == "Active":
+            self.update_act("active")
+        elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+            self.update_act("inactive")
+        
+        full_states = []
+        for i in range(self.start_sys,self.end_sys):
+            fl = open ("%s/shot_%s%i/borders.txt"%(self.path,self.act,i))
+            lines = fl.readlines()#.split()
+            fl.close()
+            #lines = [int(l) for l in lines]
+            shell = []
+            for l in lines[1::3]:
+            	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+            shell_arr = np.array(shell)
+            
+            possible_states = aps.all_possible_states()
+            
+            states = []
+            
+            for s in shell:
+            	states.append(self.check_states(s,possible_states))
+            full_states.append(states)
+        pd.DataFrame(full_states).to_csv("%s/shot_%s"%(self.path, self.act))
+            
+            
     def build_ternary_charge_states(self):
         
         # Initialize resid's assumption there isn't a lot of movement 
@@ -395,10 +461,15 @@ class CGTM_Collect_Data:
                     all_states.append(states)
                     
         pd.DataFrame(all_states).to_csv("%s/simplified_raw.csv"%self.path)
+
         
-build = CGTM_Collect_Data(0,8,[0,100,105],"charge")
+
+build = CGTM_Collect_Data(2,11,[0,100,105],"cg","in")
+build.build_cg_long_states()
+build.build_cg_short_states()
+# build = CGTM_Collect_Data(2,11,[0,100,105],"cg","act")
+# build.build_cg_short_states()
 # build.analysis_multi_raw()
-# build.build_simplified()
-build.build_ternary_charge_states()
-#build.cat_states()
+
+
 

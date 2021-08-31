@@ -182,18 +182,18 @@ def analysis_multi_raw(path,init,fint):
     plt.show()
     np.savetxt("states_short_raw.txt",states,fmt="%i")
     pd.DataFrame(hist).to_csv("states_short_raw.csv")
-    dt = 500
-    shell_con = (shell_arr.T/ shell_arr.sum(axis = 1)).T
-    dppc,dp_var = [],[]
-    chol,ch_var = [],[]
-    dopc,do_var = [],[]
-    for frm in range(0,len(shell_con),dt):
-        dppc.append(shell_con[frm:frm+dt,0].mean()), dp_var.append(shell_con[frm:frm+dt,0].var())
-        chol.append(shell_con[frm:frm+dt,1].mean()), ch_var.append(shell_con[frm:frm+dt,1].var())
-        dopc.append(shell_con[frm:frm+dt,2].mean()), do_var.append(shell_con[frm:frm+dt,2].var())
-    print("DPPC: %f"%np.mean(dppc[int(len(dppc)/2):]))
-    print("DOPC: %f"%np.mean(dopc[int(len(dppc)/2):]))
-    print("CHOL: %f"%np.mean(chol[int(len(dppc)/2):]))
+    # dt = 500
+    # shell_con = (shell_arr.T/ shell_arr.sum(axis = 1)).T
+    # dppc,dp_var = [],[]
+    # chol,ch_var = [],[]
+    # dopc,do_var = [],[]
+    # for frm in range(0,len(shell_con),dt):
+    #     dppc.append(shell_con[frm:frm+dt,0].mean()), dp_var.append(shell_con[frm:frm+dt,0].var())
+    #     chol.append(shell_con[frm:frm+dt,1].mean()), ch_var.append(shell_con[frm:frm+dt,1].var())
+    #     dopc.append(shell_con[frm:frm+dt,2].mean()), do_var.append(shell_con[frm:frm+dt,2].var())
+    print("DPPC:  %f"%(hist * all_possible_states()[:,0]).sum())
+    print("DOPC:  %f"%(hist * all_possible_states()[:,1]).sum())
+    print("CHOL:  %f"%(hist * all_possible_states()[:,2]).sum())
     return hist,edge
 
 pi_eq = analysis_multi_cgtm("/home/sharplm/shot_inactive",2,10)
