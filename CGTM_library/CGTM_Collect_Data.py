@@ -12,7 +12,7 @@ import all_possible_states as aps
 import choose_path as chp
 
 class CGTM_Collect_Data:
-    def __init__(self,start_sys, end_sys, ref_frame, counting, act=None):
+    def __init__(self,start_sys, end_sys, ref_frame, counting, act=None, length=None):
         '''
         Parameters
         ----------
@@ -36,11 +36,20 @@ class CGTM_Collect_Data:
         self.counting = counting
         self.path = chp.choose_path()
         self.act = act
+        self.length = length
         # choosing location of directory
         if self.counting == "cg":
             self.path = self.path[1]
         else:
             self.path = self.path[0]
+
+        
+        if self.act is not None:
+            if self.length is None:
+                import sys
+                print("Please specify simulation length")
+                print('length = <long / short>')
+                sys.exit()
 
     def update_act(self,act):
         self.act = act
@@ -92,6 +101,13 @@ class CGTM_Collect_Data:
         return out
 
     def build_cg_long_states(self):
+        
+        if self.length == "short":
+            print("Cannot find short simulation data using")
+            print("long argument.")
+            import sys
+            sys.exit()
+        
         # act is active or inactve
         if self.act == "act":
             self.update_act("Active")
@@ -108,17 +124,25 @@ class CGTM_Collect_Data:
         	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
         shell_arr = np.array(shell)
         
+        
         possible_states = aps.all_possible_states()
         
         states = []
-        
+        shell = np.array([shell_arr[:,0] / shell_arr.sum(axis=1),shell_arr[:,1] / shell_arr.sum(axis=1),shell_arr[:,2] / shell_arr.sum(axis=1)])
+        shell = shell.T
         for s in shell:
         	states.append(self.check_states(s,possible_states))
         states = np.array(states)
         
-        pd.DataFrame(states).to_csv("%s/long_%s"%(self.path, self.act))
+        pd.DataFrame(states).to_csv("%s/CG/data/states/%s_%s"%(self.path, self.length, self.act))
 
     def build_cg_short_states(self):
+        
+        if self.length == "long":
+            print("Cannot find long simulation data using")
+            print("short argument.")
+            import sys
+            sys.exit()
         
         if self.act == "act" or self.act == "Active":
             self.update_act("active")
@@ -135,7 +159,8 @@ class CGTM_Collect_Data:
             for l in lines[1::3]:
             	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
             shell_arr = np.array(shell)
-            
+            shell = np.array([shell_arr[:,0] / shell_arr.sum(axis=1),shell_arr[:,1] / shell_arr.sum(axis=1),shell_arr[:,2] / shell_arr.sum(axis=1)])
+            shell = shell.T
             possible_states = aps.all_possible_states()
             
             states = []
@@ -143,7 +168,7 @@ class CGTM_Collect_Data:
             for s in shell:
             	states.append(self.check_states(s,possible_states))
             full_states.append(states)
-        pd.DataFrame(full_states).to_csv("%s/shot_%s"%(self.path, self.act))
+        pd.DataFrame(full_states).to_csv("%s/CG/data/states/%s_%s.csv"%(self.path, self.length, self.act))
             
             
     def build_ternary_charge_states(self):
@@ -464,11 +489,11 @@ class CGTM_Collect_Data:
 
         
 
-build = CGTM_Collect_Data(0,8,[100,105],"charge")
-build.build_simplified()
+# build = CGTM_Collect_Data(0,8,[100,105],"charge")
+# build.build_simplified()
 
-# build = CGTM_Collect_Data(2,11,[0,100,105],"cg","act")
-# build.build_cg_short_states()
+build = CGTM_Collect_Data(1,11,[0,100,105],"cg","act", "long")
+build.build_cg_long_states()
 # build.analysis_multi_raw()
 
 

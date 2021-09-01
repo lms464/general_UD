@@ -13,7 +13,7 @@ import choose_path as chp
 
 
 class CGTM_Calculations:
-    def __init__(self, leaflet_in, dt, kind):
+    def __init__(self, leaflet_in, dt, kind, act=None, length=None):
         
         assert dt > 0, "dt MUST be greater than 0"
         
@@ -21,11 +21,26 @@ class CGTM_Calculations:
         self.dt = dt
         self.kind = None
         self.path = chp.choose_path()
+        self.act = act
+        self.length = length
+        
+        if self.act is not None:
+            if self.length is None:
+                import sys
+                print("Please specify simulation length")
+                print('length = <long / short>')
+                sys.exit()
 
         if kind == "sat" or kind == "chain":
             self.kind = "ChainsT"
         elif kind == "chg" or kind == "charge":
             self.kind = "New2"
+        elif kind == 'cg':
+            self.kind = kind
+        if self.kind == "cg":
+            self.path = self.path[1]
+        else:
+            self.path = self.path[0]
         
     def __get_leaflet__(self):
         return self.leaflet_in
@@ -34,6 +49,31 @@ class CGTM_Calculations:
         return self.kind
     
     def __test__(self):
+        
+        def build_simplified_CGTM(self):
+            '''
+            This should really be moved to the test case 
+            '''
+            states = pd.read_csv("%s/simplified_raw.csv"%self.path,index_col=0).T
+            states = states.fillna(0)
+            states_use = pd.DataFrame()
+            for s in states:
+                if states[s][250:].sum() == 0:
+                    continue
+                else:
+                    states_use[s] = states[s]
+            TM_norm = self.build_TM(states.iloc[:,::self.dt])
+            pi_eq, eigs = self.solve_pi_eq(TM_norm)
+            print("DPPC:  %f"%(pi_eq * aps.all_possible_states()[:,0]).sum())
+            print("DOPC:  %f"%(pi_eq * aps.all_possible_states()[:,1]).sum())
+            print("CHOL:  %f\n\n"%(pi_eq * aps.all_possible_states()[:,2]).sum())
+            
+            hist,edge = np.histogram(states_use,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+            print("DPPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,0]).sum())
+            print("DOPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,1]).sum())
+            print("CHOL:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,2]).sum())        
+            return pi_eq, eigs, TM_norm,hist  
+        
         def get_A(P):
             I = np.eye(len(P))
             row_1 = np.ones((len(P)))
@@ -53,11 +93,6 @@ class CGTM_Calculations:
             pi_ji = self.solve_pi_eq(Tji)[0]
             
             print(np.allclose(pi_ij@Tij, pi_ji@Tji))
-            
-            
-            
-            
-        
         
         states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         detailed_balance(states)
@@ -70,7 +105,9 @@ class CGTM_Calculations:
         pi_eig, eigs = self.solve_pi_eq(TM_norm)
         return pi_lin, pi_eig, np.allclose(pi_lin, pi_eig), TM_norm
 
-    
+    def update_act(self,act):
+        self.act = act
+        
     def build_raw(self):
         states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
@@ -132,6 +169,9 @@ class CGTM_Calculations:
         return pi_eg, np.linalg.eig(P.T)            
     
     def build_CGTM(self):
+        ''' 
+        
+        Built a testing funciton, use that please
         
         def get_A(P):
             I = np.eye(len(P))
@@ -143,39 +183,27 @@ class CGTM_Calculations:
             B[-1] = 1.0
             return B
         def LinSolve(A,B):
-            return np.linalg.solve(A.T.dot(A),A.T.dot(B)) 
+            return np.linalg.solve(A.T.dot(A),A.T.dot(B)) '''
+        # This is a place holder only
+        states = 0 
         
-        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        if self.act == None:
+            states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        else:
+            if self.act == "act" or self.act == "Active":
+                self.update_act("active")
+            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+                self.update_act("inactive")
+            states = pd.read_csv("%s/CG/data/states/shot_%s.csv"%(self.path,self.act),index_col=0)
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
-        A = get_A(TM_norm)
-        B = get_B(A)
-        pi_lin = LinSolve(A,B)
+        # A = get_A(TM_norm)
+        # B = get_B(A)
+        # pi_lin = LinSolve(A,B)
         
         
-        return pi_eq, eigs, TM_norm, pi_lin
-
-    def build_simplified_CGTM(self):
-    
-        states = pd.read_csv("%s/simplified_raw.csv"%self.path,index_col=0).T
-        states = states.fillna(0)
-        states_use = pd.DataFrame()
-        for s in states:
-            if states[s][250:].sum() == 0:
-                continue
-            else:
-                states_use[s] = states[s]
-        TM_norm = self.build_TM(states.iloc[:,::self.dt])
-        pi_eq, eigs = self.solve_pi_eq(TM_norm)
-        print("DPPC:  %f"%(pi_eq * aps.all_possible_states()[:,0]).sum())
-        print("DOPC:  %f"%(pi_eq * aps.all_possible_states()[:,1]).sum())
-        print("CHOL:  %f\n\n"%(pi_eq * aps.all_possible_states()[:,2]).sum())
-        
-        hist,edge = np.histogram(states_use,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
-        print("DPPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,0]).sum())
-        print("DOPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,1]).sum())
-        print("CHOL:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,2]).sum())        
-        return pi_eq, eigs, TM_norm,hist        
+        return pi_eq, eigs, TM_norm
+      
 
     def develop_lag(self, dt_max,step):
         flin = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
@@ -264,16 +292,23 @@ class CGTM_Calculations:
 
     def write_pi_eq(self):
         pi_eq = self.build_CGTM()[0]
-        pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
+        if self.act==None:
+            pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
+        else:
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.leaflet_in,self.kind))
         
     def write_pi_raw(self):
         pi_raw = self.build_raw()[0]
-        pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
+        if self.act == None:
+            pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
+        else:
+            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.leaflet_in,self.kind))
 
-test1 = CGTM_Calculations("SL",1,"charge")
+test1 = CGTM_Calculations("",1,"cg","act")
+test1.write_pi_eq()
 # test1.sigConverge()
-import CGTM_Plotting as cgp
-cgp.plot_sigConverge( CGTM_Calculations("SU",1,"charge").sigConverge(),CGTM_Calculations("SL",1,"charge").sigConverge(),test1.__get_kind__())
+# import CGTM_Plotting as cgp
+# cgp.plot_sigConverge( CGTM_Calculations("SU",1,"charge").sigConverge(),CGTM_Calculations("SL",1,"charge").sigConverge(),test1.__get_kind__())
 # zed = test1.calc_confidence()
 #pi_lin, pi_eig, comp, TM = test1.__test__()
 # test1.write_pi_eq()
