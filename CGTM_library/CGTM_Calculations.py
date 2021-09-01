@@ -48,6 +48,12 @@ class CGTM_Calculations:
     def __get_kind__(self):
         return self.kind
     
+    def __get_length__(self):
+        return self.length
+    
+    def __get_act__(self):
+        return self.act
+    
     def __test__(self):
         
         def build_simplified_CGTM(self):
@@ -109,7 +115,11 @@ class CGTM_Calculations:
         self.act = act
         
     def build_raw(self):
-        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        if self.act is None:
+            states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        else:
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T   
+
         hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
         # plt.bar(edge[:-1],hist/hist.sum())
         # plt.savefig("%s_state_raw_%s.pdf"%(nm,kind))
@@ -194,7 +204,7 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data/states/shot_%s.csv"%(self.path,self.act),index_col=0)
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0)
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
         # A = get_A(TM_norm)
@@ -222,11 +232,24 @@ class CGTM_Calculations:
         return sig_pi
     
     def sigConverge(self):
-        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        states = 0 
+        
+        if self.act == None:
+            states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        else:
+            if self.act == "act" or self.act == "Active":
+                self.update_act("active")
+            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+                self.update_act("inactive")
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
         pi_sig = []
-        sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
+        sim_list = []
+        if self.act is None:
+            sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
+        else:
+            sim_list = [1,2,3,4,5,6,7,8,9,10]
         for nset in sim_list:
             TM_norm = self. build_TM(states.iloc[:nset,::self.dt])
             pi_eq, eigs = self.solve_pi_eq(TM_norm)
@@ -295,21 +318,21 @@ class CGTM_Calculations:
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.leaflet_in,self.kind))
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
         
     def write_pi_raw(self):
         pi_raw = self.build_raw()[0]
         if self.act == None:
             pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.leaflet_in,self.kind))
+            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
-test1 = CGTM_Calculations("",1,"cg","act")
-test1.write_pi_eq()
+# test1 = CGTM_Calculations("",1,"cg","inact","short")
+# test1.write_pi_eq()
 # test1.sigConverge()
-# import CGTM_Plotting as cgp
-# cgp.plot_sigConverge( CGTM_Calculations("SU",1,"charge").sigConverge(),CGTM_Calculations("SL",1,"charge").sigConverge(),test1.__get_kind__())
-# zed = test1.calc_confidence()
+import matplotlib.pyplot as plt
+import CGTM_Plotting as cgp
+cgp.plot_sigConverge( CGTM_Calculations("",1,"cg","inact","long").sigConverge(),CGTM_Calculations("",1,"cg","act","long").sigConverge(),"long")
 #pi_lin, pi_eig, comp, TM = test1.__test__()
 # test1.write_pi_eq()
 # test1.write_pi_raw()

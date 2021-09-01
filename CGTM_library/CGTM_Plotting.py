@@ -63,13 +63,17 @@ def diff_plot(pi,raw, ax):
 
 
 def plot_sigConverge(sigSU, sigSL,kind):
-    sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
+    sim_list = []
+    if len(sigSU) <= 10:
+        sim_list = [1,2,3,4,5,6,7,8,9,10]
+    else:
+        sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
     plt.plot(sim_list,sigSU,"o--",label="Outer Leaflet")
     plt.plot(sim_list,sigSL,"+--",label="Inner Leaflet")
     plt.ylabel(r"$\sigma_{\pi}$")
     plt.xlabel("Simulations Used")
     plt.legend()
-    plt.savefig("Convergence_%s.jpg"%kind)
+    plt.savefig("Convergence_%s.pdf"%kind)
     plt.close()
 
 def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):

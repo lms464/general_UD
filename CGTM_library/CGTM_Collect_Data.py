@@ -133,8 +133,12 @@ class CGTM_Collect_Data:
         for s in shell:
         	states.append(self.check_states(s,possible_states))
         states = np.array(states)
+        if self.act == "act" or self.act == "Active":
+            self.update_act("active")
+        elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+            self.update_act("inactive")
         
-        pd.DataFrame(states).to_csv("%s/CG/data/states/%s_%s"%(self.path, self.length, self.act))
+        pd.DataFrame(states).to_csv("%s/CG/data/states/%s_%s.csv"%(self.path, self.length, self.act))
 
     def build_cg_short_states(self):
         
