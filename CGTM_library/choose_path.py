@@ -6,11 +6,10 @@ Created on Thu Aug 19 12:48:01 2021
 @author: sharplm
 """
 import os 
-# import sys
 
 def choose_path():
     censere_asym = "/Censere/UDel/resources/test_vor/data"
-    censere_cg = None #needs path
+    censere_cg = "/Censere/UDel/"
     censere = [censere_asym, censere_cg]
     deebo_asym = '/home/sharplm/Asym/data/'
     deebo_cg = "/home/sharplm"
