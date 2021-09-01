@@ -464,9 +464,9 @@ class CGTM_Collect_Data:
 
         
 
-build = CGTM_Collect_Data(2,11,[0,100,105],"cg","in")
-build.build_cg_long_states()
-build.build_cg_short_states()
+build = CGTM_Collect_Data(0,8,[100,105],"charge")
+build.build_simplified()
+
 # build = CGTM_Collect_Data(2,11,[0,100,105],"cg","act")
 # build.build_cg_short_states()
 # build.analysis_multi_raw()
