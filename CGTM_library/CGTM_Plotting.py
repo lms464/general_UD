@@ -76,7 +76,7 @@ def plot_sigConverge(sigSU, sigSL,kind):
     plt.savefig("Convergence_%s.pdf"%kind)
     plt.close()
 
-def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
+def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
 
     import matplotlib.tri as tri
 
@@ -91,6 +91,12 @@ def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
         # add tick labels
         for xx, yy, rr in zip(x[1], y[1], r):
             plt.text(xx+offset[0], yy+offset[1], "{:.2}".format(rr))
+            
+            
+    '''
+    get raw and get hist, run raw, run pi eq could be inputs instead of 
+    functions to collect data....
+    '''        
     def get_raw(leaflet_in):
         states = pd.read_csv("%s/%s.csv"%(chp.choose_path(),leaflet_in),index_col=0).T   
         return states       
@@ -110,7 +116,7 @@ def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
         states = np.asarray(aps.all_possible_states())
         return states, hist
     
-    def run_ternary(state):
+    def run_ternary(state,fl_name):
         n = 4
         tick_size = 0.1
         margin = 0.05
@@ -133,17 +139,17 @@ def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
         #     states, hist = run_raw(state)    
         
         # elif pi_eq == True:
-        states, hist = run_pi_eq(state)    
+        states, hist = aps.all_possible_states(), state  
         
         # elif pi_eq == False and raw == False:
         #     print("Please set raw or pi_eq to True")
         #     return 0
         
-        STATES = []
+        # STATES = []
         
-        for si, s in enumerate(states):
-            STATES.append(np.append(s,hist[si]))
-        STATES = np.asarray(STATES)
+        # for si, s in enumerate(states):
+        #     STATES.append(np.append(s,hist["0"][si]))
+        # STATES = np.asarray(STATES)
         
         
         #Define twin axis
@@ -165,7 +171,7 @@ def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
         c = states[:,2]
         
         # # values is stored in the last column
-        v = hist
+        v = hist["0"]
         # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
         # X,Y = [], []
         # for s in states:
@@ -222,7 +228,7 @@ def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
         cax = plt.axes([0.75, 0.55, 0.055, 0.3])
         plt.colorbar(cax=cax,format='%.3f')
         #plt.show()
-        plt.savefig("%s_tern.pdf"%state)
+        plt.savefig("%s_tern.pdf"%fl_name)
         plt.close()
         
     def run_ternary_diff(state1,state2):
@@ -346,7 +352,7 @@ def Ternary_Heat_Map(leaflet_in,leaflet_in2=None):
     if leaflet_in2 is not None :
         run_ternary_diff(leaflet_in,leaflet_in2)
     else:
-        run_ternary(leaflet_in)
+        run_ternary(leaflet_in,fl_name)
 
         
 

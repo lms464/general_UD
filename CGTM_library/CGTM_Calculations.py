@@ -333,29 +333,3 @@ class CGTM_Calculations:
 import matplotlib.pyplot as plt
 import CGTM_Plotting as cgp
 cgp.plot_sigConverge( CGTM_Calculations("",1,"cg","inact","long").sigConverge(),CGTM_Calculations("",1,"cg","act","long").sigConverge(),"long")
-#pi_lin, pi_eig, comp, TM = test1.__test__()
-# test1.write_pi_eq()
-# test1.write_pi_raw()
-
-# test1 = CGTM_Calculations("SL",1,"charge")
-# test1.build_CGTM()
-# test1.write_pi_eq()
-# test1.write_pi_raw()
-
-# data1 = test1.series_weighted_avg()
-
-# import ternary
-# import matplotlib.pyplot as plt
-
-
-# figure, tax = ternary.figure(scale=1)
-# figure.set_size_inches(10, 10)
-# tax.scatter(data1)
-# # tax.scatter(data2)
-# tax.boundary(linewidth=2.0)
-# tax.gridlines(multiple=.1, color="blue")
-# tax.ticks(axis='lbr', linewidth=.5, multiple=1)
-# tax.clear_matplotlib_ticks()
-# tax.get_axes().axis('off')
-# # tax.savefig("sat.pdf")
-# # tax.close()
