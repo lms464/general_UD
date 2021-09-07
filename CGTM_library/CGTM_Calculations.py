@@ -271,8 +271,14 @@ class CGTM_Calculations:
     #     return np.asarray(pi_eq),eigs
     def calc_confidence(self,tau=1):
         # tau can be played with, but 1 and 2 work best
-        
-        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        if self.act == None:
+            states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        else:
+            if self.act == "act" or self.act == "Active":
+                self.update_act("active")
+            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+                self.update_act("inactive")
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
         possible_states = aps.all_possible_states()
         # states = []
         # for s in shell:
@@ -288,7 +294,8 @@ class CGTM_Calculations:
         tau = 1
         # bit of a hack, the states.T lets me run through time
         for i in range(0,len(states.T),tau):
-            print(i)
+            if i%100==0:
+                print("Frame %i"%i)
             n, bins = np.histogram(states.T[:i*tau+tau], bins=len(possible_states),range=(0,len(possible_states)))
             n = n/np.sum(n)
             TM = self.build_TM(states.T[:i*tau+tau].T)
@@ -302,7 +309,9 @@ class CGTM_Calculations:
             ratio_pi_sum = (np.sum(ratio_pi)/len(pi1[pi1>0]))
             Z.append(ratio_sum)
             Zp.append(ratio_pi_sum)
-        return Z,Zp
+        pd.DataFrame(Z).to_csv("%/CG/data/%s_ratio_sum.csv"%(self.path,self.act))
+        pd.DataFrame(Zp).to_csv("%/CG/data/%s_ratio_pi_sum.csv"%(self.path,self.act))
+        #return Z,Zp
     def series_weighted_avg(self):
         
         wsa = []

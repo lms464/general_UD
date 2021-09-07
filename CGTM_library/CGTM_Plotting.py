@@ -29,15 +29,23 @@ class MidpointNormalize(mcol.Normalize):
 		x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
 		return np.ma.masked_array(np.interp(value, x, y), np.isnan(value))
 
-def plot_state_dist(pi_eq, leaflet_in, kind):
-
-    plt.bar(np.arange(0,len(aps.all_possible_states())),pi_eq)
-    plt.ylabel("Prob of State")
-    plt.xlabel("State")
+def plot_state_dist(pi_eq_file,ax):
+    pi_eq = pd.read_csv("%s.csv"%pi_eq_file,index_col=0).T
+    ax.bar(np.arange(0,len(aps.all_possible_states())),pi_eq.values[0])
+    ax.set_ylabel("Prob of State")
+    ax.set_xlabel("State")
     # plt.savefig("%sPi_Eq_%s.pdf"%(leaflet_in,kind))
     # plt.close()
+def diff_plot(pi_eq_file,pi_raw_file, ax):
+    pi = pd.read_csv("%s.csv"%pi_eq_file,index_col=0).T
+    raw = pd.read_csv("%s.csv"%pi_raw_file,index_col=0).T
+    dpi = pi.values[0] - raw.values[0]
+    line = ax.bar(np.arange(0,len(aps.all_possible_states())), dpi)
+    ax.set_ylabel(r"$\Delta$ Prob of State")
+    ax.set_xlabel("State")
     
-def plot_cgtm(TM_norm, leaflet_in,kind):
+def plot_cgtm(TM_norm_path):
+    TM_norm = pd.read_csv("%s.csv"%TM_norm_path,index_col=0,header=0)
     plt.pcolormesh(TM_norm,cmap="gist_earth_r")
     plt.xlabel("State")
     plt.ylabel("State")
@@ -45,19 +53,24 @@ def plot_cgtm(TM_norm, leaflet_in,kind):
     # plt.savefig("%s_TMCG_%s.pdf"%(leaflet_in,kind))
     # plt.close()
     
-def plot_state_traj(leaflet_in,kind):
-    states = pd.read_csv("/Censere/UDel/resources/test_vor/data/states/%s%s.csv"%(leaflet_in,kind),index_col=0).T   
-    plt.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=220)
-    plt.xlabel("Simulation")
-    plt.ylabel("Frame")
+def plot_state_traj(state,ax):
+    states = pd.read_csv("%s.csv"%(state),index_col=0)
+    
+    if np.shape(states)[1]>1:
+        ax.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=220)
+        ax.set_xlabel("Simulation")
+        ax.set_ylabel("Frame")
+    else:
+        ax.pcolormesh(states,cmap="ocean_r",vmin=0,vmax=220)
+        ax.set_ylabel("Frame")
+        #ax.set_yticks(np.linspace(0,len(states)*.4,100))
+        ax.set_xticks([])
+        
     # plt.colorbar(label="State")
     # plt.savefig("%s_State_Change_Sims%s.pdf"%(leaflet_in,kind))
     # plt.close()
 
-def diff_plot(pi,raw, ax):
-    dpi = pi - raw
-    line = ax.bar(np.arange(0,len(aps.all_possible_states())), dpi)
-    return line
+
 
 
 def plot_sigConverge(sigSU, sigSL,kind):
@@ -352,6 +365,8 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
 
 def Ternary_Scatter(ax, data1, data2=None, rot=None):
     
+    # Take in a state file, and produce brute force distribution
+    # data1 is a weighted sum... why?
     import ternary
     
     if rot is not None:
