@@ -29,35 +29,33 @@ class MidpointNormalize(mcol.Normalize):
 		x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
 		return np.ma.masked_array(np.interp(value, x, y), np.isnan(value))
 
-def plot_CGTM(pi_eq, TM_norm, leaflet_in, kind):
+def plot_state_dist(pi_eq, leaflet_in, kind):
 
     plt.bar(np.arange(0,len(aps.all_possible_states())),pi_eq)
     plt.ylabel("Prob of State")
     plt.xlabel("State")
-    plt.savefig("%sPi_Eq_%s.pdf"%(leaflet_in,kind))
-    plt.close()
+    # plt.savefig("%sPi_Eq_%s.pdf"%(leaflet_in,kind))
+    # plt.close()
     
+def plot_cgtm(TM_norm, leaflet_in,kind):
     plt.pcolormesh(TM_norm,cmap="gist_earth_r")
     plt.xlabel("State")
     plt.ylabel("State")
-    plt.colorbar(label="Prob of Transition")
-    plt.savefig("%s_TMCG_%s.pdf"%(leaflet_in,kind))
-    plt.close()
+    # plt.colorbar(label="Prob of Transition")
+    # plt.savefig("%s_TMCG_%s.pdf"%(leaflet_in,kind))
+    # plt.close()
     
-    try:
-        states = pd.read_csv("/Censere/UDel/resources/test_vor/data/states/%s%s.csv"%(leaflet_in,kind),index_col=0).T   
-    
-        plt.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=220)
-        plt.xlabel("Simulation")
-        plt.ylabel("Frame")
-        plt.colorbar(label="State")
-        plt.savefig("%s_State_Change_Sims%s.pdf"%(leaflet_in,kind))
-        plt.close()
-    except:
-        pass
+def plot_state_traj(leaflet_in,kind):
+    states = pd.read_csv("/Censere/UDel/resources/test_vor/data/states/%s%s.csv"%(leaflet_in,kind),index_col=0).T   
+    plt.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=220)
+    plt.xlabel("Simulation")
+    plt.ylabel("Frame")
+    # plt.colorbar(label="State")
+    # plt.savefig("%s_State_Change_Sims%s.pdf"%(leaflet_in,kind))
+    # plt.close()
+
 def diff_plot(pi,raw, ax):
     dpi = pi - raw
-    #fig, ax = plt.subplots()
     line = ax.bar(np.arange(0,len(aps.all_possible_states())), dpi)
     return line
 
@@ -76,7 +74,7 @@ def plot_sigConverge(sigSU, sigSL,kind):
     plt.savefig("Convergence_%s.pdf"%kind)
     plt.close()
 
-def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
+def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
 
     import matplotlib.tri as tri
 
@@ -86,11 +84,11 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         x = np.vstack((x, x + tick[0]))
         y = start[1] * (1 - r) + stop[1] * r
         y = np.vstack((y, y + tick[1]))
-        plt.plot(x, y, 'k', lw=1)
+        ax.plot(x, y, 'k', lw=1)
         
         # add tick labels
         for xx, yy, rr in zip(x[1], y[1], r):
-            plt.text(xx+offset[0], yy+offset[1], "{:.2}".format(rr))
+            ax.text(xx+offset[0], yy+offset[1], "{:.2}".format(rr))
             
             
     '''
@@ -98,7 +96,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
     functions to collect data....
     '''        
     def get_raw(leaflet_in):
-        states = pd.read_csv("%s/%s.csv"%(chp.choose_path(),leaflet_in),index_col=0).T   
+        states = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],leaflet_in),index_col=0).T   
         return states       
     def get_hist(states):
         hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
@@ -116,11 +114,12 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         states = np.asarray(aps.all_possible_states())
         return states, hist
     
-    def run_ternary(state,fl_name):
+    def run_ternary(state,fl_name,ax):
         n = 4
         tick_size = 0.1
         margin = 0.05
-        
+        norm2 = MidpointNormalize(0,0.12,0.06)
+
         # define corners of triangle    
         left = np.r_[0, 0]
         right = np.r_[1, 0]
@@ -139,6 +138,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         #     states, hist = run_raw(state)    
         
         # elif pi_eq == True:
+        state = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state),index_col=0).T
         states, hist = aps.all_possible_states(), state  
         
         # elif pi_eq == False and raw == False:
@@ -153,7 +153,9 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         
         
         #Define twin axis
-        fig, ax = plt.subplots()
+        # if ax == None:
+        #     fig, ax = plt.subplots()
+
         # Note that the ordering from start to stop is important for the tick labels
         plot_ticks(right, left, bottom_tick, n, offset=(0, -0.04))
         plot_ticks(left, top, left_tick, n, offset=(-0.06, -0.0))
@@ -171,7 +173,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         c = states[:,2]
         
         # # values is stored in the last column
-        v = hist["0"]
+        v = hist.values[0]#["0"]
         # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
         # X,Y = [], []
         # for s in states:
@@ -187,7 +189,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         T = tri.Triangulation(x,y)
         
         # # plot the contour
-        plt.tricontourf(x,y,T.triangles,v,cmap='RdBu_r')
+        ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
         
         
         # create the grid
@@ -203,16 +205,16 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         
         
         #plotting the mesh and caliberate the axis
-        plt.triplot(trimesh,'k--')
+        tern = ax.triplot(trimesh,'k--')
         #plt.title('Binding energy peratom of Al-Ti-Ni clusters')
         # ax.set_xlabel('Al-Ti',fontsize=12,color='black')
         # ax.set_ylabel('Ti-Ni',fontsize=12,color='black')
         # ax2 = ax.twinx()
         # ax2.set_ylabel('Al-Ni',fontsize=12,color='black')
-        # Corners
-        fig.text(0.15, 0.065, 'Chol', fontsize=12, color='black')
-        fig.text(0.92, 0.19, 'Neutral', fontsize=12, color='black')
-        fig.text(0.40, 0.89, 'Anionic', fontsize=12, color='black')
+        # # Corners
+        # ax.text(0.15, 0.065, 'Chol', fontsize=12, color='black')
+        # ax.text(0.92, 0.19, 'Neutral', fontsize=12, color='black')
+        # ax.text(0.40, 0.89, 'Anionic', fontsize=12, color='black')
         
         # Connections
         # fig.text(0.47, 0.05, 'Ti-Al', fontsize=12, color='black')  # Note: not sure about
@@ -225,13 +227,14 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         # ax.set_ylim(0, 1)
         # ax2.set_ylim(1, 0)
         ax.set_axis_off()
-        cax = plt.axes([0.75, 0.55, 0.055, 0.3])
-        plt.colorbar(cax=cax,format='%.3f')
+        #cax = plt.axes([0.75, 0.55, 0.055, 0.3])
+        # plt.colorbar(cax=ax,format='%.3f')
+        #return ax,tern
         #plt.show()
-        plt.savefig("%s_tern.pdf"%fl_name)
-        plt.close()
+        # plt.savefig("%s_tern.pdf"%fl_name)
+        # plt.close()
         
-    def run_ternary_diff(state1,state2):
+    def run_ternary_diff(state1,state2,ax):
         n = 4
         tick_size = 0.1
         margin = 0.05
@@ -254,23 +257,14 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         #     states, hist = run_raw(state)    
         
         # elif pi_eq == True:
-        states, hist1 = run_pi_eq(state1)    
-        states, hist2 = run_pi_eq(state2)  
-        hist = hist1-hist2
-        norm2 = MidpointNormalize(midpoint=np.min(hist),vmin=0,vmax=np.max(hist))
-        # elif pi_eq == False and raw == False:
-        #     print("Please set raw or pi_eq to True")
-        #     return 0
-        
-        STATES = []
-        
-        for si, s in enumerate(states):
-            STATES.append(np.append(s,hist[si]))
-        STATES = np.asarray(STATES)
-        
-        
+        state1 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state1),index_col=0).T
+        states, hist1 = aps.all_possible_states(), state1  
+
+        state2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state2),index_col=0).T
+        states, hist2 = aps.all_possible_states(), state2  
+        norm2 = MidpointNormalize(-1E-2,1E-2,0)
         #Define twin axis
-        fig, ax = plt.subplots()
+        # fig, ax = plt.subplots()
         # Note that the ordering from start to stop is important for the tick labels
         plot_ticks(right, left, bottom_tick, n, offset=(0, -0.04))
         plot_ticks(left, top, left_tick, n, offset=(-0.06, -0.0))
@@ -288,7 +282,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         c = states[:,2]
         
         # # values is stored in the last column
-        v = hist
+        v = hist1.values[0] - hist2.values[0]
         # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
         # X,Y = [], []
         # for s in states:
@@ -304,7 +298,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         T = tri.Triangulation(x,y)
         
         # # plot the contour
-        plt.tricontourf(x,y,T.triangles,v,cmap='RdBu_r')
+        ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
         
         
         # create the grid
@@ -320,16 +314,16 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         
         
         #plotting the mesh and caliberate the axis
-        plt.triplot(trimesh,'k--',normalize=norm2)
+        ax.triplot(trimesh,'k--')
         #plt.title('Binding energy peratom of Al-Ti-Ni clusters')
         # ax.set_xlabel('Al-Ti',fontsize=12,color='black')
         # ax.set_ylabel('Ti-Ni',fontsize=12,color='black')
         # ax2 = ax.twinx()
         # ax2.set_ylabel('Al-Ni',fontsize=12,color='black')
         # Corners
-        fig.text(0.15, 0.065, 'Chol', fontsize=12, color='black')
-        fig.text(0.92, 0.19, 'Neutral', fontsize=12, color='black')
-        fig.text(0.40, 0.89, 'Anionic', fontsize=12, color='black')
+        # fig.text(0.15, 0.065, 'Chol', fontsize=12, color='black')
+        # fig.text(0.92, 0.19, 'Neutral', fontsize=12, color='black')
+        # fig.text(0.40, 0.89, 'Anionic', fontsize=12, color='black')
         
         # Connections
         # fig.text(0.47, 0.05, 'Ti-Al', fontsize=12, color='black')  # Note: not sure about
@@ -342,21 +336,21 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None):
         # ax.set_ylim(0, 1)
         # ax2.set_ylim(1, 0)
         ax.set_axis_off()
-        cax = plt.axes([0.75, 0.55, 0.055, 0.3])
-        plt.colorbar(cax=cax,format='%.3f')
+        # cax = plt.axes([0.75, 0.55, 0.055, 0.3])
+        # plt.colorbar(cax=cax,format='%.3f')
         # plt.show()
-        plt.savefig("%s_tern_diff.pdf"%state1)
-        plt.close()    
+        # plt.savefig("%s_tern_diff.pdf"%state1)
+        # plt.close()    
     
     
     if leaflet_in2 is not None :
-        run_ternary_diff(leaflet_in,leaflet_in2)
+        run_ternary_diff(leaflet_in,leaflet_in2,ax)
     else:
-        run_ternary(leaflet_in,fl_name)
+        return run_ternary(leaflet_in,fl_name,ax)
 
         
 
-def Ternary_Scatter(kind, data1, data2=None, rot=None):
+def Ternary_Scatter(ax, data1, data2=None, rot=None):
     
     import ternary
     
@@ -364,19 +358,25 @@ def Ternary_Scatter(kind, data1, data2=None, rot=None):
         data1 = np.array([data1[:,1],data1[:,2],data1[:,0]]).T
         
     
-    figure, tax = ternary.figure(scale=1)
+    # figure, tax = ternary.figure(scale=1)
     #figure.set_size_inches(10, 7.5)
-    tax.scatter(data1)
+    ax.scatter(data1)
     if data2 is not None:
-        tax.scatter(data2)
-    tax.boundary(linewidth=2.0)
-    tax.gridlines(multiple=1, color="blue")
-    tax.ticks(axis='lbr', linewidth=.5, multiple=1)
-    tax.clear_matplotlib_ticks()
-    tax.get_axes().axis('off')
+        ax.scatter(data2)
+    ax.boundary(linewidth=2.0)
+    ax.gridlines(multiple=1, color="blue")
+    ax.ticks(axis='lbr', linewidth=.5, multiple=1)
+    ax.clear_matplotlib_ticks()
+    ax.get_axes().axis('off')
     # plt.show()
-    tax.savefig("Scatter_%s.pdf"%kind)
-    tax.close()
-    
-# Ternary_Heat_Map("pi_eq_SUChainsT")
+    # tax.savefig("Scatter_%s.pdf"%kind)
+    # tax.close()
+
+# fig,ax = plt.subplots(2,2,figsize=(8,8))
+# Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,0])
+# Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg","",ax=ax[0,1])
+# Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,0])
+# Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,1])
+
+# ()
 # Ternary_Heat_Map("pi_eq_SLChainsT")

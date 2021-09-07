@@ -332,4 +332,17 @@ class CGTM_Calculations:
 # test1.sigConverge()
 import matplotlib.pyplot as plt
 import CGTM_Plotting as cgp
-cgp.plot_sigConverge( CGTM_Calculations("",1,"cg","inact","long").sigConverge(),CGTM_Calculations("",1,"cg","act","long").sigConverge(),"long")
+d1 = CGTM_Calculations("",1,"cg","inactive","long")
+d1.write_pi_raw()
+
+d1 = CGTM_Calculations("",1,"cg","active","long")
+d1.write_pi_raw()
+
+
+d1 = CGTM_Calculations("",1,"cg","inactive","short")
+d1.write_pi_raw()
+
+d1 = CGTM_Calculations("",1,"cg","active","short")
+d1.write_pi_raw()
+
+
