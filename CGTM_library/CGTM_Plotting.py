@@ -44,11 +44,11 @@ def diff_plot(pi_eq_file,pi_raw_file, ax):
     ax.set_ylabel(r"$\Delta$ Prob of State")
     ax.set_xlabel("State")
     
-def plot_cgtm(TM_norm_path):
-    TM_norm = pd.read_csv("%s.csv"%TM_norm_path,index_col=0,header=0)
-    plt.pcolormesh(TM_norm,cmap="gist_earth_r")
-    plt.xlabel("State")
-    plt.ylabel("State")
+def plot_cgtm(TM_norm,ax):
+    #TM_norm = pd.read_csv("%s.csv"%TM_norm_path,index_col=0,header=0)
+    ax.pcolormesh(TM_norm,cmap="gist_earth_r")
+    # ax.set_xlabel("State")
+    # ax.set_ylabel("State")
     # plt.colorbar(label="Prob of Transition")
     # plt.savefig("%s_TMCG_%s.pdf"%(leaflet_in,kind))
     # plt.close()
@@ -70,8 +70,11 @@ def plot_state_traj(state,ax):
     # plt.savefig("%s_State_Change_Sims%s.pdf"%(leaflet_in,kind))
     # plt.close()
 
-
-
+def plot_convergence(fl,ax):
+    conv = pd.read_csv(fl,index_col=0)
+    ax.plot(conv.index*.4, conv,"o-")
+    ax.plot([0, (conv.index*.4)[-1]],[1,1],'k--',lw=2)
+    ax.set_yscale('log')
 
 def plot_sigConverge(sigSU, sigSL,kind):
     sim_list = []
@@ -87,7 +90,7 @@ def plot_sigConverge(sigSU, sigSL,kind):
     plt.savefig("Convergence_%s.pdf"%kind)
     plt.close()
 
-def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
+def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
 
     import matplotlib.tri as tri
 
@@ -127,7 +130,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
         states = np.asarray(aps.all_possible_states())
         return states, hist
     
-    def run_ternary(state,fl_name,ax):
+    def run_ternary(state,fl_name,ax,out):
         n = 4
         tick_size = 0.1
         margin = 0.05
@@ -170,8 +173,8 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
         #     fig, ax = plt.subplots()
 
         # Note that the ordering from start to stop is important for the tick labels
-        plot_ticks(right, left, bottom_tick, n, offset=(0, -0.04))
-        plot_ticks(left, top, left_tick, n, offset=(-0.06, -0.0))
+        plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
+        plot_ticks(left, top, left_tick, n, offset=(-0.12, -0.0))
         plot_ticks(top, right, right_tick, n,offset=(0,.01))
         # fig, tax = ternary.figure(scale=100)
         # fig.set_size_inches(5, 4.5)
@@ -202,8 +205,10 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
         T = tri.Triangulation(x,y)
         
         # # plot the contour
-        ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
-        
+        if out == None:
+            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
+        else:
+            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
@@ -246,8 +251,12 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
         #plt.show()
         # plt.savefig("%s_tern.pdf"%fl_name)
         # plt.close()
+        if out == None:
+            return
+        else:
+            return out
         
-    def run_ternary_diff(state1,state2,ax):
+    def run_ternary_diff(state1,state2,ax,out):
         n = 4
         tick_size = 0.1
         margin = 0.05
@@ -275,12 +284,13 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
 
         state2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state2),index_col=0).T
         states, hist2 = aps.all_possible_states(), state2  
-        norm2 = MidpointNormalize(-1E-2,1E-2,0)
+        norm2 = MidpointNormalize(-10**(-2),10**(-2),0)
+
         #Define twin axis
         # fig, ax = plt.subplots()
         # Note that the ordering from start to stop is important for the tick labels
-        plot_ticks(right, left, bottom_tick, n, offset=(0, -0.04))
-        plot_ticks(left, top, left_tick, n, offset=(-0.06, -0.0))
+        plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
+        plot_ticks(left, top, left_tick, n, offset=(-0.18, -0.0))
         plot_ticks(top, right, right_tick, n,offset=(0,.01))
         # fig, tax = ternary.figure(scale=100)
         # fig.set_size_inches(5, 4.5)
@@ -311,8 +321,10 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
         T = tri.Triangulation(x,y)
         
         # # plot the contour
-        ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
-        
+        if out == None:
+            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
+        else:
+            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
@@ -327,6 +339,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
         
         
         #plotting the mesh and caliberate the axis
+        
         ax.triplot(trimesh,'k--')
         #plt.title('Binding energy peratom of Al-Ti-Ni clusters')
         # ax.set_xlabel('Al-Ti',fontsize=12,color='black')
@@ -354,12 +367,15 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None):
         # plt.show()
         # plt.savefig("%s_tern_diff.pdf"%state1)
         # plt.close()    
-    
+        if out == None:
+            return
+        else:
+            return out
     
     if leaflet_in2 is not None :
-        run_ternary_diff(leaflet_in,leaflet_in2,ax)
+        return run_ternary_diff(leaflet_in,leaflet_in2,ax,out)
     else:
-        return run_ternary(leaflet_in,fl_name,ax)
+        return run_ternary(leaflet_in,fl_name,ax,out)
 
         
 

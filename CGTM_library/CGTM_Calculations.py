@@ -309,8 +309,12 @@ class CGTM_Calculations:
             ratio_pi_sum = (np.sum(ratio_pi)/len(pi1[pi1>0]))
             Z.append(ratio_sum)
             Zp.append(ratio_pi_sum)
-        pd.DataFrame(Z).to_csv("%/CG/data/%s_ratio_sum.csv"%(self.path,self.act))
-        pd.DataFrame(Zp).to_csv("%/CG/data/%s_ratio_pi_sum.csv"%(self.path,self.act))
+        try:
+            pd.DataFrame(Z).to_csv("%sCG/data/%s_ratio_sum.csv"%(self.path,self.act))
+            pd.DataFrame(Zp).to_csv("%s/CG/data/%s_ratio_pi_sum.csv"%(self.path,self.act))
+        except:
+            pd.DataFrame(Z).to_csv("./%s_ratio_sum.csv"%self.act)
+            pd.DataFrame(Zp).to_csv("./%s_ratio_pi_sum.csv"%self.act)
         #return Z,Zp
     def series_weighted_avg(self):
         
