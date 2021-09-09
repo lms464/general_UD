@@ -56,7 +56,7 @@ def SI_CG():
     plt.tight_layout()
     plt.savefig("CG_SI.pdf")
     plt.close()
-ternary_CG()
+# ternary_CG()
 # states_CG()   
 # CGTM()    
 # SI_CG()
@@ -70,3 +70,38 @@ def Confidence():
     plt.savefig("confidence.pdf")
     plt.close()
 # Confidence()
+
+import networkx as nx
+import all_possible_states as aps
+import numpy as np
+import itertools
+
+list_o_list = [np.linspace(0,230,231),np.linspace(0,230,231)]
+states = list(itertools.product(*list_o_list))
+states = np.arange(0,len(aps.all_possible_states()))
+Q = cgc.CGTM_Calculations("",1,"cg","active","short").build_CGTM()[-1]
+G = nx.MultiDiGraph()
+labels={}
+edge_labels={}
+pos = []
+
+for i, origin_state in enumerate(states):
+    for j, destination_state in enumerate(states):
+        rate = Q[i][j]
+        if rate > 0:
+            pos.append([i,j])
+            G.add_edge(origin_state,
+                        destination_state,
+                        weight=rate,
+                        label="{:.02f}".format(rate))
+            edge_labels[(origin_state, destination_state)] = label="{:.02f}".format(rate)
+
+
+plt.figure(figsize=(20,20))
+node_size = 200
+# pos = {state:list(state) for state in tansistions}
+nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)
+nx.draw_networkx_labels(G, pos, font_weight=2)
+nx.draw_networkx_edge_labels(G, pos, edge_labels)
+plt.axis('off');
+nx.drawing.nx_pydot.write_dot(G, 'mc.dot')
