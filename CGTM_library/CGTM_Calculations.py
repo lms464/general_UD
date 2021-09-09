@@ -340,22 +340,22 @@ class CGTM_Calculations:
         else:
             pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
-# test1 = CGTM_Calculations("",1,"cg","inact","short")
-# test1.write_pi_eq()
-# test1.sigConverge()
-import matplotlib.pyplot as plt
-import CGTM_Plotting as cgp
-d1 = CGTM_Calculations("",1,"cg","inactive","long")
-d1.write_pi_raw()
+# # test1 = CGTM_Calculations("",1,"cg","inact","short")
+# # test1.write_pi_eq()
+# # test1.sigConverge()
+# import matplotlib.pyplot as plt
+# import CGTM_Plotting as cgp
+# d1 = CGTM_Calculations("",1,"cg","inactive","long")
+# d1.write_pi_raw()
 
-d1 = CGTM_Calculations("",1,"cg","active","long")
-d1.write_pi_raw()
+# d1 = CGTM_Calculations("",1,"cg","active","long")
+# d1.write_pi_raw()
 
 
-d1 = CGTM_Calculations("",1,"cg","inactive","short")
-d1.write_pi_raw()
+# d1 = CGTM_Calculations("",1,"cg","inactive","short")
+# d1.write_pi_raw()
 
-d1 = CGTM_Calculations("",1,"cg","active","short")
-d1.write_pi_raw()
+# d1 = CGTM_Calculations("",1,"cg","active","short")
+# d1.write_pi_raw()
 
 

@@ -13,6 +13,7 @@ import pandas as pd
 import all_possible_states as aps
 import choose_path as chp
 import matplotlib.colors as mcol
+import CGTM_Calculations as cgc
 
 class MidpointNormalize(mcol.Normalize):
 	"""
@@ -57,15 +58,16 @@ def plot_state_traj(state,ax):
     states = pd.read_csv("%s.csv"%(state),index_col=0)
     
     if np.shape(states)[1]>1:
-        ax.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=220)
+        s = ax.pcolormesh(states.T,cmap="ocean_r",vmin=0,vmax=230)
         ax.set_xlabel("Simulation")
         ax.set_ylabel("Frame")
+        return s
     else:
-        ax.pcolormesh(states,cmap="ocean_r",vmin=0,vmax=220)
+        s = ax.pcolormesh(states,cmap="ocean_r",vmin=0,vmax=230)
         ax.set_ylabel("Frame")
         #ax.set_yticks(np.linspace(0,len(states)*.4,100))
         ax.set_xticks([])
-        
+        return s
     # plt.colorbar(label="State")
     # plt.savefig("%s_State_Change_Sims%s.pdf"%(leaflet_in,kind))
     # plt.close()
@@ -254,8 +256,8 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         if out == None:
             return
         else:
-            return out
-        
+            sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
+            return out,sm        
     def run_ternary_diff(state1,state2,ax,out):
         n = 4
         tick_size = 0.1
@@ -284,13 +286,13 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
 
         state2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state2),index_col=0).T
         states, hist2 = aps.all_possible_states(), state2  
-        norm2 = MidpointNormalize(-10**(-2),10**(-2),0)
+        norm2 = MidpointNormalize(vmin=-10**(-2),vmax=10**(-2),midpoint=0)
 
         #Define twin axis
         # fig, ax = plt.subplots()
         # Note that the ordering from start to stop is important for the tick labels
         plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
-        plot_ticks(left, top, left_tick, n, offset=(-0.18, -0.0))
+        plot_ticks(left, top, left_tick, n, offset=(-0.15, -0.0))
         plot_ticks(top, right, right_tick, n,offset=(0,.01))
         # fig, tax = ternary.figure(scale=100)
         # fig.set_size_inches(5, 4.5)
@@ -306,6 +308,9 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         
         # # values is stored in the last column
         v = hist1.values[0] - hist2.values[0]
+        for vi,V in enumerate(v):
+            if np.abs(V) < 1E-10:
+                v[vi] = 0.0
         # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
         # X,Y = [], []
         # for s in states:
@@ -367,10 +372,13 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         # plt.show()
         # plt.savefig("%s_tern_diff.pdf"%state1)
         # plt.close()    
+        
         if out == None:
             return
         else:
-            return out
+            sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
+
+            return out,sm
     
     if leaflet_in2 is not None :
         return run_ternary_diff(leaflet_in,leaflet_in2,ax,out)
@@ -402,8 +410,70 @@ def Ternary_Scatter(ax, data1, data2=None, rot=None):
     # plt.show()
     # tax.savefig("Scatter_%s.pdf"%kind)
     # tax.close()
-
-# fig,ax = plt.subplots(2,2,figsize=(8,8))
+    
+def network_plot(act,ax):
+    import all_possible_states as aps
+    import networkx as nx
+    import numpy as np
+    from matplotlib import cm
+    import itertools
+    
+    
+    def rescale(l,newmin,newmax):
+        arr = list(l)
+        return list(np.array([(x-min(arr))/(max(arr)-min(arr))*(newmax-newmin)+newmin for x in arr]))
+        
+    
+    
+    list_o_list = [np.linspace(0,230,231),np.linspace(0,230,231)]
+    states = list(itertools.product(*list_o_list))
+    states = np.arange(0,len(aps.all_possible_states()))
+    Q = cgc.CGTM_Calculations("",1,"cg",act,"short").build_CGTM()[-1]
+    G = nx.MultiDiGraph()
+    # edge_labels={}
+    #pos = []
+    
+    for i, origin_state in enumerate(states):
+        for j, destination_state in enumerate(states):
+            rate = Q[i][j]
+            if rate > 0:
+                #pos.append([i,j])
+                G.add_edge(origin_state,
+                            destination_state,
+                            weight=rate,
+                            label="{:.02f}".format(rate))
+                # edge_labels[(origin_state, destination_state)] = label="{:.02f}".format(rate)
+    
+    
+    # base_size = 1
+    
+    graph_colormap = cm.get_cmap('Reds', 12)
+    # node color varies with Degree
+    c = rescale([G.degree(v) for v in G],0.0,0.9) 
+    c = [graph_colormap(i) for i in c]
+    # node size varies with betweeness centrality - map to range [10,100] 
+    G2 = nx.DiGraph(G)
+    eigen_centrality = nx.eigenvector_centrality(G2, max_iter=1000)
+    bc = eigen_centrality.copy()#nx.betweenness_centrality(G) # betweeness centrality
+    s =  rescale([v for v in bc.values()],500,2500)
+    # edge width shows 1-weight to convert cost back to strength of interaction 
+    ew = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,3)
+    # edge color also shows weight
+    ec = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,1)
+    ec = [graph_colormap(i) for i in ec]
+    
+    pos = nx.drawing.nx_pydot.graphviz_layout(G, prog="circo")
+    nx.draw_networkx(G, pos=pos, with_labels=True, node_color=c, node_size=s,edge_color= ec,width=ew,
+                 font_color='white',font_weight='bold',font_size='9',ax=ax)
+    # pos = {state:list(state) for state in tansistions}
+    # nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)
+    # nx.draw_networkx_labels(G, pos, font_weight=2)
+    # nx.draw_networkx_nodes(G, pos, node_size=[v * base_size for v in G.nodes()])
+    #nx.draw_networkx_edge_labels(G, pos, edge_labels)
+    # ax.set_axis('off');
+#     plt.savefig("Transitions_Network_%s.pdf"%act)
+#     plt.close()
+# # fig,ax = plt.subplots(2,2,figsize=(8,8))
 # Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,0])
 # Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg","",ax=ax[0,1])
 # Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,0])
