@@ -57,7 +57,7 @@ def SI_CG():
     plt.colorbar(s1,cax=cax)
     plt.savefig("CG_SI.pdf",bbox_inches='tight')
     plt.close()
-ternary_CG()
+# ternary_CG()
 # states_CG()   
 # CGTM()    
 # SI_CG()
@@ -79,3 +79,13 @@ def network():
     plt.tight_layout()
     plt.savefig("State_transitions.pdf")
     plt.close()
+
+import numpy as np
+test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short")
+test1 = cgc.CGTM_Calculations("",1,"cg","active","short")
+sigs = test2.sigConverge_time()
+plt.plot(np.linspace(1,50,len(sigs)),sigs,'*-')
+sigs = test1.sigConverge_time()
+plt.plot(np.linspace(1,50,len(sigs)),sigs,'*-')
+plt.savefig("SumSig.pdf")
+plt.close()

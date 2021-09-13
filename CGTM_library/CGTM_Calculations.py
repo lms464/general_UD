@@ -141,12 +141,14 @@ class CGTM_Calculations:
         return np.array(out)
 
     
-    def build_TM(self,states):
+    def build_TM(self,states,overide=False):
         all_states = aps.all_possible_states()
         TM_m = np.zeros((len(all_states),len(all_states)))
         # norm_t = []
         
-        if np.ndim(states) == 1:
+        # this isn't realy nessisary is it
+        # good intial fail safe though.
+        if np.ndim(states) == 1 and overide==False:
             import os
             print("Your states matrix has one row. This does not work")
             os.exit()
@@ -231,12 +233,17 @@ class CGTM_Calculations:
             sig_pi.append(np.sum(np.sqrt((s - ref)**2)) / (sl - 1))
         return sig_pi
     
-    def sigConverge(self):
+    def sigConverge_simulations(self):
         states = 0 
         
         if self.act == None:
             states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         else:
+            print("\n########################################################\n\n")
+            print("This will run, however there are not enough simulations at")
+            print("this time for this to be beneficial")
+            print("\n\n\n########################################################")
+
             if self.act == "act" or self.act == "Active":
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
@@ -256,7 +263,43 @@ class CGTM_Calculations:
             pi_sig.append(pi_eq)
         sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
         return sig_
-    
+
+    def sigConverge_time(self,overide=True):
+        states = 0 
+        
+        if self.act == None:
+            print("\n########################################################\n\n")
+            print("This will run, however these simulations are not enough")
+            print("for this to be useful")
+            print("\n\n\n########################################################")
+            states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        else:
+
+            if self.act == "act" or self.act == "Active":
+                self.update_act("active")
+            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+                self.update_act("inactive")
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
+        state_shape = np.shape(states)
+        TM_norm = self.build_TM(states.iloc[:,::self.dt],overide)
+        pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
+        pi_sig = []
+        sim_list = []
+        if self.act is None:
+            sim_list = np.arange(1,99*600,10)
+        else:
+            sim_list = np.arange(1,len(states.T),3)
+            
+        for nset in sim_list:
+            TM_lim = self. build_TM(states.iloc[:,::nset])
+            pi_eq, eigs = self.solve_pi_eq(TM_lim)
+            pi_sig.append(pi_eq)
+            
+            # if pi_sig[-1] > np.mean(pi_sig):
+            #     return TM_lim, pi_sig, nset
+        sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
+        return sig_
+
     # def build_CGTM_series(self):
     # THIS SHOULDN'T BE
     #
