@@ -259,6 +259,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
             sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
             return out,sm        
     def run_ternary_diff(state1,state2,ax,out):
+        import matplotlib.colors as mcolors
         n = 4
         tick_size = 0.1
         margin = 0.05
@@ -286,7 +287,6 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
 
         state2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state2),index_col=0).T
         states, hist2 = aps.all_possible_states(), state2  
-        norm2 = MidpointNormalize(vmin=-10**(-2),vmax=10**(-2),midpoint=0)
 
         #Define twin axis
         # fig, ax = plt.subplots()
@@ -307,10 +307,10 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         c = states[:,2]
         
         # # values is stored in the last column
-        v = hist1.values[0] - hist2.values[0]
-        for vi,V in enumerate(v):
-            if np.abs(V) < 1E-10:
-                v[vi] = 0.0
+        v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
+        #v = v -(v.values[0].max()+v.values[0].min())/2
+        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-2,vmax=1E-2)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
+        # norm2  = mcolors.TwoSlopeNorm(vmin=-2*10**-2, vmax = 2*10**-2, vcenter=0)
         # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
         # X,Y = [], []
         # for s in states:
@@ -327,9 +327,9 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         
         # # plot the contour
         if out == None:
-            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
+            ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='RdBu_r',norm=norm2)
         else:
-            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
+            out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr')#,norm=norm2)
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])

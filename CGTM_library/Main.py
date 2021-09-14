@@ -80,12 +80,10 @@ def network():
     plt.savefig("State_transitions.pdf")
     plt.close()
 
-import numpy as np
-test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short")
-test1 = cgc.CGTM_Calculations("",1,"cg","active","short")
-sigs = test2.sigConverge_time()
-plt.plot(np.linspace(1,50,len(sigs)),sigs,'*-')
-sigs = test1.sigConverge_time()
-plt.plot(np.linspace(1,50,len(sigs)),sigs,'*-')
-plt.savefig("SumSig.pdf")
-plt.close()
+# import numpy as np
+# test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").weighted_avg()
+# test1 = cgc.CGTM_Calculations("",1,"cg","active","short").weighted_avg()
+fig, ax = plt.subplots(1,1)
+oot = 0
+oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_shortcg",ax=ax,out=oot)
+plt.colorbar(sm2)

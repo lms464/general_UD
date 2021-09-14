@@ -359,15 +359,12 @@ class CGTM_Calculations:
             pd.DataFrame(Z).to_csv("./%s_ratio_sum.csv"%self.act)
             pd.DataFrame(Zp).to_csv("./%s_ratio_pi_sum.csv"%self.act)
         #return Z,Zp
-    def series_weighted_avg(self):
-        
-        wsa = []
-        pi_eq, eigs = self.build_CGTM_series()
+    def weighted_avg(self):
+        pi_eq = self.build_CGTM()[0]
         all_states = aps.all_possible_states()
-        for pi in pi_eq:
-            tmp_wsa = [np.sum((pi*all_states[:,0])),np.sum((pi*all_states[:,1])),np.sum((pi*all_states[:,2]))]
-            wsa.append(tmp_wsa)
-        return np.asarray(wsa)
+        tmp_wsa = [np.sum((pi_eq*all_states[:,0])),np.sum((pi_eq*all_states[:,1])),np.sum((pi_eq*all_states[:,2]))]
+        return tmp_wsa
+    
 
     def write_pi_eq(self):
         pi_eq = self.build_CGTM()[0]
@@ -402,3 +399,4 @@ class CGTM_Calculations:
 # d1.write_pi_raw()
 
 
+pd.DataFrame(aps.all_possible_states()).to_csv("all_states.csv")
