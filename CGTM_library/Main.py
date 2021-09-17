@@ -63,27 +63,54 @@ def SI_CG():
 # SI_CG()
 
 def Confidence():
+    
+    # cgc.CGTM_Calculations("",1,"cg","inactive","short").calc_confidence(1)
+    # cgc.CGTM_Calculations("",1,"cg","active","short").calc_confidence(1)
+    
+    
+    '''
+    Converges after 9 steps, which is the same number of simulations
+    suggesting something is wrong with data collection (ie I'm looping
+    over the wrong axis)
+    '''
+    
     path="/home/liam/Censere/UDel/CG/data"
     fig, ax = plt.subplots(1,2,figsize=(12,6),sharex="row")
     for jj, j in enumerate(["inactive","active"]):
-        cgp.plot_convergence(path+"/"+j+"_ratio_sum.csv",ax[jj])
-    
-    plt.savefig("confidence.pdf")
-    plt.close()
-# Confidence()
+        cgp.plot_convergence(path+"/"+j+"_ratio_pi_sum.csv",ax[jj])
+    plt.show()
+    # plt.savefig("confidence.pdf")
+    # plt.close()
+Confidence()
 
-def network():
+def network(leaflet=None, kind=None, act=None):
+    # leaflet and act should be lists with 2 
+    # indexes ex ["SU","SL"]
     fig, ax = plt.subplots(1,2,figsize=(24,12))
-    cgp.network_plot("inactive", ax[0])
-    cgp.network_plot("active", ax[1])
+
+    if leaflet == None:
+        cgp.network_plot(ax[0],leaflet, kind, act[0])
+        cgp.network_plot(ax[1],leaflet, kind, act[1])
+    elif act == None:
+        cgp.network_plot(ax[0],leaflet[0], kind, act)
+        cgp.network_plot(ax[1],leaflet[1], kind, act)
+    else:
+        print("You should not have both leaflet and act")
+        print("as 'None' or '<input>'.\n Exiting")
+        return 0
+
+    # cgp.network_plot("inactive", ax[0])
+    # cgp.network_plot("active", ax[1])
     plt.tight_layout()
     plt.savefig("State_transitions.pdf")
     plt.close()
 
+
+# network(["SU","SL"],"charge")
 # import numpy as np
 # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").weighted_avg()
 # test1 = cgc.CGTM_Calculations("",1,"cg","active","short").weighted_avg()
-fig, ax = plt.subplots(1,1)
-oot = 0
-oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_shortcg",ax=ax,out=oot)
-plt.colorbar(sm2)
+# fig, ax = plt.subplots(1,1)
+# oot = 0
+# oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_shortcg",ax=ax,out=oot)
+# plt.colorbar(sm2)

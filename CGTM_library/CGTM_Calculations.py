@@ -312,7 +312,12 @@ class CGTM_Calculations:
     #         pi_eq.append(pi_tmp)
     #         eigs.append(eigs_tmp)
     #     return np.asarray(pi_eq),eigs
+    
+    
     def calc_confidence(self,tau=1):
+        # should only be used for analysis when you have 
+        # both a LONG system and a set of short systems
+        # TODO fix this to do that!!
         # tau can be played with, but 1 and 2 work best
         if self.act == None:
             states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
@@ -321,46 +326,81 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,"long",self.act),index_col=0).T
         possible_states = aps.all_possible_states()
         # states = []
         # for s in shell:
         #     states.append(self.check_states(s,possible_states))
         # states = np.array(states)
         n1, bins1 = np.histogram(states, bins=len(possible_states),range=(0,len(possible_states)))
-        pi1 = self.build_CGTM()[0]
+        # pi1 = self.build_CGTM()[0]
         n1 = n1/np.sum(n1)
         Z = []
         Zp = []
-        Pat = []
-        Rat = []
-        tau = 1
+
+        # tau = 1
+        if self.act != None: 
+            if self.act == "act" or self.act == "Active":
+                self.update_act("active")
+            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+                self.update_act("inactive")
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
+        iter_max = len(states)
+        while len(states)/iter_max < 4:
+            iter_max = iter_max - 1
         # bit of a hack, the states.T lets me run through time
-        for i in range(0,len(states.T),tau):
-            if i%100==0:
+        for i in range(0,int(iter_max),tau):
+            # ind = states.index.astype(int)[::i*tau+tau]
+            if i%10==0:
                 print("Frame %i"%i)
-            n, bins = np.histogram(states.T[:i*tau+tau], bins=len(possible_states),range=(0,len(possible_states)))
-            n = n/np.sum(n)
-            TM = self.build_TM(states.T[:i*tau+tau].T)
+            # n, bins = np.histogram(states.iloc[ind,:], bins=len(possible_states),range=(0,len(possible_states)))
+            # n = n/np.sum(n)
+            TM = self.build_TM(states.iloc[::i*tau+tau,:])
             pi = self.solve_pi_eq(TM)[0]
-            Pat.append(n)
-            ratio= n/n1
+            # Pat.append(n)
+
+            phi_tau = np.asarray(self.weighted_avg(pi)) / np.asarray(self.weighted_avg(n1))
+            print(self.weighted_avg(pi),phi_tau.sum())
+            Z.append(phi_tau)
+            Zp.append(phi_tau.sum())
+            
+            '''
+            
+            This doesn't work...
+            initially I was dealing with short - short systems
+            and the states would overlap
+            If I compare short to long, it breaks because
+            there is a difference in states -> inf
+            
+            ratio= n/n1            
             ratio=np.nan_to_num(ratio,0)
-            Rat.append(ratio)
+            
+            if ratio.max() >= 1E308:
+                ratio = [np.longdouble(r) for r in ratio]
+                
+            #Rat.append(ratio)
             ratio_sum = np.sum(ratio)/len(n1[n1>0])
             ratio_pi = pi/pi1
+            ratio_pi = np.nan_to_num(ratio_pi,0)
+            
+            if ratio_pi.max() >= 1E308:
+                ratio_pi = [np.longdouble(r) for r in ratio_pi]
+            
             ratio_pi_sum = (np.sum(ratio_pi)/len(pi1[pi1>0]))
-            Z.append(ratio_sum)
-            Zp.append(ratio_pi_sum)
+            
+            '''
+            # Z.append(ratio_sum)
+            # Zp.append(ratio_pi_sum)
         try:
             pd.DataFrame(Z).to_csv("%sCG/data/%s_ratio_sum.csv"%(self.path,self.act))
-            pd.DataFrame(Zp).to_csv("%s/CG/data/%s_ratio_pi_sum.csv"%(self.path,self.act))
+            (pd.DataFrame(Zp)/3).to_csv("%s/CG/data/%s_ratio_pi_sum.csv"%(self.path,self.act))
         except:
             pd.DataFrame(Z).to_csv("./%s_ratio_sum.csv"%self.act)
-            pd.DataFrame(Zp).to_csv("./%s_ratio_pi_sum.csv"%self.act)
+            (pd.DataFrame(Zp)/3).to_csv("./%s_ratio_pi_sum.csv"%self.act)
         #return Z,Zp
-    def weighted_avg(self):
-        pi_eq = self.build_CGTM()[0]
+    def weighted_avg(self, pi_eq=None):
+        if pi_eq is None:
+            pi_eq = self.build_CGTM()[0]
         all_states = aps.all_possible_states()
         tmp_wsa = [np.sum((pi_eq*all_states[:,0])),np.sum((pi_eq*all_states[:,1])),np.sum((pi_eq*all_states[:,2]))]
         return tmp_wsa

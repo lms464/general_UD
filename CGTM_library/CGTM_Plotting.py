@@ -73,10 +73,13 @@ def plot_state_traj(state,ax):
     # plt.close()
 
 def plot_convergence(fl,ax):
-    conv = pd.read_csv(fl,index_col=0)
+    conv = pd.read_csv(fl,index_col=0)#[::-1]
     ax.plot(conv.index*.4, conv,"o-")
-    ax.plot([0, (conv.index*.4)[-1]],[1,1],'k--',lw=2)
-    ax.set_yscale('log')
+    ax.plot([0, ((conv.index+1)*.4)[-1]],[np.mean(conv),np.mean(conv)],'r--',lw=2)
+    ax.plot([0, ((conv.index+1)*.4)[-1]],[1,1],'k--',lw=2)
+    # ax.set_yscale('log')
+    ax.set_ylim(.75,1.25)
+    ax.set_xlabel(r"$\tau$(ns)")
 
 def plot_sigConverge(sigSU, sigSL,kind):
     sim_list = []
@@ -411,7 +414,7 @@ def Ternary_Scatter(ax, data1, data2=None, rot=None):
     # tax.savefig("Scatter_%s.pdf"%kind)
     # tax.close()
     
-def network_plot(act,ax):
+def network_plot(ax,leaflet=None, kind=None, act=None):
     import all_possible_states as aps
     import networkx as nx
     import numpy as np
@@ -428,7 +431,12 @@ def network_plot(act,ax):
     list_o_list = [np.linspace(0,230,231),np.linspace(0,230,231)]
     states = list(itertools.product(*list_o_list))
     states = np.arange(0,len(aps.all_possible_states()))
-    Q = cgc.CGTM_Calculations("",1,"cg",act,"short").build_CGTM()[-1]
+    Q = 0
+    
+    if act == None:
+        Q = cgc.CGTM_Calculations(leaflet,1,kind,).build_CGTM()[-1]
+    else:
+        Q = cgc.CGTM_Calculations("",1,"cg",act,"short").build_CGTM()[-1]
     G = nx.MultiDiGraph()
     # edge_labels={}
     #pos = []
@@ -465,19 +473,3 @@ def network_plot(act,ax):
     pos = nx.drawing.nx_pydot.graphviz_layout(G, prog="circo")
     nx.draw_networkx(G, pos=pos, with_labels=True, node_color=c, node_size=s,edge_color= ec,width=ew,
                  font_color='white',font_weight='bold',font_size='9',ax=ax)
-    # pos = {state:list(state) for state in tansistions}
-    # nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)
-    # nx.draw_networkx_labels(G, pos, font_weight=2)
-    # nx.draw_networkx_nodes(G, pos, node_size=[v * base_size for v in G.nodes()])
-    #nx.draw_networkx_edge_labels(G, pos, edge_labels)
-    # ax.set_axis('off');
-#     plt.savefig("Transitions_Network_%s.pdf"%act)
-#     plt.close()
-# # fig,ax = plt.subplots(2,2,figsize=(8,8))
-# Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,0])
-# Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg","",ax=ax[0,1])
-# Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,0])
-# Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,1])
-
-# ()
-# Ternary_Heat_Map("pi_eq_SLChainsT")
