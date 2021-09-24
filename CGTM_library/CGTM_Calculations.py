@@ -227,7 +227,7 @@ class CGTM_Calculations:
             pi.append(pi_eq), eig.append(np.real(np.sort(eigs[0])[-2]))
         return eig
 
-    def sig(self, ref, states,sim_list):
+    def sig(self, ref, states, sim_list):
         sig_pi = []
         for s,sl in zip(states,sim_list):
             sig_pi.append(np.sum(np.sqrt((s - ref)**2)) / (sl - 1))
@@ -313,6 +313,46 @@ class CGTM_Calculations:
     #         eigs.append(eigs_tmp)
     #     return np.asarray(pi_eq),eigs
     
+    def sigConverge_time_diff(self,overide=True):
+        states = 0 
+        states_ref = 0
+        # the assumption is that 
+        if self.act == None:
+            print("\n########################################################\n\n")
+            print("This will run, however these simulations are not enough")
+            print("for this to be useful")
+            print("\n\n\n########################################################")
+            states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
+        else:
+
+            if self.act == "act" or self.act == "Active":
+                self.update_act("active")
+            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+                self.update_act("inactive")
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,'short',self.act),index_col=0) 
+            states_ref = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,'long',self.act),index_col=0) 
+            
+        #state_shape = np.shape(states_ref)
+        TM_norm = self.build_TM(states_ref.iloc[:,::self.dt],overide)
+        pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
+        pi_sig = []
+        sim_list = []
+        if self.act is None:
+            sim_list = np.arange(1,99*600,10)
+        else:
+            sim_list = np.arange(1,len(states.T),3)
+            
+        for nset in sim_list:
+            TM_lim = self. build_TM(states.iloc[:,::nset])
+            pi_eq, eigs = self.solve_pi_eq(TM_lim)
+            pi_sig.append(pi_eq)
+            
+            # if pi_sig[-1] > np.mean(pi_sig):
+            #     return TM_lim, pi_sig, nset
+        sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
+        return sig_
+
+        
     
     def calc_confidence(self,tau=1):
         # should only be used for analysis when you have 
@@ -392,7 +432,7 @@ class CGTM_Calculations:
             # Z.append(ratio_sum)
             # Zp.append(ratio_pi_sum)
         try:
-            pd.DataFrame(Z).to_csv("%sCG/data/%s_ratio_sum.csv"%(self.path,self.act))
+            pd.DataFrame(Z).to_csv("%s/CG/data/%s_ratio_sum.csv"%(self.path,self.act))
             (pd.DataFrame(Zp)/3).to_csv("%s/CG/data/%s_ratio_pi_sum.csv"%(self.path,self.act))
         except:
             pd.DataFrame(Z).to_csv("./%s_ratio_sum.csv"%self.act)

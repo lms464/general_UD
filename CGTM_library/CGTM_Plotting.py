@@ -87,8 +87,8 @@ def plot_sigConverge(sigSU, sigSL,kind):
         sim_list = [1,2,3,4,5,6,7,8,9,10]
     else:
         sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
-    plt.plot(sim_list,sigSU,"o--",label="Outer Leaflet")
-    plt.plot(sim_list,sigSL,"+--",label="Inner Leaflet")
+    plt.plot(np.linspace(0,50,len(sigSU)),sigSU,"o--",label="Outer Leaflet")
+    plt.plot(np.linspace(0,50,len(sigSU)),sigSL,"+--",label="Inner Leaflet")
     plt.ylabel(r"$\sigma_{\pi}$")
     plt.xlabel("Simulations Used")
     plt.legend()
@@ -470,6 +470,6 @@ def network_plot(ax,leaflet=None, kind=None, act=None):
     ec = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,1)
     ec = [graph_colormap(i) for i in ec]
     
-    pos = nx.drawing.nx_pydot.graphviz_layout(G, prog="circo")
+    pos = nx.drawing.nx_pydot.graphviz_layout(G)#, prog="circo")
     nx.draw_networkx(G, pos=pos, with_labels=True, node_color=c, node_size=s,edge_color= ec,width=ew,
                  font_color='white',font_weight='bold',font_size='9',ax=ax)

@@ -74,14 +74,12 @@ def Confidence():
     over the wrong axis)
     '''
     
-    path="/home/liam/Censere/UDel/CG/data"
+    path="~/CG/data"
     fig, ax = plt.subplots(1,2,figsize=(12,6),sharex="row")
     for jj, j in enumerate(["inactive","active"]):
         cgp.plot_convergence(path+"/"+j+"_ratio_pi_sum.csv",ax[jj])
-    plt.show()
-    # plt.savefig("confidence.pdf")
-    # plt.close()
-Confidence()
+    plt.savefig("confidence.pdf")
+    plt.close()
 
 def network(leaflet=None, kind=None, act=None):
     # leaflet and act should be lists with 2 
@@ -105,10 +103,17 @@ def network(leaflet=None, kind=None, act=None):
     plt.savefig("State_transitions.pdf")
     plt.close()
 
+def sig_conv(SL,SU,kind):
+    cgp.plot_sigConverge(SL,SU,kind)
+  
+
+
+test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time_diff()
+test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_time_diff()
+sig_conv(test1,test2,'cg')
 
 # network(["SU","SL"],"charge")
 # import numpy as np
-# test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").weighted_avg()
 # test1 = cgc.CGTM_Calculations("",1,"cg","active","short").weighted_avg()
 # fig, ax = plt.subplots(1,1)
 # oot = 0
