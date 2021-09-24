@@ -155,6 +155,7 @@ class CGTM_Collect_Data:
         
         full_states = []
         for i in range(self.start_sys,self.end_sys):
+            print("Running System %i..."%i)
             fl = open ("%s/shot_%s%i/borders.txt"%(self.path,self.act,i))
             lines = fl.readlines()#.split()
             fl.close()
