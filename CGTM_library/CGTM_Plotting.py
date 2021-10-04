@@ -390,21 +390,25 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
 
         
 
-def Ternary_Scatter(ax, data1, data2=None, rot=None):
+def Ternary_Scatter(ax, data1, rot=None):
     
     # Take in a state file, and produce brute force distribution
     # data1 is a weighted sum... why?
-    import ternary
+    data = []
+    data1 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],data1),index_col=0).values
+    for dat in data1:
+        if np.sum(dat) == 0:
+            continue
+        data.append(dat)
     
     if rot is not None:
-        data1 = np.array([data1[:,1],data1[:,2],data1[:,0]]).T
+        data = np.array([data1[:,1],data1[:,2],data1[:,0]]).T
         
     
-    # figure, tax = ternary.figure(scale=1)
-    #figure.set_size_inches(10, 7.5)
-    ax.scatter(data1)
-    if data2 is not None:
-        ax.scatter(data2)
+
+    ax.scatter(data)
+    # if data2 is not None:
+    #     ax.scatter(data2)
     ax.boundary(linewidth=2.0)
     ax.gridlines(multiple=1, color="blue")
     ax.ticks(axis='lbr', linewidth=.5, multiple=1)

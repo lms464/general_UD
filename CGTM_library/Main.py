@@ -22,6 +22,17 @@ def ternary_CG():
     plt.savefig("CG_ternary.pdf",bbox_inches='tight')
     plt.close()
 
+def ternary_scatter():
+    #Needs a functin to look at initial distribution, not 
+    # the FINAL distribution!
+    
+    import pandas as pd
+    import ternary
+    figure, ax = ternary.figure(scale=1)
+    figure.set_size_inches(10, 7.5)
+    states = pd.read_csv("all_states.csv",index_col=0)
+    cgp.Ternary_Scatter(ax,"CG/data/init_raw_active_shortcg",True)
+ternary_scatter()
     
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey='col',sharex=True)
@@ -108,9 +119,9 @@ def sig_conv(SL,SU,kind):
   
 
 
-test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time_diff()
-test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_time_diff()
-sig_conv(test1,test2,'cg')
+# # test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time_diff()
+# test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_time_diff()
+# sig_conv(test2,test2,'cg')
 
 # network(["SU","SL"],"charge")
 # import numpy as np

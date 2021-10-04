@@ -54,6 +54,8 @@ class CGTM_Calculations:
     def __get_act__(self):
         return self.act
     
+    
+    
     def __test__(self):
         
         def build_simplified_CGTM(self):
@@ -299,19 +301,6 @@ class CGTM_Calculations:
             #     return TM_lim, pi_sig, nset
         sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
         return sig_
-
-    # def build_CGTM_series(self):
-    # THIS SHOULDN'T BE
-    #
-    #     states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
-    #     pi_eq = []
-    #     eigs = []
-    #     for state in states.T:
-    #         TM_norm = self.build_TM(states.T[state])
-    #         pi_tmp, eigs_tmp = self.solve_pi_eq(TM_norm)
-    #         pi_eq.append(pi_tmp)
-    #         eigs.append(eigs_tmp)
-    #     return np.asarray(pi_eq),eigs
     
     def sigConverge_time_diff(self,overide=True):
         states = 0 
@@ -404,33 +393,6 @@ class CGTM_Calculations:
             Z.append(phi_tau)
             Zp.append(phi_tau.sum())
             
-            '''
-            
-            This doesn't work...
-            initially I was dealing with short - short systems
-            and the states would overlap
-            If I compare short to long, it breaks because
-            there is a difference in states -> inf
-            
-            ratio= n/n1            
-            ratio=np.nan_to_num(ratio,0)
-            
-            if ratio.max() >= 1E308:
-                ratio = [np.longdouble(r) for r in ratio]
-                
-            #Rat.append(ratio)
-            ratio_sum = np.sum(ratio)/len(n1[n1>0])
-            ratio_pi = pi/pi1
-            ratio_pi = np.nan_to_num(ratio_pi,0)
-            
-            if ratio_pi.max() >= 1E308:
-                ratio_pi = [np.longdouble(r) for r in ratio_pi]
-            
-            ratio_pi_sum = (np.sum(ratio_pi)/len(pi1[pi1>0]))
-            
-            '''
-            # Z.append(ratio_sum)
-            # Zp.append(ratio_pi_sum)
         try:
             pd.DataFrame(Z).to_csv("%s/CG/data/%s_ratio_sum.csv"%(self.path,self.act))
             (pd.DataFrame(Zp)/3).to_csv("%s/CG/data/%s_ratio_pi_sum.csv"%(self.path,self.act))
@@ -444,7 +406,28 @@ class CGTM_Calculations:
         all_states = aps.all_possible_states()
         tmp_wsa = [np.sum((pi_eq*all_states[:,0])),np.sum((pi_eq*all_states[:,1])),np.sum((pi_eq*all_states[:,2]))]
         return tmp_wsa
-    
+
+    def get_initial_states(self):
+        if self.act != None: 
+            if self.act == "act" or self.act == "Active":
+                self.update_act("active")
+            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
+                self.update_act("inactive")
+        states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
+        return states.iloc[0,:]
+
+    def write_initial_states_distribution(self):
+        init_states = self.get_initial_states()
+        possible_states = aps.all_possible_states()
+        init_hist, init_edge = np.histogram(init_states,bins=len(possible_states),range=(0,len(possible_states)))
+        init_hist[init_hist>0] = 1 
+        init_hist = (possible_states.T * init_hist).T
+        print()
+        #init_hist = self.weighted_avg(init_hist)
+        if self.act==None:
+            pd.DataFrame(init_hist).to_csv("%s/init_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
+        else:
+            pd.DataFrame(init_hist).to_csv("%s/CG/data/init_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
     def write_pi_eq(self):
         pi_eq = self.build_CGTM()[0]
@@ -460,8 +443,12 @@ class CGTM_Calculations:
         else:
             pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
-# # test1 = CGTM_Calculations("",1,"cg","inact","short")
-# # test1.write_pi_eq()
+# CGTM_Calculations("",1,"cg","act","short").write_initial_states_distribution()
+# CGTM_Calculations("",1,"cg","inact","short").write_initial_states_distribution()
+
+# test1.write_pi_eq()
+# test1.write_pi_raw()
+
 # # test1.sigConverge()
 # import matplotlib.pyplot as plt
 # import CGTM_Plotting as cgp
@@ -479,4 +466,4 @@ class CGTM_Calculations:
 # d1.write_pi_raw()
 
 
-pd.DataFrame(aps.all_possible_states()).to_csv("all_states.csv")
+# pd.DataFrame(aps.all_possible_states()).to_csv("all_states.csv")
