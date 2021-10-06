@@ -6,10 +6,10 @@ def ternary_CG():
     uot = 0
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,0])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,0],initial="CG/data/init_raw_inactive_shortcg")
     cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[0,1])
     cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","","CG/data/pi_raw_inactive_shortcg",ax=ax[0,2])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,0])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_longcg","",ax=ax[1,0] ,initial="CG/data/init_raw_inactive_shortcg")
     uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,1], out=uot)
     # cgp.Ternary_Scatter(ax[1,2], "CG/data/pi_eq_active_shortcg")
     oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_shortcg",ax=ax[1,2],out=oot)
@@ -18,9 +18,9 @@ def ternary_CG():
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
-    # plt.show()
-    plt.savefig("CG_ternary.pdf",bbox_inches='tight')
-    plt.close()
+    plt.show()
+    # plt.savefig("CG_ternary.pdf",bbox_inches='tight')
+    # plt.close()
 
 def ternary_scatter():
     #Needs a functin to look at initial distribution, not 
@@ -31,8 +31,8 @@ def ternary_scatter():
     figure, ax = ternary.figure(scale=1)
     figure.set_size_inches(10, 7.5)
     states = pd.read_csv("all_states.csv",index_col=0)
-    cgp.Ternary_Scatter(ax,"CG/data/init_raw_active_shortcg",True)
-ternary_scatter()
+    cgp.Ternary_Scatter(ax,"CG/data/pi_eq_active_shortcg",True)
+# ternary_scatter()
     
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey='col',sharex=True)
@@ -68,7 +68,7 @@ def SI_CG():
     plt.colorbar(s1,cax=cax)
     plt.savefig("CG_SI.pdf",bbox_inches='tight')
     plt.close()
-# ternary_CG()
+ternary_CG()
 # states_CG()   
 # CGTM()    
 # SI_CG()

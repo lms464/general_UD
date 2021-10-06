@@ -95,7 +95,7 @@ def plot_sigConverge(sigSU, sigSL,kind):
     plt.savefig("Convergence_%s.pdf"%kind)
     plt.close()
 
-def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
+def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initial=None):
 
     import matplotlib.tri as tri
 
@@ -135,7 +135,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         states = np.asarray(aps.all_possible_states())
         return states, hist
     
-    def run_ternary(state,fl_name,ax,out):
+    def run_ternary(state,fl_name,ax,out,initial):
         n = 4
         tick_size = 0.1
         margin = 0.05
@@ -222,13 +222,28 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         # creating the grid
         refiner = tri.UniformTriRefiner(triangle)
         trimesh = refiner.refine_triangulation(subdiv=3)
+        tern = ax.triplot(trimesh,'--',color='grey')
         
+        if initial is not None:
+            hist_mod = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],initial),index_col=0,header=0)
+    
+            a1,b1,c1 = hist_mod.iloc[:,0], hist_mod.iloc[:,1], hist_mod.iloc[:,2]
+            a1 = a1[a1>0].values
+            b1 = b1[b1>0].values
+            c1 = c1[c1>0].values
+            x = 0.5 * ( 2.*b1+c1 ) / ( a1+b1+c1 )
+            y = 0.5*np.sqrt(3) * c1 / (a1+b1+c1)
+            # points = np.array([a,b,c]).T
+            tri_point = tri.Triangulation(x,y)
+            refiner = tri.UniformTriRefiner(tri_point)
+            trimesh = refiner.refine_triangulation(subdiv=2)
+            tern = ax.triplot(tri_point,'*',color='black')
+
         # plt.axis('off')
         
         
         
         #plotting the mesh and caliberate the axis
-        tern = ax.triplot(trimesh,'k--')
         #plt.title('Binding energy peratom of Al-Ti-Ni clusters')
         # ax.set_xlabel('Al-Ti',fontsize=12,color='black')
         # ax.set_ylabel('Ti-Ni',fontsize=12,color='black')
@@ -342,6 +357,8 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
         refiner = tri.UniformTriRefiner(triangle)
         trimesh = refiner.refine_triangulation(subdiv=3)
         
+        
+        
         # plt.axis('off')
         
         
@@ -386,7 +403,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None):
     if leaflet_in2 is not None :
         return run_ternary_diff(leaflet_in,leaflet_in2,ax,out)
     else:
-        return run_ternary(leaflet_in,fl_name,ax,out)
+        return run_ternary(leaflet_in,fl_name,ax,out,initial)
 
         
 
