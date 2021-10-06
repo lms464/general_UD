@@ -211,9 +211,9 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         # # plot the contour
         if out == None:
-            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
+            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
         else:
-            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2)
+            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
@@ -344,10 +344,10 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         T = tri.Triangulation(x,y)
         
         # # plot the contour
-        if out == None:
-            ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='RdBu_r',norm=norm2)
-        else:
-            out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr')#,norm=norm2)
+        # if out == None:
+        #     ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2)
+        # else:
+        out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2,extend='both',levels=100)
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])

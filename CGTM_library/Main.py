@@ -18,9 +18,9 @@ def ternary_CG():
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
-    plt.show()
-    # plt.savefig("CG_ternary.pdf",bbox_inches='tight')
-    # plt.close()
+    # plt.show()
+    plt.savefig("CG_ternary.pdf",bbox_inches='tight')
+    plt.close()
 
 def ternary_scatter():
     #Needs a functin to look at initial distribution, not 
