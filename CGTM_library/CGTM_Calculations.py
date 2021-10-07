@@ -258,13 +258,13 @@ class CGTM_Calculations:
         if self.act is None:
             sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
         else:
-            sim_list = [1,2,3,4,5,6,7,8,9,10]
-        for nset in sim_list:
+            sim_list = states.index
+        for nset in sim_list[2:]:
             TM_norm = self. build_TM(states.iloc[:nset,::self.dt])
             pi_eq, eigs = self.solve_pi_eq(TM_norm)
             pi_sig.append(pi_eq)
         sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
-        return sig_
+        return sig_,pi_sig#[1:]
 
     def sigConverge_time(self,overide=True):
         states = 0 
@@ -443,8 +443,8 @@ class CGTM_Calculations:
         else:
             pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
-# CGTM_Calculations("",1,"cg","act","short").write_initial_states_distribution()
-# CGTM_Calculations("",1,"cg","inact","short").write_initial_states_distribution()
+pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_pi.csv")
+pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_pi.csv")
 
 # test1.write_pi_eq()
 # test1.write_pi_raw()
