@@ -443,8 +443,25 @@ class CGTM_Calculations:
         else:
             pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
-pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_pi.csv")
-pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_pi.csv")
+
+
+
+# d1 = CGTM_Calculations("",1,"cg","active","long")
+# d11 = d1.weighted_avg(d1.build_raw()[0])
+# d2 = CGTM_Calculations("",1,"cg","active","short")
+# d21 = d2.weighted_avg(d2.build_raw()[0])
+# d22 = d2.weighted_avg()
+# # CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
+# d3 = CGTM_Calculations("",1,"cg","inactive","long")
+# d31 = d3.weighted_avg(d3.build_raw()[0])
+# d4 = CGTM_Calculations("",1,"cg","inactive","short")
+# d41 = d4.weighted_avg(d4.build_raw()[0])
+# d42 = d4.weighted_avg()
+
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
+
+# pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_pi.csv")
+# pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_pi.csv")
 
 # test1.write_pi_eq()
 # test1.write_pi_raw()

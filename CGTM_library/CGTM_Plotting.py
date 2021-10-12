@@ -87,8 +87,8 @@ def plot_sigConverge(sigSU, sigSL,kind):
         sim_list = [1,2,3,4,5,6,7,8,9,10]
     else:
         sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
-    plt.plot(np.linspace(0,50,len(sigSU)),sigSU,"o--",label="Outer Leaflet")
-    plt.plot(np.linspace(0,50,len(sigSU)),sigSL,"+--",label="Inner Leaflet")
+    plt.plot(np.linspace(0,99,len(sigSU)),sigSU,"o--",label="Outer Leaflet")
+    plt.plot(np.linspace(0,99,len(sigSU)),sigSL,"+--",label="Inner Leaflet")
     plt.ylabel(r"$\sigma_{\pi}$")
     plt.xlabel("Simulations Used")
     plt.legend()
@@ -152,54 +152,24 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         right_tick = 0.8264*tick_size * (top - left) / n
         left_tick = 0.8264*tick_size * (left - right) / n
         
-        # state = "pi_sl"#"StatesL_I"
         hist = 0
         states = 0
-        # if raw == True:
-        #     states, hist = run_raw(state)    
-        
+
         # elif pi_eq == True:
         state = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state),index_col=0).T
         states, hist = aps.all_possible_states(), state  
-        
-        # elif pi_eq == False and raw == False:
-        #     print("Please set raw or pi_eq to True")
-        #     return 0
-        
-        # STATES = []
-        
-        # for si, s in enumerate(states):
-        #     STATES.append(np.append(s,hist["0"][si]))
-        # STATES = np.asarray(STATES)
-        
-        
-        #Define twin axis
-        # if ax == None:
-        #     fig, ax = plt.subplots()
 
         # Note that the ordering from start to stop is important for the tick labels
         plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
         plot_ticks(left, top, left_tick, n, offset=(-0.12, -0.0))
         plot_ticks(top, right, right_tick, n,offset=(0,.01))
-        # fig, tax = ternary.figure(scale=100)
-        # fig.set_size_inches(5, 4.5)
-        # tax.scatter(pd.DataFrame(states)[[0,1,2]].values)
-        # tax.gridlines(multiple=20)
-        # tax.get_axes().axis('off')
-        
-        
         
         a = states[:,0]
         b = states[:,1]
         c = states[:,2]
         
         # # values is stored in the last column
-        v = hist.values[0]#["0"]
-        # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
-        # X,Y = [], []
-        # for s in states:
-        #     R = t.dot(s)
-        #     X.append(R[0]), Y.append(R[1])
+        v = hist.values[0]
         
         # # translate the data to cartesian corrds
         x = 0.5 * ( 2.*b+c ) / ( a+b+c )
@@ -239,38 +209,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
             trimesh = refiner.refine_triangulation(subdiv=2)
             tern = ax.triplot(tri_point,'*',color='black')
 
-        # plt.axis('off')
-        
-        
-        
-        #plotting the mesh and caliberate the axis
-        #plt.title('Binding energy peratom of Al-Ti-Ni clusters')
-        # ax.set_xlabel('Al-Ti',fontsize=12,color='black')
-        # ax.set_ylabel('Ti-Ni',fontsize=12,color='black')
-        # ax2 = ax.twinx()
-        # ax2.set_ylabel('Al-Ni',fontsize=12,color='black')
-        # # Corners
-        # ax.text(0.15, 0.065, 'Chol', fontsize=12, color='black')
-        # ax.text(0.92, 0.19, 'Neutral', fontsize=12, color='black')
-        # ax.text(0.40, 0.89, 'Anionic', fontsize=12, color='black')
-        
-        # Connections
-        # fig.text(0.47, 0.05, 'Ti-Al', fontsize=12, color='black')  # Note: not sure about
-        # fig.text(0.72, 0.50, 'Al-Ni', fontsize=12, color='black')  # the nomenclature;
-        # fig.text(0.25, 0.50, 'Ti-Ni', fontsize=12, color='black')  # might be switched
-        
-        
-        #set scale for axis
-        # ax.set_xlim(1, 0)
-        # ax.set_ylim(0, 1)
-        # ax2.set_ylim(1, 0)
         ax.set_axis_off()
-        #cax = plt.axes([0.75, 0.55, 0.055, 0.3])
-        # plt.colorbar(cax=ax,format='%.3f')
-        #return ax,tern
-        #plt.show()
-        # plt.savefig("%s_tern.pdf"%fl_name)
-        # plt.close()
         if out == None:
             return
         else:
@@ -307,18 +246,10 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         states, hist2 = aps.all_possible_states(), state2  
 
         #Define twin axis
-        # fig, ax = plt.subplots()
         # Note that the ordering from start to stop is important for the tick labels
         plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
         plot_ticks(left, top, left_tick, n, offset=(-0.15, -0.0))
         plot_ticks(top, right, right_tick, n,offset=(0,.01))
-        # fig, tax = ternary.figure(scale=100)
-        # fig.set_size_inches(5, 4.5)
-        # tax.scatter(pd.DataFrame(states)[[0,1,2]].values)
-        # tax.gridlines(multiple=20)
-        # tax.get_axes().axis('off')
-        
-        
         
         a = states[:,0]
         b = states[:,1]
@@ -326,27 +257,15 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         # # values is stored in the last column
         v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
-        #v = v -(v.values[0].max()+v.values[0].min())/2
         norm2 = MidpointNormalize(midpoint=0,vmin=-1E-2,vmax=1E-2)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
-        # norm2  = mcolors.TwoSlopeNorm(vmin=-2*10**-2, vmax = 2*10**-2, vcenter=0)
-        # t = np.transpose(np.array([[0,0],[1,0],[0,1]]))
-        # X,Y = [], []
-        # for s in states:
-        #     R = t.dot(s)
-        #     X.append(R[0]), Y.append(R[1])
         
         # # translate the data to cartesian corrds
         x = 0.5 * ( 2.*b+c ) / ( a+b+c )
         y = 0.5*np.sqrt(3) * c / (a+b+c)
         
         
-        # # create a triangulation out of these points
         T = tri.Triangulation(x,y)
-        
-        # # plot the contour
-        # if out == None:
-        #     ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2)
-        # else:
+
         out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2,extend='both',levels=100)
         
         # create the grid
@@ -357,83 +276,163 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         refiner = tri.UniformTriRefiner(triangle)
         trimesh = refiner.refine_triangulation(subdiv=3)
         
-        
-        
-        # plt.axis('off')
-        
-        
-        
         #plotting the mesh and caliberate the axis
-        
         ax.triplot(trimesh,'k--')
-        #plt.title('Binding energy peratom of Al-Ti-Ni clusters')
-        # ax.set_xlabel('Al-Ti',fontsize=12,color='black')
-        # ax.set_ylabel('Ti-Ni',fontsize=12,color='black')
-        # ax2 = ax.twinx()
-        # ax2.set_ylabel('Al-Ni',fontsize=12,color='black')
-        # Corners
-        # fig.text(0.15, 0.065, 'Chol', fontsize=12, color='black')
-        # fig.text(0.92, 0.19, 'Neutral', fontsize=12, color='black')
-        # fig.text(0.40, 0.89, 'Anionic', fontsize=12, color='black')
-        
-        # Connections
-        # fig.text(0.47, 0.05, 'Ti-Al', fontsize=12, color='black')  # Note: not sure about
-        # fig.text(0.72, 0.50, 'Al-Ni', fontsize=12, color='black')  # the nomenclature;
-        # fig.text(0.25, 0.50, 'Ti-Ni', fontsize=12, color='black')  # might be switched
-        
-        
-        #set scale for axis
-        # ax.set_xlim(1, 0)
-        # ax.set_ylim(0, 1)
-        # ax2.set_ylim(1, 0)
         ax.set_axis_off()
-        # cax = plt.axes([0.75, 0.55, 0.055, 0.3])
-        # plt.colorbar(cax=cax,format='%.3f')
-        # plt.show()
-        # plt.savefig("%s_tern_diff.pdf"%state1)
-        # plt.close()    
-        
+
         if out == None:
             return
         else:
             sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
-
             return out,sm
-    
-    if leaflet_in2 is not None :
-        return run_ternary_diff(leaflet_in,leaflet_in2,ax,out)
-    else:
-        return run_ternary(leaflet_in,fl_name,ax,out,initial)
 
-        
+    def run_ternary_iterate(state,ax,out):
+            import matplotlib.colors as mcolors
+            n = 4
+            tick_size = 0.1
+            margin = 0.05
+            norm2 = 0
+            norm2 = MidpointNormalize(0,0.12,0.06)
 
-def Ternary_Scatter(ax, data1, rot=None):
     
-    # Take in a state file, and produce brute force distribution
-    # data1 is a weighted sum... why?
-    data = []
-    data1 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],data1),index_col=0).values
-    for dat in data1:
-        if np.sum(dat) == 0:
-            continue
-        data.append(dat)
+            # define corners of triangle    
+            left = np.r_[0, 0]
+            right = np.r_[1, 0]
+            top = np.r_[0.5,  np.sqrt(2.3)*0.576]
+            triangle = np.c_[left, right, top, left]
+            
+            # define vectors for ticks
+            bottom_tick = 0.8264*tick_size * (right - top) / n
+            right_tick = 0.8264*tick_size * (top - left) / n
+            left_tick = 0.8264*tick_size * (left - right) / n
+            
+            # state = "pi_sl"#"StatesL_I"
+            hist = 0
+            states = 0
+            # if raw == True:
+            #     states, hist = run_raw(state)    
+            
+            # elif pi_eq == True:
+            # state = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state),index_col=0).T
+            states, hist = aps.all_possible_states(), state  
     
-    if rot is not None:
-        data = np.array([data1[:,1],data1[:,2],data1[:,0]]).T
-        
-    
+            # Note that the ordering from start to stop is important for the tick labels
+            plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
+            plot_ticks(left, top, left_tick, n, offset=(-0.12, -0.0))
+            plot_ticks(top, right, right_tick, n,offset=(0,.01))
 
-    ax.scatter(data)
-    # if data2 is not None:
-    #     ax.scatter(data2)
-    ax.boundary(linewidth=2.0)
-    ax.gridlines(multiple=1, color="blue")
-    ax.ticks(axis='lbr', linewidth=.5, multiple=1)
-    ax.clear_matplotlib_ticks()
-    ax.get_axes().axis('off')
-    # plt.show()
-    # tax.savefig("Scatter_%s.pdf"%kind)
-    # tax.close()
+            a = states[:,0]
+            b = states[:,1]
+            c = states[:,2]
+            
+            # # values is stored in the last column
+            v = hist.values#[0]#["0"]
+            
+            # # translate the data to cartesian corrds
+            x = 0.5 * ( 2.*b+c ) / ( a+b+c )
+            y = 0.5*np.sqrt(3) * c / (a+b+c)
+            
+            
+            # # create a triangulation out of these points
+            T = tri.Triangulation(x,y)
+            
+            # # plot the contour
+
+            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100,extend="both")
+            
+            # create the grid
+            corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
+            triangle = tri.Triangulation(corners[:, 0], corners[:, 1])
+            
+            # creating the grid
+            refiner = tri.UniformTriRefiner(triangle)
+            trimesh = refiner.refine_triangulation(subdiv=3)
+            tern = ax.triplot(trimesh,'--',color='grey')
+
+            if out == None:
+                return
+            else:
+                sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
+                return out,sm       
+    def run_ternary_diff_iter(state1,state2,ax,out):
+            import matplotlib.colors as mcolors
+            n = 4
+            tick_size = 0.1
+            margin = 0.05
+            
+            # define corners of triangle    
+            left = np.r_[0, 0]
+            right = np.r_[1, 0]
+            top = np.r_[0.5,  np.sqrt(2.3)*0.576]
+            triangle = np.c_[left, right, top, left]
+            
+            # define vectors for ticks
+            bottom_tick = 0.8264*tick_size * (right - top) / n
+            right_tick = 0.8264*tick_size * (top - left) / n
+            left_tick = 0.8264*tick_size * (left - right) / n
+            
+            # state = "pi_sl"#"StatesL_I"
+            hist1,hist2 = 0,0
+            states1,states2 = 0,0
+            # if raw == True:
+            #     states, hist = run_raw(state)    
+            
+            # elif pi_eq == True:
+            states, hist1 = aps.all_possible_states(), state1  
+    
+            states, hist2 = aps.all_possible_states(), state2  
+    
+            #Define twin axis
+            # Note that the ordering from start to stop is important for the tick labels
+            plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
+            plot_ticks(left, top, left_tick, n, offset=(-0.15, -0.0))
+            plot_ticks(top, right, right_tick, n,offset=(0,.01))
+            
+            a = states[:,0]
+            b = states[:,1]
+            c = states[:,2]
+            
+            # # values is stored in the last column
+            v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
+            norm2 = MidpointNormalize(midpoint=0,vmin=-1E-2,vmax=1E-2)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
+            
+            # # translate the data to cartesian corrds
+            x = 0.5 * ( 2.*b+c ) / ( a+b+c )
+            y = 0.5*np.sqrt(3) * c / (a+b+c)
+            
+            
+            T = tri.Triangulation(x,y)
+    
+            out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2,extend='both',levels=100)
+            
+            # create the grid
+            corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
+            triangle = tri.Triangulation(corners[:, 0], corners[:, 1])
+            
+            # creating the grid
+            refiner = tri.UniformTriRefiner(triangle)
+            trimesh = refiner.refine_triangulation(subdiv=3)
+            
+            #plotting the mesh and caliberate the axis
+            ax.triplot(trimesh,'k--')
+            ax.set_axis_off()
+    
+            if out == None:
+                return
+            else:
+                sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
+                return out,sm
+    if isinstance(leaflet_in, str) == True:
+        if leaflet_in2 is not None :
+            return run_ternary_diff(leaflet_in,leaflet_in2,ax,out)
+        else:
+            return run_ternary(leaflet_in,fl_name,ax,out,initial)
+    elif isinstance(leaflet_in, pd.core.series.Series) or isinstance(leaflet_in, pd.core.frame.DataFrame) == True:
+        if leaflet_in2 is None:
+            return run_ternary_iterate(leaflet_in,ax,out)  
+        else:
+            return run_ternary_diff_iter(leaflet_in,leaflet_in2,ax,out)  
+
     
 def network_plot(ax,leaflet=None, kind=None, act=None):
     import all_possible_states as aps
@@ -472,9 +471,7 @@ def network_plot(ax,leaflet=None, kind=None, act=None):
                             weight=rate,
                             label="{:.02f}".format(rate))
                 # edge_labels[(origin_state, destination_state)] = label="{:.02f}".format(rate)
-    
-    
-    # base_size = 1
+    base_size = 1
     
     graph_colormap = cm.get_cmap('Reds', 12)
     # node color varies with Degree
@@ -491,6 +488,6 @@ def network_plot(ax,leaflet=None, kind=None, act=None):
     ec = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,1)
     ec = [graph_colormap(i) for i in ec]
     
-    pos = nx.drawing.nx_pydot.graphviz_layout(G)#, prog="circo")
+    pos = nx.drawing.nx_pydot.graphviz_layout(G, prog="circo")
     nx.draw_networkx(G, pos=pos, with_labels=True, node_color=c, node_size=s,edge_color= ec,width=ew,
-                 font_color='white',font_weight='bold',font_size='9',ax=ax)
+                  font_color='white',font_weight='bold',font_size='9',ax=ax)

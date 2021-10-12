@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import CGTM_Calculations as cgc
 import CGTM_Plotting as cgp
 
+
 def ternary_CG():
     uot = 0
     oot = 0
@@ -18,30 +19,49 @@ def ternary_CG():
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
-    # plt.show()
-    plt.savefig("CG_ternary.pdf",bbox_inches='tight')
-    plt.close()
+    plt.show()
+    # plt.savefig("CG_ternary.pdf",bbox_inches='tight')
+    # plt.close()
 
-def ternary_scatter():
-    #Needs a functin to look at initial distribution, not 
-    # the FINAL distribution!
-    
+def ternary_iterative():
+    import choose_path as chp
     import pandas as pd
-    import ternary
-    figure, ax = ternary.figure(scale=1)
-    figure.set_size_inches(10, 7.5)
-    states = pd.read_csv("all_states.csv",index_col=0)
-    cgp.Ternary_Scatter(ax,"CG/data/pi_eq_active_shortcg",True)
-# ternary_scatter()
+    uot = 0
+    oot = 0
+    
+    long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    
+    
+    state_act = pd.read_csv("%s/CG/data/act_short_binned_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    
+    dpi_ref = (long_inact - state_inact[0].values).iloc[0,:]
+    import numpy as np
+    for si, sj in zip(state_act[-2:-1], state_inact[-2:-1]):
+        
+        fig,ax = plt.subplots(2,2,figsize=(8,8))
+        
+        cgp.Ternary_Heat_Map(state_inact[si],fl_name="",ax=ax[1,1],out=uot)
+        cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[1,0])
+        #cgp.Ternary_Heat_Map(long_inact, leaflet_in2=state_inact[si].values,fl_name="",ax=ax[1,2],out=oot)
+
+        cgp.Ternary_Heat_Map(state_act[sj],fl_name="",ax=ax[0,1])
+        cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[0,0])
+        #cgp.Ternary_Heat_Map(long_act, leaflet_in2=state_act[sj].values,fl_name="",ax=ax[0,2],out=oot)
+
+        plt.tight_layout()
+        plt.savefig("ternary_gif%i.png"%si)
+        plt.close()
     
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey='col',sharex=True)
     cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_longcg",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_longcg", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg", ax[0,2])
     cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_longcg",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_longcg", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_shortcg",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg", ax[1,2])
     plt.tight_layout()
     plt.savefig("CG_state_dist.pdf")
     plt.close()
@@ -68,8 +88,9 @@ def SI_CG():
     plt.colorbar(s1,cax=cax)
     plt.savefig("CG_SI.pdf",bbox_inches='tight')
     plt.close()
-ternary_CG()
-# states_CG()   
+# ternary_CG()
+ternary_iterative()
+# # states_CG()   
 # CGTM()    
 # SI_CG()
 
@@ -119,11 +140,15 @@ def sig_conv(SL,SU,kind):
   
 
 
-# # test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time_diff()
-# test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_time_diff()
-# sig_conv(test2,test2,'cg')
+# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()[0]
+# test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_simulations()[0]
+# sig_conv(test1,test2,'cg')
 
-# network(["SU","SL"],"charge")
+# test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None).sigConverge_time()
+# test2 = cgc.CGTM_Calculations("SL", 1, "chg",act=None).sigConverge_time()
+# sig_conv(test1,test2,'chg')
+
+# network(None,None,["active","inactive"])
 # import numpy as np
 # test1 = cgc.CGTM_Calculations("",1,"cg","active","short").weighted_avg()
 # fig, ax = plt.subplots(1,1)
