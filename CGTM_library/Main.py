@@ -7,21 +7,21 @@ def ternary_CG():
     uot = 0
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,0],initial="CG/data/init_raw_inactive_shortcg")
-    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[0,1])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","","CG/data/pi_raw_inactive_shortcg",ax=ax[0,2])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_longcg","",ax=ax[1,0] ,initial="CG/data/init_raw_inactive_shortcg")
-    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,1], out=uot)
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,1],initial="CG/data/init_raw_inactive_shortcg")
+    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[0,0])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","","CG/data/pi_raw_inactive_longcg",ax=ax[0,2])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_longcg","",ax=ax[1,1] ,initial="CG/data/init_raw_inactive_shortcg")
+    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,0], out=uot)
     # cgp.Ternary_Scatter(ax[1,2], "CG/data/pi_eq_active_shortcg")
-    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_shortcg",ax=ax[1,2],out=oot)
+    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_longcg",ax=ax[1,2],out=oot)
     cax = plt.axes([1, 0.25, 0.025, 0.5])
     plt.colorbar(sm2, cax=cax,format='%.3f')
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
-    plt.show()
-    # plt.savefig("CG_ternary.pdf",bbox_inches='tight')
-    # plt.close()
+    # plt.show()
+    plt.savefig("CG_ternary.pdf",bbox_inches='tight')
+    plt.close()
 
 def ternary_iterative():
     import choose_path as chp
@@ -40,15 +40,15 @@ def ternary_iterative():
     import numpy as np
     for si, sj in zip(state_act[-2:-1], state_inact[-2:-1]):
         
-        fig,ax = plt.subplots(2,2,figsize=(8,8))
+        fig,ax = plt.subplots(2,3,figsize=(8,8))
         
         cgp.Ternary_Heat_Map(state_inact[si],fl_name="",ax=ax[1,1],out=uot)
         cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[1,0])
-        #cgp.Ternary_Heat_Map(long_inact, leaflet_in2=state_inact[si].values,fl_name="",ax=ax[1,2],out=oot)
+        cgp.Ternary_Heat_Map(long_inact, leaflet_in2=state_inact[si].values,fl_name="",ax=ax[1,2],out=oot)
 
         cgp.Ternary_Heat_Map(state_act[sj],fl_name="",ax=ax[0,1])
         cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[0,0])
-        #cgp.Ternary_Heat_Map(long_act, leaflet_in2=state_act[sj].values,fl_name="",ax=ax[0,2],out=oot)
+        cgp.Ternary_Heat_Map(long_act, leaflet_in2=state_act[sj].values,fl_name="",ax=ax[0,2],out=oot)
 
         plt.tight_layout()
         plt.savefig("ternary_gif%i.png"%si)
@@ -89,7 +89,7 @@ def SI_CG():
     plt.savefig("CG_SI.pdf",bbox_inches='tight')
     plt.close()
 # ternary_CG()
-ternary_iterative()
+# ternary_iterative()
 # # states_CG()   
 # CGTM()    
 # SI_CG()
@@ -148,7 +148,7 @@ def sig_conv(SL,SU,kind):
 # test2 = cgc.CGTM_Calculations("SL", 1, "chg",act=None).sigConverge_time()
 # sig_conv(test1,test2,'chg')
 
-# network(None,None,["active","inactive"])
+network(["SU","SL"],"sat",None)
 # import numpy as np
 # test1 = cgc.CGTM_Calculations("",1,"cg","active","short").weighted_avg()
 # fig, ax = plt.subplots(1,1)

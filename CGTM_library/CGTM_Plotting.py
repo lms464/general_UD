@@ -215,7 +215,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         else:
             sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
             return out,sm        
-    def run_ternary_diff(state1,state2,ax,out):
+    def run_ternary_diff(statem,staten,ax,out):
         import matplotlib.colors as mcolors
         n = 4
         tick_size = 0.1
@@ -239,10 +239,10 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         #     states, hist = run_raw(state)    
         
         # elif pi_eq == True:
-        state1 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state1),index_col=0).T
+        state1 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],statem),index_col=0).T
         states, hist1 = aps.all_possible_states(), state1  
 
-        state2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state2),index_col=0).T
+        state2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],staten),index_col=0).T
         states, hist2 = aps.all_possible_states(), state2  
 
         #Define twin axis
@@ -257,7 +257,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         # # values is stored in the last column
         v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
-        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-2,vmax=1E-2)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
+        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-1,vmax=1E-1)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
         
         # # translate the data to cartesian corrds
         x = 0.5 * ( 2.*b+c ) / ( a+b+c )
@@ -394,7 +394,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
             
             # # values is stored in the last column
             v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
-            norm2 = MidpointNormalize(midpoint=0,vmin=-1E-2,vmax=1E-2)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
+            norm2 = MidpointNormalize(midpoint=0,vmin=-1E-1,vmax=1E-1)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
             
             # # translate the data to cartesian corrds
             x = 0.5 * ( 2.*b+c ) / ( a+b+c )
@@ -488,6 +488,6 @@ def network_plot(ax,leaflet=None, kind=None, act=None):
     ec = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,1)
     ec = [graph_colormap(i) for i in ec]
     
-    pos = nx.drawing.nx_pydot.graphviz_layout(G, prog="circo")
+    pos = nx.drawing.nx_pydot.graphviz_layout(G)#, prog="circo")
     nx.draw_networkx(G, pos=pos, with_labels=True, node_color=c, node_size=s,edge_color= ec,width=ew,
                   font_color='white',font_weight='bold',font_size='9',ax=ax)

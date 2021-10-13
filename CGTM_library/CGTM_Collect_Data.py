@@ -113,26 +113,28 @@ class CGTM_Collect_Data:
             self.update_act("Active")
         elif self.act == "in" or self.act == "inact":
             self.update_act("Inactive")
-
-        
-        fl = open ("%s/%s3/borders.txt"%(self.path,self.act))
-        lines = fl.readlines()#.split()
-        fl.close()
-        #lines = [int(l) for l in lines]
-        shell = []
-        for l in lines[1::3]:
-        	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
-        shell_arr = np.array(shell)
-        
-        
-        possible_states = aps.all_possible_states()
-        
         states = []
-        shell = np.array([shell_arr[:,0] / shell_arr.sum(axis=1),shell_arr[:,1] / shell_arr.sum(axis=1),shell_arr[:,2] / shell_arr.sum(axis=1)])
-        shell = shell.T
-        for s in shell:
-        	states.append(self.check_states(s,possible_states))
-        states = np.array(states)
+        for rep_ in range(self.start_sys,self.end_sys+1):
+            fl = open ("%s/%s%i/borders.txt"%(self.path,self.act,rep_))
+            lines = fl.readlines()#.split()
+            fl.close()
+            #lines = [int(l) for l in lines]
+            shell = []
+            for l in lines[1::3]:
+            	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+            shell_arr = np.array(shell)
+            
+            
+            possible_states = aps.all_possible_states()
+            
+            shell = np.array([shell_arr[:,0] / shell_arr.sum(axis=1),shell_arr[:,1] / shell_arr.sum(axis=1),shell_arr[:,2] / shell_arr.sum(axis=1)])
+            shell = shell.T
+            state_tmp = []
+            for s in shell:
+            	state_tmp.append(self.check_states(s,possible_states))
+            states.append(state_tmp)
+                
+        states = np.array(states).T
         if self.act == "act" or self.act == "Active":
             self.update_act("active")
         elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
@@ -500,11 +502,11 @@ class CGTM_Collect_Data:
 # build = CGTM_Collect_Data(0,8,[100,105],"charge")
 # build.build_simplified()
 
-build = CGTM_Collect_Data(1,31,[],"cg","act", "short")
-build.build_cg_short_states()
+# build = CGTM_Collect_Data(1,2,[],"cg","act", "long")
+# build.build_cg_long_states()
 
-build = CGTM_Collect_Data(1,31,[],"cg","inact", "short")
-build.build_cg_short_states()
+build = CGTM_Collect_Data(1,2,[],"cg","inact", "long")
+build.build_cg_long_states()
 # build.analysis_multi_raw()
 
 
