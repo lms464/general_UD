@@ -78,7 +78,7 @@ def plot_convergence(fl,ax):
     ax.plot([0, ((conv.index+1)*.4)[-1]],[np.mean(conv),np.mean(conv)],'r--',lw=2)
     ax.plot([0, ((conv.index+1)*.4)[-1]],[1,1],'k--',lw=2)
     # ax.set_yscale('log')
-    ax.set_ylim(.75,1.25)
+    #ax.set_ylim(.75,1.25)
     ax.set_xlabel(r"$\tau$(ns)")
 
 def plot_sigConverge(sigSU, sigSL,kind):
@@ -87,13 +87,14 @@ def plot_sigConverge(sigSU, sigSL,kind):
         sim_list = [1,2,3,4,5,6,7,8,9,10]
     else:
         sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
-    plt.plot(np.linspace(0,99,len(sigSU)),sigSU,"o--",label="Outer Leaflet")
-    plt.plot(np.linspace(0,99,len(sigSU)),sigSL,"+--",label="Inner Leaflet")
+    plt.plot(np.linspace(0,50,len(sigSU)),sigSU,"o--",label="Outer Leaflet")
+    plt.plot(np.linspace(0,50,len(sigSU)),sigSL,"+--",label="Inner Leaflet")
     plt.ylabel(r"$\sigma_{\pi}$")
     plt.xlabel("Simulations Used")
     plt.legend()
-    plt.savefig("Convergence_%s.pdf"%kind)
-    plt.close()
+    plt.show()
+    # plt.savefig("Convergence_%s.pdf"%kind)
+    # plt.close()
 
 def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initial=None):
 
@@ -257,7 +258,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         # # values is stored in the last column
         v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
-        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-1,vmax=1E-1)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
+        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-3,vmax=1E-3)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
         
         # # translate the data to cartesian corrds
         x = 0.5 * ( 2.*b+c ) / ( a+b+c )

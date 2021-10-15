@@ -2,6 +2,30 @@ import matplotlib.pyplot as plt
 import CGTM_Calculations as cgc
 import CGTM_Plotting as cgp
 
+def long_state_diff():
+    import choose_path as chp
+    import pandas as pd
+    import numpy as np
+    inact = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg_iter.csv"%chp.choose_path()[1],index_col=0).T
+    act = pd.read_csv("%s/CG/data/pi_raw_active_longcg_iter.csv"%chp.choose_path()[1],index_col=0).T
+    
+    fig,ax = plt.subplots(2,3,sharey=True,sharex=True)
+    # ax[0,0].bar(np.arange(0,len(inact)),inact[0])
+    # ax[0,0].bar(np.arange(0,len(inact)),inact[1])
+    # ax[0,0].bar(np.arange(0,len(inact)),inact[2])
+    ax[0,0].bar(np.arange(0,len(inact)),inact[0]-inact[1])
+    ax[0,1].bar(np.arange(0,len(inact)),inact[0]-inact[2])
+    ax[0,2].bar(np.arange(0,len(inact)),inact[1]-inact[2])
+    #ax[0,3].bar(np.arange(0,len(inact)),inact.mean(axis=1) - ((inact[1]-inact[2])+(inact[0]-inact[1])+(inact[0]-inact[2])))
+
+    ax[1,0].bar(np.arange(0,len(act)),act[0]-act[1])
+    ax[1,1].bar(np.arange(0,len(act)),act[0]-act[2])
+    ax[1,2].bar(np.arange(0,len(act)),act[1]-act[2])
+    #ax[1,3].bar(np.arange(0,len(act)),act.mean(axis=1) - ((act[1]-act[2])+(act[0]-act[1])+(act[0]-act[2])))
+    
+    plt.show()
+    
+# long_state_diff()
 
 def ternary_CG():
     uot = 0
@@ -57,11 +81,11 @@ def ternary_iterative():
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey='col',sharex=True)
     cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_longcg",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_longcg", ax[0,2])
     cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_shortcg",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_longcg",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_longcg", ax[1,2])
     plt.tight_layout()
     plt.savefig("CG_state_dist.pdf")
     plt.close()
@@ -90,7 +114,7 @@ def SI_CG():
     plt.close()
 # ternary_CG()
 # ternary_iterative()
-# # states_CG()   
+# states_CG()   
 # CGTM()    
 # SI_CG()
 
@@ -106,7 +130,7 @@ def Confidence():
     over the wrong axis)
     '''
     
-    path="~/CG/data"
+    path="~/UDel/CG/data"
     fig, ax = plt.subplots(1,2,figsize=(12,6),sharex="row")
     for jj, j in enumerate(["inactive","active"]):
         cgp.plot_convergence(path+"/"+j+"_ratio_pi_sum.csv",ax[jj])
@@ -139,16 +163,15 @@ def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
   
 
-
-# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()[0]
-# test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_simulations()[0]
-# sig_conv(test1,test2,'cg')
+test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time()
+test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_time()
+sig_conv(test1,test2,'cg')
 
 # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None).sigConverge_time()
 # test2 = cgc.CGTM_Calculations("SL", 1, "chg",act=None).sigConverge_time()
 # sig_conv(test1,test2,'chg')
 
-network(["SU","SL"],"sat",None)
+# network(["SU","SL"],"sat",None)
 # import numpy as np
 # test1 = cgc.CGTM_Calculations("",1,"cg","active","short").weighted_avg()
 # fig, ax = plt.subplots(1,1)

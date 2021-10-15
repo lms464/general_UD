@@ -54,7 +54,8 @@ class CGTM_Calculations:
     def __get_act__(self):
         return self.act
     
-    
+    def update_act(self,act):
+        self.act = act
     
     def __test__(self):
         
@@ -113,21 +114,28 @@ class CGTM_Calculations:
         pi_eig, eigs = self.solve_pi_eq(TM_norm)
         return pi_lin, pi_eig, np.allclose(pi_lin, pi_eig), TM_norm
 
-    def update_act(self,act):
-        self.act = act
-        
-    def build_raw(self):
+
+## To get raw/brute force distributions  
+    def build_raw(self,iterate=False):
         if self.act is None:
             states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         else:
             states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T   
-
-        hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+        
+        if iterate == True:
+            hist = []
+            states = states.T
+            for i in states:
+                hist_tmp,edge = np.histogram(states[i],bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+                hist.append(hist_tmp)
+            hist = np.array(hist)
+        else:
+            hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
         # plt.bar(edge[:-1],hist/hist.sum())
         # plt.savefig("%s_state_raw_%s.pdf"%(nm,kind))
         # plt.close()
         return hist/np.sum(hist),edge
-
+    
     def get_frame_state_composition(self,sel_frm=0):
         
         out = []
@@ -142,7 +150,7 @@ class CGTM_Calculations:
         # plt.close()
         return np.array(out)
 
-    
+## CGTM and the likes   
     def build_TM(self,states,overide=False):
         all_states = aps.all_possible_states()
         TM_m = np.zeros((len(all_states),len(all_states)))
@@ -218,7 +226,7 @@ class CGTM_Calculations:
         
         return pi_eq, eigs, TM_norm
       
-
+## Calc convergence and sig values
     def develop_lag(self, dt_max,step):
         flin = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         dts = [1,5,10,20,50,100,200,300,400,500,600]#np.arange(1,dt_max)
@@ -340,8 +348,6 @@ class CGTM_Calculations:
             #     return TM_lim, pi_sig, nset
         sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
         return sig_
-
-        
     
     def calc_confidence(self,tau=1):
         # should only be used for analysis when you have 
@@ -407,14 +413,7 @@ class CGTM_Calculations:
         tmp_wsa = [np.sum((pi_eq*all_states[:,0])),np.sum((pi_eq*all_states[:,1])),np.sum((pi_eq*all_states[:,2]))]
         return tmp_wsa
 
-    def get_initial_states(self):
-        if self.act != None: 
-            if self.act == "act" or self.act == "Active":
-                self.update_act("active")
-            elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
-                self.update_act("inactive")
-        states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
-        return states.iloc[0,:]
+## Routines to write out analyzed data
 
     def write_initial_states_distribution(self):
         init_states = self.get_initial_states()
@@ -436,30 +435,35 @@ class CGTM_Calculations:
         else:
             pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
         
-    def write_pi_raw(self):
-        pi_raw = self.build_raw()[0]
+    def write_pi_raw(self,iterate=False):
+        pi_raw = self.build_raw(iterate)[0]
+        it_val = ""
+        if iterate==True:
+            it_val = "_iter"
         if self.act == None:
-            pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
+            pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,it_val))
         else:
-            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s%s.csv"%(self.path,self.act,self.length,self.kind,it_val))
 
 
 
 
-d1 = CGTM_Calculations("",1,"cg","active","long")
-d11 = d1.weighted_avg(d1.build_raw()[0])
-d2 = CGTM_Calculations("",1,"cg","active","short")
-d21 = d2.weighted_avg(d2.build_raw()[0])
-d22 = d2.weighted_avg()
-print(d11,d21,d22)
+# d1 = CGTM_Calculations("",1,"cg","active","long")
+# d1.write_pi_eq()
+# d1.write_pi_raw(True)
+# d2 = CGTM_Calculations("",1,"cg","active","short")
+# d2.calc_confidence()
+# d2.write_pi_eq()
+# d2.write_pi_raw()
 
-# CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
-d3 = CGTM_Calculations("",1,"cg","inactive","long")
-d31 = d3.weighted_avg(d3.build_raw()[0])
-d4 = CGTM_Calculations("",1,"cg","inactive","short")
-d41 = d4.weighted_avg(d4.build_raw()[0])
-d42 = d4.weighted_avg()
-print(d31,d41,d42)
+# # CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
+# d3 = CGTM_Calculations("",1,"cg","inactive","long")
+# d3.write_pi_eq()
+# d3.write_pi_raw(True)
+# d4 = CGTM_Calculations("",1,"cg","inactive","short")
+# d4.calc_confidence()
+# d4.write_pi_eq()
+# d4.write_pi_raw()
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
 
 # pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_pi.csv")
