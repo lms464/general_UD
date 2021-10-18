@@ -116,21 +116,27 @@ class CGTM_Calculations:
 
 
 ## To get raw/brute force distributions  
-    def build_raw(self,iterate=False):
+    def build_raw(self,iterate_sims=False,iterate_time=False):
         if self.act is None:
             states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         else:
             states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T   
         
-        if iterate == True:
+        if iterate_sims == True and iterate_time == False:
             hist = []
             states = states.T
             for i in states:
                 hist_tmp,edge = np.histogram(states[i],bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
                 hist.append(hist_tmp)
             hist = np.array(hist)
+        elif iterate_time == True and iterate_sims == False:
+            hist = []
+            for i in states:
+                hist_tmp,edge = np.histogram(states[i],bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+                hist.append(hist_tmp)
+            hist = np.array(hist)
         else:
-            hist,edge = np.histogram(states,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+            hist,edge = np.histogram(states[states.columns[:]],bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
         # plt.bar(edge[:-1],hist/hist.sum())
         # plt.savefig("%s_state_raw_%s.pdf"%(nm,kind))
         # plt.close()
@@ -266,12 +272,12 @@ class CGTM_Calculations:
         if self.act is None:
             sim_list = [2,4,6,8,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,99]
         else:
-            sim_list = states.index
+            sim_list = states.columns
         for nset in sim_list[2:]:
-            TM_norm = self. build_TM(states.iloc[:nset,::self.dt])
+            TM_norm = self. build_TM(states.iloc[::self.dt,:int(nset)]) #switch these axis for sims
             pi_eq, eigs = self.solve_pi_eq(TM_norm)
             pi_sig.append(pi_eq)
-        sig_ = self.sig(pi_eq_ref,pi_sig,sim_list)
+        sig_ = []#self.sig(pi_eq_ref,pi_sig,sim_list)
         return sig_,pi_sig#[1:]
 
     def sigConverge_time(self,overide=True):
@@ -298,7 +304,7 @@ class CGTM_Calculations:
         if self.act is None:
             sim_list = np.arange(1,99*600,10)
         else:
-            sim_list = np.arange(1,len(states.T),3)
+            sim_list = np.arange(1,len(states.T),1)
             
         for nset in sim_list:
             TM_lim = self. build_TM(states.iloc[:,::nset])
@@ -435,11 +441,13 @@ class CGTM_Calculations:
         else:
             pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
         
-    def write_pi_raw(self,iterate=False):
-        pi_raw = self.build_raw(iterate)[0]
+    def write_pi_raw(self,iterate_time=False, iterate_sims=False):
+        pi_raw = self.build_raw(iterate_time,iterate_sims)[0]
         it_val = ""
-        if iterate==True:
-            it_val = "_iter"
+        if iterate_time == True:
+            it_val = "_time"
+        if iterate_sims == True:
+            it_val = "_sims"
         if self.act == None:
             pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,it_val))
         else:
@@ -448,26 +456,27 @@ class CGTM_Calculations:
 
 
 
-# d1 = CGTM_Calculations("",1,"cg","active","long")
+d1 = CGTM_Calculations("",1,"cg","active","long")
 # d1.write_pi_eq()
-# d1.write_pi_raw(True)
+d1.write_pi_raw()
 # d2 = CGTM_Calculations("",1,"cg","active","short")
-# d2.calc_confidence()
-# d2.write_pi_eq()
-# d2.write_pi_raw()
+# # d2.calc_confidence()
+# # d2.write_pi_eq()
+# d2.write_pi_raw(True,False)
+# d2.write_pi_raw(False,True)
 
-# # CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
-# d3 = CGTM_Calculations("",1,"cg","inactive","long")
+# CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
+d3 = CGTM_Calculations("",1,"cg","inactive","long")
 # d3.write_pi_eq()
-# d3.write_pi_raw(True)
+d3.write_pi_raw()
 # d4 = CGTM_Calculations("",1,"cg","inactive","short")
 # d4.calc_confidence()
 # d4.write_pi_eq()
 # d4.write_pi_raw()
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
 
-# pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_pi.csv")
-# pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_pi.csv")
+# pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_time_pi.csv")
+# pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_time_pi.csv")
 
 # test1.write_pi_eq()
 # test1.write_pi_raw()

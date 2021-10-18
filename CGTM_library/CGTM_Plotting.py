@@ -35,8 +35,10 @@ def plot_state_dist(pi_eq_file,ax):
     ax.bar(np.arange(0,len(aps.all_possible_states())),pi_eq.values[0])
     ax.set_ylabel("Prob of State")
     ax.set_xlabel("State")
+    
     # plt.savefig("%sPi_Eq_%s.pdf"%(leaflet_in,kind))
     # plt.close()
+    
 def diff_plot(pi_eq_file,pi_raw_file, ax):
     pi = pd.read_csv("%s.csv"%pi_eq_file,index_col=0).T
     raw = pd.read_csv("%s.csv"%pi_raw_file,index_col=0).T
@@ -258,7 +260,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         # # values is stored in the last column
         v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
-        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-3,vmax=1E-3)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
+        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-1,vmax=1E-1)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
         
         # # translate the data to cartesian corrds
         x = 0.5 * ( 2.*b+c ) / ( a+b+c )

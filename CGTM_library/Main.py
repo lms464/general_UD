@@ -6,24 +6,27 @@ def long_state_diff():
     import choose_path as chp
     import pandas as pd
     import numpy as np
+    
+    i = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%chp.choose_path()[1],index_col=0).T
+    a = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%chp.choose_path()[1],index_col=0).T    
     inact = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg_iter.csv"%chp.choose_path()[1],index_col=0).T
     act = pd.read_csv("%s/CG/data/pi_raw_active_longcg_iter.csv"%chp.choose_path()[1],index_col=0).T
     
-    fig,ax = plt.subplots(2,3,sharey=True,sharex=True)
-    # ax[0,0].bar(np.arange(0,len(inact)),inact[0])
-    # ax[0,0].bar(np.arange(0,len(inact)),inact[1])
-    # ax[0,0].bar(np.arange(0,len(inact)),inact[2])
-    ax[0,0].bar(np.arange(0,len(inact)),inact[0]-inact[1])
-    ax[0,1].bar(np.arange(0,len(inact)),inact[0]-inact[2])
-    ax[0,2].bar(np.arange(0,len(inact)),inact[1]-inact[2])
-    #ax[0,3].bar(np.arange(0,len(inact)),inact.mean(axis=1) - ((inact[1]-inact[2])+(inact[0]-inact[1])+(inact[0]-inact[2])))
+    fig,ax = plt.subplots(2,4,sharey="col",sharex=True)
+    ax[0,0].bar(i.columns,i.values[0])
 
-    ax[1,0].bar(np.arange(0,len(act)),act[0]-act[1])
-    ax[1,1].bar(np.arange(0,len(act)),act[0]-act[2])
-    ax[1,2].bar(np.arange(0,len(act)),act[1]-act[2])
+    ax[0,1].bar(np.arange(0,len(inact)),inact[0]-inact[1])
+    ax[0,2].bar(np.arange(0,len(inact)),inact[0]-inact[2])
+    ax[0,3].bar(np.arange(0,len(inact)),inact[1]-inact[2])
+    #ax[0,3].bar(np.arange(0,len(inact)),inact.mean(axis=1) - ((inact[1]-inact[2])+(inact[0]-inact[1])+(inact[0]-inact[2])))
+    ax[1,0].bar(a.columns,a.values[0])
+    ax[1,1].bar(np.arange(0,len(act)),act[0]-act[1])
+    ax[1,2].bar(np.arange(0,len(act)),act[0]-act[2])
+    ax[1,3].bar(np.arange(0,len(act)),act[1]-act[2])
     #ax[1,3].bar(np.arange(0,len(act)),act.mean(axis=1) - ((act[1]-act[2])+(act[0]-act[1])+(act[0]-act[2])))
-    
-    plt.show()
+    plt.tight_layout()
+    plt.savefig("States_Long_Iterative_dif.pdf")
+    plt.close()
     
 # long_state_diff()
 
@@ -43,9 +46,9 @@ def ternary_CG():
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
-    # plt.show()
-    plt.savefig("CG_ternary.pdf",bbox_inches='tight')
-    plt.close()
+    plt.show()
+    # plt.savefig("CG_ternary.pdf",bbox_inches='tight')
+    # plt.close()
 
 def ternary_iterative():
     import choose_path as chp
@@ -57,8 +60,8 @@ def ternary_iterative():
     long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
     
     
-    state_act = pd.read_csv("%s/CG/data/act_short_binned_pi.csv"%(chp.choose_path()[1]),index_col=0).T
-    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_act = pd.read_csv("%s/CG/data/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
     
     dpi_ref = (long_inact - state_inact[0].values).iloc[0,:]
     import numpy as np
@@ -89,7 +92,81 @@ def states_CG():
     plt.tight_layout()
     plt.savefig("CG_state_dist.pdf")
     plt.close()
+    
+def state_iterative():
+    
+    import choose_path as chp
+    import pandas as pd
+    
 
+    long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    
+    
+    state_act = pd.read_csv("%s/CG/data/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    
+    dsi,dss = 0,0
+
+    for si,sa in zip(state_inact, state_act):
+        
+        fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
+        
+        dsi = long_inact.values[0] - state_inact[si].values
+        
+        ax[0,0].bar(state_inact.index,long_inact.values[0])
+        ax[0,1].bar(state_inact.index, state_inact[si].values)
+        ax[0,2].bar(state_inact.index, dsi)
+        
+        dss = long_act.values[0] - state_act[si].values
+
+        ax[1,0].bar(state_act.index,long_act.values[0])
+        ax[1,1].bar(state_act.index, state_act[si].values)
+        ax[1,2].bar(state_act.index, dss)
+        
+        plt.ylim(-.16,.16)
+        plt.tight_layout()
+        plt.savefig("state_frame%s.png"%si)
+        plt.close()
+    # return dsi,dss
+            
+# dsi,dss = state_iterative()
+
+
+def over_lapped_state_network() :
+    
+    import pandas as pd
+    import choose_path as chp
+    fig, ax = plt.subplots(1,2,figsize=(24,12))
+
+    
+    long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    
+    state_inact = pd.read_csv("%s/CG/data/pi_eq_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_act = pd.read_csv("%s/CG/data/pi_eq_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    
+    d_active = long_act -(long_act - state_act)
+    d_active[d_active <= 0 ] = 0
+    
+    d_inactive = long_inact - (long_inact - state_inact)
+    d_inactive[d_active <= 0 ] = 0
+    
+    fig, ax = plt.subplots(1,2,figsize=(24,12))
+
+    cgp.network_plot(ax[0],d_inactive)
+    cgp.network_plot(ax[1],d_active)
+    # cgp.network_plot(ax[0],leaflet[0], kind, act)
+    # cgp.network_plot(ax[1],leaflet[1], kind, act)
+
+
+    # cgp.network_plot("inactive", ax[0])
+    # cgp.network_plot("active", ax[1])
+    plt.tight_layout()
+    plt.savefig("State_overlap.pdf")
+    plt.close()    
+    
+over_lapped_state_network()
     
 def CGTM():
     fig,ax = plt.subplots(1,2,figsize=(8,4),sharey=True,sharex=True)
@@ -113,6 +190,7 @@ def SI_CG():
     plt.savefig("CG_SI.pdf",bbox_inches='tight')
     plt.close()
 # ternary_CG()
+
 # ternary_iterative()
 # states_CG()   
 # CGTM()    
@@ -163,9 +241,9 @@ def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
   
 
-test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time()
-test2 = cgc.CGTM_Calculations("",1,"cg","active","short").sigConverge_time()
-sig_conv(test1,test2,'cg')
+# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time()
+# test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
+# sig_conv(test1,test2,'cg')
 
 # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None).sigConverge_time()
 # test2 = cgc.CGTM_Calculations("SL", 1, "chg",act=None).sigConverge_time()
