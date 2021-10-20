@@ -137,7 +137,7 @@ def over_lapped_state_network() :
     
     import pandas as pd
     import choose_path as chp
-    fig, ax = plt.subplots(1,2,figsize=(24,12))
+    fig, ax = plt.subplots(1,2,figsize=(36,24))
 
     
     long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
@@ -151,11 +151,14 @@ def over_lapped_state_network() :
     
     d_inactive = long_inact - (long_inact - state_inact)
     d_inactive[d_active <= 0 ] = 0
+    di = d_inactive.T[d_inactive.T["0"]>0].index
     
     fig, ax = plt.subplots(1,2,figsize=(24,12))
 
-    cgp.network_plot(ax[0],d_inactive)
-    cgp.network_plot(ax[1],d_active)
+    cgp.network_plot(ax[0],act="inactive")
+    cgp.network_plot(ax[1],act="active")
+
+    # cgp.network_plot(ax[0],act="inactive")
     # cgp.network_plot(ax[0],leaflet[0], kind, act)
     # cgp.network_plot(ax[1],leaflet[1], kind, act)
 
@@ -163,7 +166,8 @@ def over_lapped_state_network() :
     # cgp.network_plot("inactive", ax[0])
     # cgp.network_plot("active", ax[1])
     plt.tight_layout()
-    plt.savefig("State_overlap.pdf")
+    # plt.show()
+    plt.savefig("State_overlap1.pdf")
     plt.close()    
     
 over_lapped_state_network()
@@ -234,7 +238,7 @@ def network(leaflet=None, kind=None, act=None):
     # cgp.network_plot("inactive", ax[0])
     # cgp.network_plot("active", ax[1])
     plt.tight_layout()
-    plt.savefig("State_transitions.pdf")
+    plt.savefig("State_transitions2.pdf")
     plt.close()
 
 def sig_conv(SL,SU,kind):
