@@ -140,7 +140,7 @@ class CGTM_Collect_Data:
         elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
             self.update_act("inactive")
         
-        pd.DataFrame(states).to_csv("%s/CG/data/states/%s_%s.csv"%(self.path, self.length, self.act))
+        pd.DataFrame(states).to_csv("%s/CG/data_dx2/states_dx2/%s_%s.csv"%(self.path, self.length, self.act))
 
     def build_cg_short_states(self):
         
@@ -175,7 +175,7 @@ class CGTM_Collect_Data:
             for s in shell:
             	states.append(self.check_states(s,possible_states))
             full_states.append(states)
-        pd.DataFrame(full_states).to_csv("%s/CG/data/states/%s_%s.csv"%(self.path, self.length, self.act))
+        pd.DataFrame(full_states).to_csv("%s/CG/data_dx2/states_dx2/%s_%s.csv"%(self.path, self.length, self.act))
             
             
     def build_ternary_charge_states(self):
@@ -504,11 +504,11 @@ class CGTM_Collect_Data:
 
 # build = CGTM_Collect_Data(1,2,[],"cg","act", "long")
 # build.build_cg_long_states()
-build = CGTM_Collect_Data(1,3,[],"cg","act", "long")
-build.build_cg_long_states()
+build = CGTM_Collect_Data(1,50,[],"cg","act", "short")
+build.build_cg_short_states()
 
-build = CGTM_Collect_Data(1,3,[],"cg","inact", "long")
-build.build_cg_long_states()
+build = CGTM_Collect_Data(1,50,[],"cg","inact", "short")
+build.build_cg_short_states()
 # build.analysis_multi_raw()
 
 

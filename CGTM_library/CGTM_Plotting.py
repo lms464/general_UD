@@ -419,6 +419,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
             #plotting the mesh and caliberate the axis
             ax.triplot(trimesh,'k--')
             ax.set_axis_off()
+
     
             if out == None:
                 return
@@ -465,20 +466,20 @@ def network_plot(ax,leaflet=None, kind=None, act=None,inds=False):
     G2 = None
     # edge_labels={}
     #pos = []
-    labs = {}
-    k = 0
+    # labs = {}
+    # k = 0
     for i, origin_state in enumerate(states):
         for j, destination_state in enumerate(states):
             rate = Q[i][j]
             if rate > 0:
-                k = k + 1
+                # k = k + 1
                 #pos.append([i,j])
                 G.add_edge(origin_state,
                     destination_state,
                     weight=rate,
                     label="%i->%i"%(i,j)
                 )
-                labs[k] ="%i->%i"%(i,j)
+                # labs[k] ="%i->%i"%(i,j)
 
                 # edge_labels[(origin_state, destination_state)] = label="{:.02f}".format(rate)
     pos1 = {}
@@ -486,19 +487,19 @@ def network_plot(ax,leaflet=None, kind=None, act=None,inds=False):
         pos1[p[0]] = (pos_states[p[0]][2],pos_states[p[0]][1])
     nx.set_node_attributes(G,pos1,"coord")
     base_size = 1
-    labs2 = {}
+    # labs2 = {}
     if inds is not None:
         G2 = nx.MultiDiGraph()
         Q2 = cgc.CGTM_Calculations("",1,"cg",act,"long").build_CGTM()[-1]
 
         # edge_labels={}
         #pos = []
-        k = 0
+        # k = 0
         for i, origin_state in enumerate(states):
             for j, destination_state in enumerate(states):
                 rate = Q2[i][j]
                 if rate > 0:
-                    k = k + 1
+                    # k = k + 1
                     #pos.append([i,j])
                     G2.add_edge(origin_state,
                         destination_state,
@@ -512,13 +513,13 @@ def network_plot(ax,leaflet=None, kind=None, act=None,inds=False):
     
     pos = {**pos1,**pos2}
     G3 = nx.compose(G, G2)
-    pos3 = nx.drawing.nx_pydot.graphviz_layout(G3, prog="circo")
+    # pos3 = nx.drawing.nx_pydot.graphviz_layout(G3, prog="circo")
     #nx.draw(G3,pos=pos,with_labels=True,ax=ax)
-    nx.draw_networkx_nodes(G3,pos1,nodelist=G.nodes(),node_color='b',ax=ax,alpha=.25)
-    nx.draw_networkx_nodes(G3,pos2,nodelist=G2.nodes(),ax=ax,node_color='r',alpha=.25)
-    nx.draw_networkx_edges(G3,pos1,edgelist=G.edges(),ax=ax,edge_color="b",alpha=.25)
-    nx.draw_networkx_edges(G3,pos2,edgelist=G2.edges(),ax=ax,edge_color="r",alpha=.25)
-    nx.draw_networkx_labels(G3,pos,ax=ax)
+    # nx.draw_networkx_nodes(G3,pos1,nodelist=G.nodes(),node_color='b',ax=ax,alpha=.25)
+    # nx.draw_networkx_nodes(G3,pos2,nodelist=G2.nodes(),ax=ax,node_color='r',alpha=.25)
+    # nx.draw_networkx_edges(G3,pos1,edgelist=G.edges(),ax=ax,edge_color="b",alpha=.25)
+    # nx.draw_networkx_edges(G3,pos2,edgelist=G2.edges(),ax=ax,edge_color="r",alpha=.25)
+    # nx.draw_networkx_labels(G3,pos,ax=ax)
     # nx.draw_networkx_labels(G3,pos3,labels=labs2,font_size=8,ax=ax)
     # nx.draw_networkx_labels(G3,pos3,labels=labs,font_size=8,ax=ax)
 
@@ -530,15 +531,27 @@ def network_plot(ax,leaflet=None, kind=None, act=None,inds=False):
     # c = rescale([G.degree(v) for v in G],0.0,0.9) 
     # c = [graph_colormap(i) for i in c]
     # # node size varies with betweeness centrality - map to range [10,100] 
-    # G2 = nx.DiGraph(G)
-    # eigen_centrality = nx.eigenvector_centrality(G2, max_iter=1000)
-    # bc = eigen_centrality.copy()#nx.betweenness_centrality(G) # betweeness centrality
-    # s =  rescale([v for v in bc.values()],500,2500)
-    # # edge width shows 1-weight to convert cost back to strength of interaction 
-    # ew = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,3)
-    # # edge color also shows weight
+    G4 = nx.DiGraph(G)
+    eigen_centrality = nx.eigenvector_centrality(G4, max_iter=1000)
+    bc = eigen_centrality.copy()#nx.betweenness_centrality(G) # betweeness centrality
+    s1 =  rescale([v for v in bc.values()],500,2500)
+    # edge width shows 1-weight to convert cost back to strength of interaction 
+    ew1 = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,4)
+    # edge color also shows weight
     # ec = rescale([float(G[u][v][0]['weight']) for u,v,null in G.edges],0.1,1)
     # ec = [graph_colormap(i) for i in ec]
+    G5 = nx.DiGraph(G2)
+    eigen_centrality = nx.eigenvector_centrality(G5, max_iter=1000)
+    bc = eigen_centrality.copy()#nx.betweenness_centrality(G) # betweeness centrality
+    s2 =  rescale([v for v in bc.values()],500,2500)
+    ew2 = rescale([float(G2[u][v][0]['weight']) for u,v,null in G2.edges],0.1,4)
+
+    
+    nx.draw_networkx_nodes(G3,pos1,nodelist=G.nodes(),node_color='b',node_size=s1,ax=ax,alpha=.25)
+    nx.draw_networkx_nodes(G3,pos2,nodelist=G2.nodes(),ax=ax,node_color='r',node_size=s2,alpha=.25)
+    nx.draw_networkx_edges(G3,pos1,edgelist=G.edges(),ax=ax,edge_color="b",width=ew1,alpha=.25)
+    nx.draw_networkx_edges(G3,pos2,edgelist=G2.edges(),ax=ax,edge_color="r",width=ew2,alpha=.25)
+    nx.draw_networkx_labels(G3,pos,ax=ax)
     
     # pos = nx.drawing.nx_pydot.graphviz_layout(G, prog="circo")
     # nx.draw_networkx(G, pos=pos, with_labels=True, node_color=c, node_size=s,edge_color= ec,width=ew,

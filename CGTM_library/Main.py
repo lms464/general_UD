@@ -9,20 +9,21 @@ def long_state_diff():
     
     i = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%chp.choose_path()[1],index_col=0).T
     a = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%chp.choose_path()[1],index_col=0).T    
-    inact = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg_iter.csv"%chp.choose_path()[1],index_col=0).T
-    act = pd.read_csv("%s/CG/data/pi_raw_active_longcg_iter.csv"%chp.choose_path()[1],index_col=0).T
-    
-    fig,ax = plt.subplots(2,4,sharey="col",sharex=True)
-    ax[0,0].bar(i.columns,i.values[0])
+    act = pd.read_csv("%s/CG/data/pi_raw_active_longcg_time.csv"%chp.choose_path()[1],index_col=0).T
+    inact = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg_time.csv"%chp.choose_path()[1],index_col=0).T
+    in_data = tmp = pd.DataFrame([i.values[0],inact[0],inact[1],inact[2]]).T
+    act_data = tmp = pd.DataFrame([a.values[0],act[0],act[1],act[2]]).T
+    fig,ax = plt.subplots(2,4,sharey=True,sharex=True)
+    ax[0,0].bar(i.columns,in_data[0])
 
-    ax[0,1].bar(np.arange(0,len(inact)),inact[0]-inact[1])
-    ax[0,2].bar(np.arange(0,len(inact)),inact[0]-inact[2])
-    ax[0,3].bar(np.arange(0,len(inact)),inact[1]-inact[2])
+    ax[0,1].bar(np.arange(0,len(inact)),in_data[0]-in_data[1])
+    ax[0,2].bar(np.arange(0,len(inact)),in_data[0]-in_data[2])
+    ax[0,3].bar(np.arange(0,len(inact)),in_data[0]-in_data[3])
     #ax[0,3].bar(np.arange(0,len(inact)),inact.mean(axis=1) - ((inact[1]-inact[2])+(inact[0]-inact[1])+(inact[0]-inact[2])))
     ax[1,0].bar(a.columns,a.values[0])
-    ax[1,1].bar(np.arange(0,len(act)),act[0]-act[1])
-    ax[1,2].bar(np.arange(0,len(act)),act[0]-act[2])
-    ax[1,3].bar(np.arange(0,len(act)),act[1]-act[2])
+    ax[1,1].bar(np.arange(0,len(act)),act_data[0]-act_data[1])
+    ax[1,2].bar(np.arange(0,len(act)),act_data[0]-act_data[2])
+    ax[1,3].bar(np.arange(0,len(act)),act_data[0]-act_data[3])
     #ax[1,3].bar(np.arange(0,len(act)),act.mean(axis=1) - ((act[1]-act[2])+(act[0]-act[1])+(act[0]-act[2])))
     plt.tight_layout()
     plt.savefig("States_Long_Iterative_dif.pdf")
@@ -31,14 +32,16 @@ def long_state_diff():
 # long_state_diff()
 
 def ternary_CG():
+    import choose_path as chp
+    import pandas as pd
     uot = 0
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
     cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,1],initial="CG/data/init_raw_inactive_shortcg")
     cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[0,0])
     cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","","CG/data/pi_raw_inactive_longcg",ax=ax[0,2])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_longcg","",ax=ax[1,1] ,initial="CG/data/init_raw_inactive_shortcg")
-    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,0], out=uot)
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,1] ,initial="CG/data/init_raw_active_shortcg")
+    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_longcg","",ax=ax[1,0], out=uot)
     # cgp.Ternary_Scatter(ax[1,2], "CG/data/pi_eq_active_shortcg")
     oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_longcg",ax=ax[1,2],out=oot)
     cax = plt.axes([1, 0.25, 0.025, 0.5])
@@ -46,41 +49,89 @@ def ternary_CG():
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
-    plt.show()
-    # plt.savefig("CG_ternary.pdf",bbox_inches='tight')
+    # plt.show()
+    plt.savefig("CG_ternary_long-short.pdf",bbox_inches='tight')
+    plt.close()
+    # fig,ax = plt.subplots(2,4,figsize=(12,8))
+    # i = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%chp.choose_path()[1],index_col=0).T
+    # a = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%chp.choose_path()[1],index_col=0).T    
+    # act = pd.read_csv("%s/CG/data/pi_raw_active_longcg_time.csv"%chp.choose_path()[1],index_col=0).T
+    # inact = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg_time.csv"%chp.choose_path()[1],index_col=0).T
+    # in_data = tmp = pd.DataFrame([i.values[0],inact[0],inact[1],inact[2]]).T
+    # act_data = tmp = pd.DataFrame([a.values[0],act[0],act[1],act[2]]).T
+    # uot,sm1 = cgp.Ternary_Heat_Map(in_data[0],fl_name="",ax=ax[0,0],out=uot)
+    # oot,sm2 =cgp.Ternary_Heat_Map(in_data[0],"",in_data[1],ax=ax[0,1],)
+    # cgp.Ternary_Heat_Map(in_data[0],"",in_data[2],ax=ax[0,2],)
+    # cgp.Ternary_Heat_Map(in_data[0],"",in_data[3],ax=ax[0,3],)
+    
+    # cgp.Ternary_Heat_Map(act_data[0],fl_name="",ax=ax[1,0],out=uot)
+    # cgp.Ternary_Heat_Map(act_data[0],"",act_data[1],ax=ax[1,1],)
+    # cgp.Ternary_Heat_Map(act_data[0],"",act_data[2],ax=ax[1,2],)
+    # cgp.Ternary_Heat_Map(act_data[0],"",act_data[3],ax=ax[1,3],)
+    
+    # cax = plt.axes([1, 0.25, 0.025, 0.5])
+    # plt.colorbar(sm2, cax=cax,format='%.3f')
+    # cax = plt.axes([0.15,-.025,0.45,0.025])
+    # plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
+    # plt.tight_layout()
+    # plt.savefig("CG_ternary_long-long.pdf",bbox_inches='tight')
     # plt.close()
+
+    
 
 def ternary_iterative():
     import choose_path as chp
     import pandas as pd
+    import numpy as np
     uot = 0
     oot = 0
     
-    long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
-    long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data/pi_eq_inactive_shortcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_act = pd.read_csv("%s/CG/data/pi_eq_active_shortcg.csv"%(chp.choose_path()[1]),index_col=0).T
     
     
-    state_act = pd.read_csv("%s/CG/data/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
-    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_act = pd.read_csv("%s/CG/data/act_short_binned_sim_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_sim_pi.csv"%(chp.choose_path()[1]),index_col=0).T
     
-    dpi_ref = (long_inact - state_inact[0].values).iloc[0,:]
-    import numpy as np
+    # dpi_ref = (long_inact - state_inact[0].values).iloc[0,:]
+    # import numpy as np
     for si, sj in zip(state_act[-2:-1], state_inact[-2:-1]):
-        
+        # d_sig_i = np.sqrt((long_inact.values[0]-state_inact.iloc[:,si])**2).mean()# - np.var()
+        # d_sig_a = np.sqrt((long_act.values[0]-state_act.iloc[:,si])**2).mean()
+        # # d_sig_a = np.sqrt((long_act.values[0]-state_act.T[si])**2).sum()
+        # plt.plot(1+si*.4,d_sig_i,"bo")
+        # plt.plot(1+si*.4,d_sig_a,"go")
+
+        # print(si,d_sig_i,d_sig_a)
         fig,ax = plt.subplots(2,3,figsize=(8,8))
-        
-        cgp.Ternary_Heat_Map(state_inact[si],fl_name="",ax=ax[1,1],out=uot)
-        cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[1,0])
-        cgp.Ternary_Heat_Map(long_inact, leaflet_in2=state_inact[si].values,fl_name="",ax=ax[1,2],out=oot)
+        left, width = .0, .95
+        bottom, height = .0, .95
+        right = left + width
+        top = bottom + height
+        ax[0,0].text(left, top, '%f'%(si*.4),
+        horizontalalignment='left',
+        verticalalignment='top',
+        transform=ax[0,0].transAxes)
+        uot,sm1 = cgp.Ternary_Heat_Map(state_inact[si],fl_name="",ax=ax[1,1],out=uot)
+        cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg","",ax=ax[1,0])
+        oot,sm2 = cgp.Ternary_Heat_Map(long_inact, leaflet_in2=state_inact[si].values,fl_name="",ax=ax[1,2],out=oot)
 
-        cgp.Ternary_Heat_Map(state_act[sj],fl_name="",ax=ax[0,1])
-        cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[0,0])
-        cgp.Ternary_Heat_Map(long_act, leaflet_in2=state_act[sj].values,fl_name="",ax=ax[0,2],out=oot)
+        # cgp.Ternary_Heat_Map(state_act[sj],fl_name="",ax=ax[0,1])
+        # cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[0,0])
+        # cgp.Ternary_Heat_Map(long_act, leaflet_in2=state_act[sj].values,fl_name="",ax=ax[0,2],out=oot)
+        # cax = plt.axes([1, 0.25, 0.025, 0.5])
+        # plt.colorbar(sm2, cax=cax,format='%.3f')
+        # cax = plt.axes([0.15,-.025,0.45,0.025])
+        # plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
+        # plt.tight_layout()
+        # # plt.show()
+        # plt.savefig("ternary_short-short_gif%i.png"%si)
+        # plt.close()
+    plt.savefig("mean_diff_short-short.pdf")
+    plt.close()
 
-        plt.tight_layout()
-        plt.savefig("ternary_gif%i.png"%si)
-        plt.close()
-    
+# ternary_iterative()
+
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey='col',sharex=True)
     cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[0,0])
@@ -93,44 +144,71 @@ def states_CG():
     plt.savefig("CG_state_dist.pdf")
     plt.close()
     
+
+
+def tmp():
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import numpy as np
+    act_pi = pd.read_csv("/home/sharplm/CG/data_dx2/pi_eq_active_shortcg.csv",index_col=0)
+    inact_pi = pd.read_csv("/home/sharplm/CG/data_dx2/pi_eq_inactive_shortcg.csv",index_col=0)
+    inact_raw = pd.read_csv("/home/sharplm/CG/data_dx2/pi_raw_inactive_shortcg.csv",index_col=0)
+    act_raw = pd.read_csv("/home/sharplm/CG/data_dx2/pi_raw_active_shortcg.csv",index_col=0)
+    plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0]-act_raw.T.values[0])
+    plt.show()
+    plt.bar(np.arange(0,len(act_pi)),inact_raw.T.values[0]-inact_pi.T.values[0])
+    plt.show()
+tmp()
 def state_iterative():
     
     import choose_path as chp
     import pandas as pd
-    
+    import numpy as np
 
-    long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
-    long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
-    
-    
     state_act = pd.read_csv("%s/CG/data/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
     state_inact = pd.read_csv("%s/CG/data/inact_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    
+    
+    long_act = pd.read_csv("%s/CG/data/pi_raw_active_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data/pi_raw_inactive_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
     
     dsi,dss = 0,0
 
     for si,sa in zip(state_inact, state_act):
         
         fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
+        left, width = .0, .95
+        bottom, height = .0, .95
+        right = left + width
+        top = bottom + height
+        ax[0,0].text(left, top, '%f'%(si*.4),
+        horizontalalignment='left',
+        verticalalignment='top',
+        transform=ax[0,0].transAxes)
         
-        dsi = long_inact.values[0] - state_inact[si].values
+        dsi = np.mean(long_inact.iloc[:,:2+si],axis=1).values - state_inact[si].values
         
-        ax[0,0].bar(state_inact.index,long_inact.values[0])
+        ax[0,0].bar(state_inact.index,np.mean(long_inact.iloc[:,:2+si],axis=1))
         ax[0,1].bar(state_inact.index, state_inact[si].values)
         ax[0,2].bar(state_inact.index, dsi)
-        
-        dss = long_act.values[0] - state_act[si].values
+        ax[0,0].set_title("Raw From Sim")
+        ax[0,0].set_ylabel("Inactive")
+        ax[1,0].set_ylabel("Active")
+        ax[0,1].set_title("Pi_eq CGTM")
+        ax[0,2].set_title("difference")
+        dss = np.mean(long_act.iloc[:,:2+si],axis=1) - state_act[si].values
 
-        ax[1,0].bar(state_act.index,long_act.values[0])
+        ax[1,0].bar(state_act.index,np.mean(long_act.iloc[:,:2+si],axis=1))
         ax[1,1].bar(state_act.index, state_act[si].values)
         ax[1,2].bar(state_act.index, dss)
         
         plt.ylim(-.16,.16)
         plt.tight_layout()
-        plt.savefig("state_frame%s.png"%si)
+        plt.savefig("state-short-short_frame%s.png"%si)
         plt.close()
     # return dsi,dss
             
-# dsi,dss = state_iterative()
+# state_iterative()
 
 
 def over_lapped_state_network() :
@@ -138,20 +216,20 @@ def over_lapped_state_network() :
     import pandas as pd
     import choose_path as chp
     fig, ax = plt.subplots(1,2,figsize=(36,24))
+  
 
+    # long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    # long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
     
-    long_act = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
-    long_inact = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    # state_inact = pd.read_csv("%s/CG/data/pi_eq_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    # state_act = pd.read_csv("%s/CG/data/pi_eq_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
     
-    state_inact = pd.read_csv("%s/CG/data/pi_eq_inactive_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
-    state_act = pd.read_csv("%s/CG/data/pi_eq_active_longcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    # d_active = long_act -(long_act - state_act)
+    # d_active[d_active <= 0 ] = 0
     
-    d_active = long_act -(long_act - state_act)
-    d_active[d_active <= 0 ] = 0
-    
-    d_inactive = long_inact - (long_inact - state_inact)
-    d_inactive[d_active <= 0 ] = 0
-    di = d_inactive.T[d_inactive.T["0"]>0].index
+    # d_inactive = long_inact - (long_inact - state_inact)
+    # d_inactive[d_active <= 0 ] = 0
+    # di = d_inactive.T[d_inactive.T["0"]>0].index
     
     fig, ax = plt.subplots(1,2,figsize=(24,12))
 
@@ -167,10 +245,10 @@ def over_lapped_state_network() :
     # cgp.network_plot("active", ax[1])
     plt.tight_layout()
     # plt.show()
-    plt.savefig("State_overlap1.pdf")
+    plt.savefig("State_overlap_cutoff0.pdf")
     plt.close()    
     
-over_lapped_state_network()
+# over_lapped_state_network()
     
 def CGTM():
     fig,ax = plt.subplots(1,2,figsize=(8,4),sharey=True,sharex=True)
@@ -193,8 +271,8 @@ def SI_CG():
     plt.colorbar(s1,cax=cax)
     plt.savefig("CG_SI.pdf",bbox_inches='tight')
     plt.close()
-# ternary_CG()
 
+# ternary_CG()
 # ternary_iterative()
 # states_CG()   
 # CGTM()    
