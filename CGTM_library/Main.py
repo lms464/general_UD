@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import CGTM_Calculations as cgc
 import CGTM_Plotting as cgp
+import all_possible_states as aps
+
+
 
 def long_state_diff():
     import choose_path as chp
@@ -86,12 +89,12 @@ def ternary_iterative():
     uot = 0
     oot = 0
     
-    long_inact = pd.read_csv("%s/CG/data/pi_eq_inactive_shortcg.csv"%(chp.choose_path()[1]),index_col=0).T
-    long_act = pd.read_csv("%s/CG/data/pi_eq_active_shortcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data_dx2/pi_eq_inactive_shortcg.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_act = pd.read_csv("%s/CG/data_dx2/pi_eq_active_shortcg.csv"%(chp.choose_path()[1]),index_col=0).T
     
     
-    state_act = pd.read_csv("%s/CG/data/act_short_binned_sim_pi.csv"%(chp.choose_path()[1]),index_col=0).T
-    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_sim_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_act = pd.read_csv("%s/CG/data_dx2/act_short_binned_sim_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_inact = pd.read_csv("%s/CG/data_dx2/inact_short_binned_sim_pi.csv"%(chp.choose_path()[1]),index_col=0).T
     
     # dpi_ref = (long_inact - state_inact[0].values).iloc[0,:]
     # import numpy as np
@@ -134,82 +137,86 @@ def ternary_iterative():
 
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey='col',sharex=True)
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_longcg",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_longcg", ax[0,2])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_longcg",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_longcg", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg",ax[0,0])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_inactive_longcg",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg","~/UDel/CG/data_dx2/pi_raw_inactive_longcg", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_active_shortcg",ax[1,0])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_active_longcg",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_active_shortcg","~/UDel/CG/data_dx2/pi_raw_active_longcg", ax[1,2])
     plt.tight_layout()
-    plt.savefig("CG_state_dist.pdf")
+    plt.savefig("CG_state_dist_dx2_test.pdf")
     plt.close()
-    
+states_CG()
 
 
 def tmp():
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
-    act_pi = pd.read_csv("/home/sharplm/CG/data_dx2/pi_eq_active_shortcg.csv",index_col=0)
-    inact_pi = pd.read_csv("/home/sharplm/CG/data_dx2/pi_eq_inactive_shortcg.csv",index_col=0)
-    inact_raw = pd.read_csv("/home/sharplm/CG/data_dx2/pi_raw_inactive_shortcg.csv",index_col=0)
-    act_raw = pd.read_csv("/home/sharplm/CG/data_dx2/pi_raw_active_shortcg.csv",index_col=0)
+    alps = aps.all_possible_states()
+    act_pi = pd.read_csv("~/UDel/CG/data_dx2/pi_eq_active_shortcg.csv",index_col=0)
+    inact_pi = pd.read_csv("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg.csv",index_col=0)
+    inact_raw = pd.read_csv("~/UDel/CG/data_dx2/pi_raw_inactive_shortcg.csv",index_col=0)
+    act_raw = pd.read_csv("~/UDel/CG/data_dx2/pi_raw_active_shortcg.csv",index_col=0)
+    plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0])#-act_raw.T.values[0])
     plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0]-act_raw.T.values[0])
-    plt.show()
-    plt.bar(np.arange(0,len(act_pi)),inact_raw.T.values[0]-inact_pi.T.values[0])
-    plt.show()
-tmp()
+    plt.savefig("tmp.pdf")
+    plt.close()
+# tmp()
 def state_iterative():
     
     import choose_path as chp
     import pandas as pd
     import numpy as np
 
-    state_act = pd.read_csv("%s/CG/data/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
-    state_inact = pd.read_csv("%s/CG/data/inact_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_act = pd.read_csv("%s/CG/data_dx2/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_inact = pd.read_csv("%s/CG/data_dx2/inact_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
     
     
-    long_act = pd.read_csv("%s/CG/data/pi_raw_active_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
-    long_inact = pd.read_csv("%s/CG/data/pi_raw_inactive_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_act = pd.read_csv("%s/CG/data_dx2/pi_raw_active_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data_dx2/pi_raw_inactive_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
     
     dsi,dss = 0,0
+    
+    for si in state_inact:
 
-    for si,sa in zip(state_inact, state_act):
-        
         fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
-        left, width = .0, .95
+        left = .0
         bottom, height = .0, .95
-        right = left + width
         top = bottom + height
         ax[0,0].text(left, top, '%f'%(si*.4),
-        horizontalalignment='left',
-        verticalalignment='top',
-        transform=ax[0,0].transAxes)
+            horizontalalignment='left',
+            verticalalignment='top',
+            transform=ax[0,0].transAxes
+        )
         
         dsi = np.mean(long_inact.iloc[:,:2+si],axis=1).values - state_inact[si].values
         
-        ax[0,0].bar(state_inact.index,np.mean(long_inact.iloc[:,:2+si],axis=1))
-        ax[0,1].bar(state_inact.index, state_inact[si].values)
-        ax[0,2].bar(state_inact.index, dsi)
+        a=ax[0,0].bar(state_inact.index,np.mean(long_inact.iloc[:,:2+si],axis=1))
+        b=ax[0,1].bar(state_inact.index, state_inact[si].values)
+        c=ax[0,2].bar(state_inact.index, dsi)
         ax[0,0].set_title("Raw From Sim")
         ax[0,0].set_ylabel("Inactive")
         ax[1,0].set_ylabel("Active")
         ax[0,1].set_title("Pi_eq CGTM")
         ax[0,2].set_title("difference")
-        dss = np.mean(long_act.iloc[:,:2+si],axis=1) - state_act[si].values
+        dss = np.mean(long_act.iloc[:,:2+si],axis=1).values - state_act[si].values
 
-        ax[1,0].bar(state_act.index,np.mean(long_act.iloc[:,:2+si],axis=1))
-        ax[1,1].bar(state_act.index, state_act[si].values)
-        ax[1,2].bar(state_act.index, dss)
-        
-        plt.ylim(-.16,.16)
+        a=ax[1,0].bar(state_act.index,np.mean(long_act.iloc[:,:2+si],axis=1))
+        b=ax[1,1].bar(state_act.index, state_act[si].values)
+        c=ax[1,2].bar(state_act.index, dss)
+        del a
+        del b
+        del c
+        dss,dsi = 0,0
+        plt.ylim(-.075,.075)
         plt.tight_layout()
-        plt.savefig("state-short-short_frame%s.png"%si)
+        plt.savefig("dx2_state-short-short_frame%s_2.pdf"%si)
         plt.close()
     # return dsi,dss
             
-# state_iterative()
-
+# o = state_iterative()
+# del o
 
 def over_lapped_state_network() :
     

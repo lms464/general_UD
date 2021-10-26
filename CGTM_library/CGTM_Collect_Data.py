@@ -504,11 +504,11 @@ class CGTM_Collect_Data:
 
 # build = CGTM_Collect_Data(1,2,[],"cg","act", "long")
 # build.build_cg_long_states()
-build = CGTM_Collect_Data(1,50,[],"cg","act", "short")
-build.build_cg_short_states()
+build = CGTM_Collect_Data(1,3,[],"cg","act", "long")
+build.build_cg_long_states()
 
-build = CGTM_Collect_Data(1,50,[],"cg","inact", "short")
-build.build_cg_short_states()
+build = CGTM_Collect_Data(1,3,[],"cg","inact", "long")
+build.build_cg_long_states()
 # build.analysis_multi_raw()
 
 
