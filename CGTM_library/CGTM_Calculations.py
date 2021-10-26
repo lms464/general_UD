@@ -118,7 +118,7 @@ class CGTM_Calculations:
     def get_A(self,P):
         I = np.eye(len(P))
         row_1 = np.ones((len(P)))
-        A = np.vstack([P.T-I,row_1])
+        A = np.vstack([P.T-I.T,row_1])
         return A
     def get_B(self,A):
         B = np.zeros(np.shape(A)[0])
@@ -207,6 +207,7 @@ class CGTM_Calculations:
 
 
     def solve_pi_eq(self, P):
+        #We have to transpose so that Markov transitions correspond to right multiplying by a column vector.  np.linalg.eig finds right eigenvectors.
         evals, evecs = sla.eigs(P.T, k = 1, which='LM')
         evecs = np.real(evecs)
         evecs[np.abs(evecs) < 10**(-12)] = 0
@@ -470,7 +471,7 @@ class CGTM_Calculations:
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_eq).to_csv("%s/CG/data_dx2/pi_eq_%s_%s%s_test.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data_dx2/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
         
     def write_pi_raw(self,iterate_time=False, iterate_sims=False):
         pi_raw = self.build_raw(iterate_time=iterate_time,iterate_sims=iterate_sims)[0]
@@ -482,13 +483,19 @@ class CGTM_Calculations:
         if self.act == None:
             pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,it_val))
         else:
-            pd.DataFrame(pi_raw).to_csv("%s/CG/data_dx2/pi_raw_%s_%s%s%s.csv"%(self.path,self.act,self.length,self.kind,it_val))
+            pd.DataFrame(pi_raw).to_csv("%s/CG/data_dx2/pi_raw_%s_%s%s%s_upd.csv"%(self.path,self.act,self.length,self.kind,it_val))
 
 
 
 # import matplotlib.pyplot as plt
-# CGTM_Calculations("",1,"cg","inactive","long").write_pi_eq()#.write_pi_raw(iterate_time=True)
-# CGTM_Calculations("",1,"cg","active","long").write_pi_eq()#(iterate_time=True)
+CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw(iterate_time=True)
+CGTM_Calculations("",1,"cg","active","short").write_pi_raw(iterate_time=True)
+
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()#.write_pi_raw(iterate_time=True)
+# CGTM_Calculations("",1,"cg","active","short").write_pi_raw()#(iterate_time=True)
+
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
+# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#(iterate_time=True)
 
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
 # CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
@@ -522,8 +529,8 @@ class CGTM_Calculations:
 # d4.write_pi_raw()
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
 
-# pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_time_pi.csv")
-# pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_time_pi.csv")
+pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_time_pi_upd.csv")
+pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_time_pi_upd.csv")
 
 # test1.write_pi_eq()
 # test1.write_pi_raw()

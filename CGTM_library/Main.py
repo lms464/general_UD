@@ -40,20 +40,20 @@ def ternary_CG():
     uot = 0
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,1],initial="CG/data/init_raw_inactive_shortcg")
-    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[0,0])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","","CG/data/pi_raw_inactive_longcg",ax=ax[0,2])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,1] ,initial="CG/data/init_raw_active_shortcg")
-    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_longcg","",ax=ax[1,0], out=uot)
+    cgp.Ternary_Heat_Map("CG/data_dx2/pi_eq_inactive_shortcg","",ax=ax[0,1],initial="CG/data/init_raw_inactive_shortcg")
+    cgp.Ternary_Heat_Map("CG/data_dx2/pi_raw_inactive_shortcg","",ax=ax[0,0])
+    cgp.Ternary_Heat_Map("CG/data_dx2/pi_eq_inactive_shortcg","","CG/data_dx2/pi_raw_inactive_shortcg",ax=ax[0,2])
+    cgp.Ternary_Heat_Map("CG/data_dx2/pi_eq_active_shortcg","",ax=ax[1,1] ,initial="CG/data/init_raw_active_shortcg")
+    uot,sm1 = cgp.Ternary_Heat_Map("CG/data_dx2/pi_raw_active_shortcg","",ax=ax[1,0], out=uot)
     # cgp.Ternary_Scatter(ax[1,2], "CG/data/pi_eq_active_shortcg")
-    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_longcg",ax=ax[1,2],out=oot)
+    oot,sm2 = cgp.Ternary_Heat_Map("CG/data_dx2/pi_eq_active_shortcg","","CG/data_dx2/pi_raw_active_shortcg",ax=ax[1,2],out=oot)
     cax = plt.axes([1, 0.25, 0.025, 0.5])
     plt.colorbar(sm2, cax=cax,format='%.3f')
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
     # plt.show()
-    plt.savefig("CG_ternary_long-short.pdf",bbox_inches='tight')
+    plt.savefig("CG_ternary_short-short.pdf",bbox_inches='tight')
     plt.close()
     # fig,ax = plt.subplots(2,4,figsize=(12,8))
     # i = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%chp.choose_path()[1],index_col=0).T
@@ -80,7 +80,7 @@ def ternary_CG():
     # plt.savefig("CG_ternary_long-long.pdf",bbox_inches='tight')
     # plt.close()
 
-    
+# ternary_CG() 
 
 def ternary_iterative():
     import choose_path as chp
@@ -136,17 +136,17 @@ def ternary_iterative():
 # ternary_iterative()
 
 def states_CG():
-    fig, ax = plt.subplots(2,3,figsize=(8,6),sharey='col',sharex=True)
+    fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
     cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_inactive_longcg",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg","~/UDel/CG/data_dx2/pi_raw_inactive_longcg", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_inactive_shortcg",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg","~/UDel/CG/data_dx2/pi_raw_inactive_shortcg", ax[0,2])
     cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_active_longcg",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_active_shortcg","~/UDel/CG/data_dx2/pi_raw_active_longcg", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_active_shortcg",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_active_shortcg","~/UDel/CG/data_dx2/pi_raw_active_shortcg", ax[1,2])
     plt.tight_layout()
     plt.savefig("CG_state_dist_dx2_test.pdf")
     plt.close()
-states_CG()
+# states_CG()
 
 
 def tmp():
@@ -184,12 +184,14 @@ def state_iterative():
         left = .0
         bottom, height = .0, .95
         top = bottom + height
-        ax[0,0].text(left, top, '%f'%(si*.4),
+        ax[0,0].text(left, top, '%f'%((si+1)*.4),
             horizontalalignment='left',
             verticalalignment='top',
             transform=ax[0,0].transAxes
         )
-        
+
+        txt = '(0.55:0.15:0.30 DPPC:DOPC:Chol) Martini FF. 50 simulations for 50 ns\nStepsize between Frames: .4 ns. The stepsize between states: 2%'
+        # fig.text(.5, -.05, txt, ha='center')
         dsi = np.mean(long_inact.iloc[:,:2+si],axis=1).values - state_inact[si].values
         
         a=ax[0,0].bar(state_inact.index,np.mean(long_inact.iloc[:,:2+si],axis=1))
@@ -215,8 +217,8 @@ def state_iterative():
         plt.close()
     # return dsi,dss
             
-# o = state_iterative()
-# del o
+o = state_iterative()
+del o
 
 def over_lapped_state_network() :
     
