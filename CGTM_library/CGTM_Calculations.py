@@ -132,7 +132,7 @@ class CGTM_Calculations:
         if self.act is None:
             states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         else:
-            states = pd.read_csv("%s/CG/data_dx2/states_dx2/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T   
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T   
         
         if iterate_sims == False and iterate_time == True:
             hist = []
@@ -188,7 +188,7 @@ class CGTM_Calculations:
                     # starts here int(states[S][si-1])
                     # ends here int(states[S][si])
                     TM_m[int(states[S][si-1]),int(states[S][si])] += 1 
-                    
+        TM_m = np.maximum(TM_m, TM_m.transpose())
         norm = TM_m.sum(axis=1)
         TM_norm = np.zeros(np.shape(TM_m))
         #TM_norm = np.maximum(TM_norm, TM_norm.transpose()) # make symetric
@@ -203,7 +203,7 @@ class CGTM_Calculations:
         for i,j in enumerate(TM_m):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
         # TM_test = np.nan_to_num(np.divide(TM_m, norm))
-        TM_norm = np.maximum(TM_norm, TM_norm.transpose())
+        # TM_norm = np.maximum(TM_norm, TM_norm.transpose())
         return TM_norm    
 
 
@@ -255,7 +255,7 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data_dx2/states_dx2/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
         # A = get_A(TM_norm)
@@ -297,7 +297,7 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data_dx2/states_dx2/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
         pi_sig = []
@@ -315,7 +315,7 @@ class CGTM_Calculations:
 
     def sigConverge_time(self,overide=True):
         states = 0 
-        states_ref = pd.read_csv("%s/CG/data_dx2/states_dx2/%s_%s.csv"%(self.path,"short",self.act),index_col=0).T 
+        states_ref = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,"short",self.act),index_col=0).T 
         if self.act == None:
             print("\n########################################################\n\n")
             print("This will run, however these simulations are not enough")
@@ -328,7 +328,7 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data_dx2/states_dx2/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
+            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
         state_shape = np.shape(states)
         pi_eq_ref = np.histogram(states_ref,bins=len(aps.all_possible_states()),normed=True,range=(0,len(aps.all_possible_states())))[0]
         # pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
@@ -465,14 +465,14 @@ class CGTM_Calculations:
         if self.act==None:
             pd.DataFrame(init_hist).to_csv("%s/init_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(init_hist).to_csv("%s/CG/data_dx2/init_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(init_hist).to_csv("%s/CG/data/init_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
     def write_pi_eq(self):
         pi_eq = self.build_CGTM()[0]
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_eq).to_csv("%s/CG/data_dx2/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
         
     def write_pi_raw(self,iterate_time=False, iterate_sims=False):
         pi_raw = self.build_raw(iterate_time=iterate_time,iterate_sims=iterate_sims)[0]
@@ -484,7 +484,7 @@ class CGTM_Calculations:
         if self.act == None:
             pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,it_val))
         else:
-            pd.DataFrame(pi_raw).to_csv("%s/CG/data_dx2/pi_raw_%s_%s%s%s_upd.csv"%(self.path,self.act,self.length,self.kind,it_val))
+            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s%s_upd.csv"%(self.path,self.act,self.length,self.kind,it_val))
 
 
 
@@ -492,11 +492,11 @@ class CGTM_Calculations:
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw(iterate_time=True)
 # CGTM_Calculations("",1,"cg","active","short").write_pi_raw(iterate_time=True)
 
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()#.write_pi_raw(iterate_time=True)
-# CGTM_Calculations("",1,"cg","active","short").write_pi_raw()#(iterate_time=True)
+# CGTM_Calculations("",1,"cg","inactive","long").write_pi_raw()#.write_pi_raw(iterate_time=True)
+# CGTM_Calculations("",1,"cg","active","long").write_pi_raw()#(iterate_time=True)
 
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
-# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#(iterate_time=True)
+CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
+CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#(iterate_time=True)
 
 # # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
 # CGTM_Calculations("",1,"cg","active","short").write_pi_eq()

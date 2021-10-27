@@ -142,7 +142,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         n = 4
         tick_size = 0.1
         margin = 0.05
-        norm2 = MidpointNormalize(0,0.06,0.03)
+        norm2 = MidpointNormalize(0,0.12,0.06)
 
         # define corners of triangle    
         left = np.r_[0, 0]
