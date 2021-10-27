@@ -137,16 +137,16 @@ def ternary_iterative():
 
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
-    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_inactive_shortcg",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg","~/UDel/CG/data_dx2/pi_raw_inactive_shortcg", ax[0,2])
-    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_active_shortcg",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_active_shortcg","~/UDel/CG/data_dx2/pi_raw_active_shortcg", ax[1,2])
+    cgp.plot_state_dist("~/CG/data_dx2/pi_eq_inactive_shortcg",ax[0,0])
+    cgp.plot_state_dist("~/CG/data_dx2/pi_raw_inactive_shortcg",ax[0,1])
+    cgp.diff_plot("~/CG/data_dx2/pi_eq_inactive_shortcg","~/CG/data_dx2/pi_raw_inactive_shortcg", ax[0,2])
+    cgp.plot_state_dist("~/CG/data_dx2/pi_eq_active_shortcg",ax[1,0])
+    cgp.plot_state_dist("~/CG/data_dx2/pi_raw_active_shortcg",ax[1,1])
+    cgp.diff_plot("~/CG/data_dx2/pi_eq_active_shortcg","~/CG/data_dx2/pi_raw_active_shortcg", ax[1,2])
     plt.tight_layout()
     plt.savefig("CG_state_dist_dx2_test.pdf")
     plt.close()
-# states_CG()
+states_CG()
 
 
 def tmp():
@@ -217,8 +217,8 @@ def state_iterative():
         plt.close()
     # return dsi,dss
             
-o = state_iterative()
-del o
+# o = state_iterative()
+# del o
 
 def over_lapped_state_network() :
     
@@ -331,12 +331,57 @@ def network(leaflet=None, kind=None, act=None):
 def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
   
+# import numpy as np
+# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
+# # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
+# # sig_conv(test1,test2,'cg')
 
-# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_time()
-# test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
-# sig_conv(test1,test2,'cg')
+# # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
+# a = test1.build_CGTM()#write_pi_eq()
+# b = test1.build_raw()#write_pi_raw()
 
-# test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None).sigConverge_time()
+# pi_raw = b[0]
+# pi_eq = a[0]
+# cgtm = a[-1]
+# alps = aps.all_possible_states()
+# # empt = []
+# # for i in range(0,len(alps)):
+# #     for j in range(0,len(alps)):
+# #         if cgtm[i,j] == 0 or cgtm[j,i] == 0:
+# #             continue
+# #         if np.isclose(pi_eq[i] *cgtm[i,j],pi_eq[i] * cgtm[j,i])==True:
+# #             empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[i]*cgtm[j,i]])
+# #         else:
+# #             empt.append((i,j),0,0)
+
+
+
+# # pi_rand = pi_raw.copy()
+# # pi_rand[pi_rand > 0] = 1
+# pi_rand = np.random.rand(len(pi_eq))*np.random.rand(len(pi_eq))
+# pi_rand = pi_rand / pi_rand.sum()
+# pi_rand_tmp = pi_rand.copy()
+# pi_rand_init = pi_rand.copy()
+
+# i = 1
+# while np.allclose(pi_rand, pi_eq) == False:
+#     pi_rand_tmp = pi_rand_init @ np.linalg.matrix_power(cgtm,i)
+#     pi_rand = pi_rand_tmp/pi_rand_tmp.sum()
+#     i = i + 1
+#     plt.plot(i,pi_eq[841],'ko')
+#     # plt.plot(i,pi_rand_tmp[841],'ro')
+#     plt.plot(i,pi_rand[841],'ro')
+#     print(i)
+# # plt.ylim([0,1.5])
+# plt.title("Markov 'simulation'")
+# plt.legend([r"max($\pi^{eq}$)","Same state Sim"])
+# plt.xlabel(r"Steps to converge to $\pi^{eq}$")
+# plt.ylabel("Sum of states (should be 1%)")
+# plt.savefig("Markov_Sim.pdf")
+# plt.close()
+
+    
+
 # test2 = cgc.CGTM_Calculations("SL", 1, "chg",act=None).sigConverge_time()
 # sig_conv(test1,test2,'chg')
 

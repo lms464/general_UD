@@ -199,10 +199,11 @@ class CGTM_Calculations:
         # TM_norm = np.nan_to_num(TM_norm)
         # TM_norm2 = np.zeros(np.shape(TM_m))
 
-        #TM_sym = np.maximum( TM_norm, TM_norm.transpose() )
+        # TM_sym = np.maximum( TM_norm, TM_norm.transpose() )
         for i,j in enumerate(TM_m):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
         # TM_test = np.nan_to_num(np.divide(TM_m, norm))
+        TM_norm = np.maximum(TM_norm, TM_norm.transpose())
         return TM_norm    
 
 
@@ -487,12 +488,12 @@ class CGTM_Calculations:
 
 
 
-# import matplotlib.pyplot as plt
-CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw(iterate_time=True)
-CGTM_Calculations("",1,"cg","active","short").write_pi_raw(iterate_time=True)
+# # import matplotlib.pyplot as plt
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw(iterate_time=True)
+# CGTM_Calculations("",1,"cg","active","short").write_pi_raw(iterate_time=True)
 
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()#.write_pi_raw(iterate_time=True)
-# CGTM_Calculations("",1,"cg","active","short").write_pi_raw()#(iterate_time=True)
+CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()#.write_pi_raw(iterate_time=True)
+CGTM_Calculations("",1,"cg","active","short").write_pi_raw()#(iterate_time=True)
 
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
 # CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#(iterate_time=True)
@@ -529,8 +530,8 @@ CGTM_Calculations("",1,"cg","active","short").write_pi_raw(iterate_time=True)
 # d4.write_pi_raw()
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
 
-pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_time_pi_upd.csv")
-pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_time_pi_upd.csv")
+# pd.DataFrame(CGTM_Calculations("",1,"cg","act","short").sigConverge_simulations()[1]).to_csv("act_short_binned_time_pi_upd.csv")
+# pd.DataFrame(CGTM_Calculations("",1,"cg","inact","short").sigConverge_simulations()[1]).to_csv("inact_short_binned_time_pi_upd.csv")
 
 # test1.write_pi_eq()
 # test1.write_pi_raw()
