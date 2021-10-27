@@ -80,7 +80,7 @@ def ternary_CG():
     # plt.savefig("CG_ternary_long-long.pdf",bbox_inches='tight')
     # plt.close()
 
-# ternary_CG() 
+ternary_CG() 
 
 def ternary_iterative():
     import choose_path as chp
@@ -137,16 +137,16 @@ def ternary_iterative():
 
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
-    cgp.plot_state_dist("~/CG/data_dx2/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/CG/data_dx2/pi_raw_inactive_shortcg",ax[0,1])
-    cgp.diff_plot("~/CG/data_dx2/pi_eq_inactive_shortcg","~/CG/data_dx2/pi_raw_inactive_shortcg", ax[0,2])
-    cgp.plot_state_dist("~/CG/data_dx2/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/CG/data_dx2/pi_raw_active_shortcg",ax[1,1])
-    cgp.diff_plot("~/CG/data_dx2/pi_eq_active_shortcg","~/CG/data_dx2/pi_raw_active_shortcg", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg",ax[0,0])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_inactive_shortcg",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg","~/UDel/CG/data_dx2/pi_raw_inactive_shortcg", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_eq_active_shortcg",ax[1,0])
+    cgp.plot_state_dist("~/UDel/CG/data_dx2/pi_raw_active_shortcg",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data_dx2/pi_eq_active_shortcg","~/UDel/CG/data_dx2/pi_raw_active_shortcg", ax[1,2])
     plt.tight_layout()
     plt.savefig("CG_state_dist_dx2_test.pdf")
     plt.close()
-states_CG()
+# states_CG()
 
 
 def tmp():

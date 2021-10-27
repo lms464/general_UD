@@ -492,13 +492,13 @@ class CGTM_Calculations:
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw(iterate_time=True)
 # CGTM_Calculations("",1,"cg","active","short").write_pi_raw(iterate_time=True)
 
-CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()#.write_pi_raw(iterate_time=True)
-CGTM_Calculations("",1,"cg","active","short").write_pi_raw()#(iterate_time=True)
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()#.write_pi_raw(iterate_time=True)
+# CGTM_Calculations("",1,"cg","active","short").write_pi_raw()#(iterate_time=True)
 
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
 # CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#(iterate_time=True)
 
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
+# # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
 # CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
 
 # plt.plot(np.linspace(0,50,len(d1)),d1)
