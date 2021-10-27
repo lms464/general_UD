@@ -13,7 +13,7 @@ def all_possible_states():
 
     # RUNS, seems fine
     #sorts by anionic, then neutral, then chol
-    list_o_list = [np.linspace(0,1,51),np.linspace(0,1,51),np.linspace(0,1,51)]
+    list_o_list = [np.linspace(0,1,21),np.linspace(0,1,21),np.linspace(0,1,21)]
     all_possibility = list(itertools.product(*list_o_list))
         
     list_100 = []
