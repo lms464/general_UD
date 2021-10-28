@@ -137,16 +137,16 @@ def ternary_iterative():
 
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg", ax[0,2])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_shortcg",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg", ax[1,2])
+    cgp.plot_state_dist("~//CG/data/pi_eq_inactive_shortcg",ax[0,0])
+    cgp.plot_state_dist("~//CG/data/pi_raw_inactive_shortcg",ax[0,1])
+    #cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg", ax[0,2])
+    cgp.plot_state_dist("~//CG/data/pi_eq_active_shortcg",ax[1,0])
+    cgp.plot_state_dist("~//CG/data/pi_raw_active_shortcg",ax[1,1])
+    #cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg", ax[1,2])
     plt.tight_layout()
-    plt.savefig("CG_state_dist_short-short.pdf")
-    plt.close()
-states_CG()
+    # plt.savefig("CG_state_dist_short-short.pdf")
+    # plt.close()
+# states_CG()
 
 
 def tmp():
@@ -154,15 +154,29 @@ def tmp():
     import matplotlib.pyplot as plt
     import numpy as np
     alps = aps.all_possible_states()
-    act_pi = pd.read_csv("~/UDel/CG/data_dx2/pi_eq_active_shortcg.csv",index_col=0)
-    inact_pi = pd.read_csv("~/UDel/CG/data_dx2/pi_eq_inactive_shortcg.csv",index_col=0)
-    inact_raw = pd.read_csv("~/UDel/CG/data_dx2/pi_raw_inactive_shortcg.csv",index_col=0)
-    act_raw = pd.read_csv("~/UDel/CG/data_dx2/pi_raw_active_shortcg.csv",index_col=0)
+    act_pi = pd.read_csv("~/CG/data/pi_eq_active_shortcg.csv",index_col=0)
+    inact_pi = pd.read_csv("~/CG/data/pi_eq_inactive_shortcg.csv",index_col=0)
+    inact_raw = pd.read_csv("~/CG/data/pi_raw_inactive_shortcg.csv",index_col=0)
+    act_raw = pd.read_csv("~/CG/data/pi_raw_active_shortcg.csv",index_col=0)
+    
+    ## make this part a function!
+    
+    for sysi, sys in enumerate([act_pi,inact_pi, inact_raw, act_raw]):
+        if len(sys.index) != len(alps) or len(sys.columns) != len(alps):
+            sys_tmp = pd.DataFrame(columns=np.arange(0,len(alps)))
+            sys_tmp[sys.index] = sys.T[sys.index]
+            sys_tmp = sys_tmp.T.fillna(0)
+            sys = sys_tmp.copy()
+            print()
+                
+    # Cause it'll break otherwise!
+    
     plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0])#-act_raw.T.values[0])
     plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0]-act_raw.T.values[0])
     plt.savefig("tmp.pdf")
     plt.close()
-# tmp()
+tmp()
+
 def state_iterative():
     
     import choose_path as chp
@@ -331,54 +345,54 @@ def network(leaflet=None, kind=None, act=None):
 def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
   
-import numpy as np
-# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
-# # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
-# # sig_conv(test1,test2,'cg')
+# import numpy as np
+# # test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
+# # # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
+# # # sig_conv(test1,test2,'cg')
 
-test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
-a = test1.build_CGTM()#write_pi_eq()
-b = test1.build_raw()#write_pi_raw()
+# test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
+# a = test1.build_CGTM()#write_pi_eq()
+# b = test1.build_raw()#write_pi_raw()
 
-pi_raw = b[0]
-pi_eq = a[0]
-cgtm = a[-1]
-alps = aps.all_possible_states()
-empt = []
-for i in range(0,len(alps)):
-    for j in range(0,len(alps)):
-        if cgtm[i,j] == 0 or cgtm[j,i] == 0:
-            continue
-        if np.isclose(pi_eq[i] *cgtm[i,j],pi_eq[i] * cgtm[j,i])==True:
-            empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[i]*cgtm[j,i]])
-        else:
-            empt.append([(i,j),0,0])
+# pi_raw = b[0]
+# pi_eq = a[0]
+# cgtm = a[-1]
+# alps = aps.all_possible_states()
+# empt = []
+# for i in range(0,len(cgtm.values)):
+#     for j in range(0,len(cgtm.values)):
+#         if cgtm.values[i,j] == 0 or cgtm[j,i] == 0:
+#             continue
+#         if np.isclose(pi_eq[i] *cgtm.values[i,j],pi_eq[i] * cgtm.values[j,i])==True:
+#             empt.append([(i,j),pi_eq[i]*cgtm.values[i,j],pi_eq[i]*cgtm.values[j,i]])
+#         # else:
+#         #     empt.append([(i,j),0,0])
 
 
 
-# pi_rand = pi_raw.copy()
-# pi_rand[pi_rand > 0] = 1
-pi_rand = np.random.rand(len(pi_eq))*np.random.rand(len(pi_eq))
-pi_rand = pi_rand / pi_rand.sum()
-pi_rand_tmp = pi_rand.copy()
-pi_rand_init = pi_rand.copy()
+# # pi_rand = pi_raw.copy()
+# # pi_rand[pi_rand > 0] = 1
+# pi_rand = np.random.rand(len(pi_eq))*np.random.rand(len(pi_eq))
+# pi_rand = pi_rand / pi_rand.sum()
+# pi_rand_tmp = pi_rand.copy()
+# pi_rand_init = pi_rand.copy()
 
-i = 1
-while np.allclose(pi_rand, pi_eq) == False:
-    pi_rand_tmp = pi_rand_tmp @ cgtm  
-    pi_rand = pi_rand_tmp/pi_rand_tmp.sum()
-    i = i + 1
-    plt.plot(i,pi_eq[219],'ko')
-    plt.plot(i,pi_rand_tmp[219],'bo')
-    plt.plot(i,pi_rand[219],'ro')
-    print(i)
-# plt.ylim([0,1.5])
-plt.title("Markov 'simulation'")
-plt.legend([r"max($\pi^{eq}$)","Same state Sim (Normalized)","Un-Normalized"])
-plt.xlabel(r"Steps to converge to $\pi^{eq}$")
-plt.ylabel("Sum of states (should be 1%)")
-plt.savefig("Markov_Sim.pdf")
-plt.close()
+# i = 1
+# while np.allclose(pi_rand, pi_eq) == False:
+#     plt.plot(i,pi_eq[27],'ko')
+#     plt.plot(i,pi_rand[27],'bo')
+#     plt.plot(i,pi_rand_tmp[27],'ro')
+#     pi_rand_tmp = pi_rand_tmp @ cgtm  
+#     pi_rand = pi_rand_tmp/pi_rand_tmp.sum()
+#     i = i + 1
+#     print(i,pi_rand_tmp.sum())
+# # plt.ylim([0,1.5])
+# plt.title("Markov 'simulation'")
+# plt.legend([r"max($\pi^{eq}$)","Same state Sim (Normalized)","Same state Sim Un-Normalized"])
+# plt.xlabel(r"Steps to converge to $\pi^{eq}$")
+# plt.ylabel("Sum of states (should be black line)")
+# plt.savefig("Markov_Sim.pdf")
+# plt.close()
 
     
 

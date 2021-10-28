@@ -32,7 +32,7 @@ class MidpointNormalize(mcol.Normalize):
 
 def plot_state_dist(pi_eq_file,ax):
     pi_eq = pd.read_csv("%s.csv"%pi_eq_file,index_col=0).T
-    ax.bar(np.arange(0,len(aps.all_possible_states())),pi_eq.values[0])
+    ax.bar(np.arange(0,len(pi_eq.values[0])),pi_eq.values[0])
     ax.set_ylabel("Prob of State")
     ax.set_xlabel("State")
     

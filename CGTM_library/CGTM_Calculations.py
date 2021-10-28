@@ -188,10 +188,16 @@ class CGTM_Calculations:
                     # starts here int(states[S][si-1])
                     # ends here int(states[S][si])
                     TM_m[int(states[S][si-1]),int(states[S][si])] += 1 
-        TM_m = np.maximum(TM_m, TM_m.transpose())
+        #TM_m = np.maximum(TM_m, TM_m.transpose())
+        tm = []
+        for i in TM_m:
+            if i.sum()<1:
+                continue
+            else:
+                tm.append(i)
         norm = TM_m.sum(axis=1)
         TM_norm = np.zeros(np.shape(TM_m))
-        #TM_norm = np.maximum(TM_norm, TM_norm.transpose()) # make symetric
+        # TM_norm = np.maximum(TM_norm, TM_norm.transpose()) # make symetric
         # for i,j in enumerate(TM_m):
         #     TM_norm[i] = j / norm[i]
 
@@ -203,13 +209,22 @@ class CGTM_Calculations:
         for i,j in enumerate(TM_m):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
         # TM_test = np.nan_to_num(np.divide(TM_m, norm))
-        # TM_norm = np.maximum(TM_norm, TM_norm.transpose())
+        TM_norm = pd.DataFrame(TM_norm)
+        TM_tmp = TM_norm.loc[(TM_norm.sum(axis=1) != 0), (TM_norm.sum(axis=0) != 0)]
+        TM_index = TM_tmp.index.values
+        TM_cols = TM_tmp.columns.values
+        del TM_tmp
+        state_ind = [c for c in TM_cols]
+        state_ind = [c for c in TM_index]
+        state_ind = np.unique(state_ind)
+        TM_norm = TM_norm.iloc[state_ind,state_ind]
+        # TM_norm = np.maximum(TM_norm1, TM_norm1.transpose())
         return TM_norm    
 
 
     def solve_pi_eq(self, P):
         #We have to transpose so that Markov transitions correspond to right multiplying by a column vector.  np.linalg.eig finds right eigenvectors.
-        evals, evecs = sla.eigs(P.T, k = 1, which='LM')
+        evals, evecs = sla.eigs(P.values.T, k = 1, which='LM')
         evecs = np.real(evecs)
         evecs[np.abs(evecs) < 10**(-12)] = 0
         pi_eg = (evecs/evecs.sum()).real
@@ -258,6 +273,7 @@ class CGTM_Calculations:
             states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
+        pi_eq = pd.Series(pi_eq,index=TM_norm.index)
         # A = get_A(TM_norm)
         # B = get_B(A)
         # pi_lin = LinSolve(A,B)
@@ -495,10 +511,10 @@ class CGTM_Calculations:
 # CGTM_Calculations("",1,"cg","inactive","long").write_pi_raw()#.write_pi_raw(iterate_time=True)
 # CGTM_Calculations("",1,"cg","active","long").write_pi_raw()#(iterate_time=True)
 
-CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
-CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#(iterate_time=True)
+# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#write_pi_eq()#(iterate_time=True)
 
-# # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
 # CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
 
 # plt.plot(np.linspace(0,50,len(d1)),d1)
