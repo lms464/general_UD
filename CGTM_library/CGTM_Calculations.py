@@ -189,15 +189,16 @@ class CGTM_Calculations:
                     # ends here int(states[S][si])
                     TM_m[int(states[S][si-1]),int(states[S][si])] += 1 
         #TM_m = np.maximum(TM_m, TM_m.transpose())
-        tm = []
-        for i in TM_m:
-            if i.sum()<1:
-                continue
-            else:
-                tm.append(i)
-        norm = TM_m.sum(axis=1)
+        # tm = []
+        # for i in TM_m:
+        #     if np.isclose(i.sum(),1) == False:
+        #         continue
+        #     else:
+        #         tm.append(i)
         TM_norm = np.zeros(np.shape(TM_m))
-        # TM_norm = np.maximum(TM_norm, TM_norm.transpose()) # make symetric
+        # TM_m = np.maximum(TM_m, TM_m.transpose()) # make symetric
+        norm = TM_m.sum(axis=1)
+
         # for i,j in enumerate(TM_m):
         #     TM_norm[i] = j / norm[i]
 
@@ -218,7 +219,6 @@ class CGTM_Calculations:
         state_ind = [c for c in TM_index]
         state_ind = np.unique(state_ind)
         TM_norm = TM_norm.iloc[state_ind,state_ind]
-        # TM_norm = np.maximum(TM_norm1, TM_norm1.transpose())
         return TM_norm    
 
 
@@ -488,7 +488,7 @@ class CGTM_Calculations:
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s_tmp.csv"%(self.path,self.act,self.length,self.kind))
         
     def write_pi_raw(self,iterate_time=False, iterate_sims=False):
         pi_raw = self.build_raw(iterate_time=iterate_time,iterate_sims=iterate_sims)[0]
@@ -500,7 +500,7 @@ class CGTM_Calculations:
         if self.act == None:
             pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,it_val))
         else:
-            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s%s_upd.csv"%(self.path,self.act,self.length,self.kind,it_val))
+            pd.DataFrame(pi_raw).to_csv("%s/UDel/CG/data/pi_raw_%s_%s%s%s_upd.csv"%(self.path,self.act,self.length,self.kind,it_val))
 
 
 
@@ -510,12 +510,10 @@ class CGTM_Calculations:
 
 # CGTM_Calculations("",1,"cg","inactive","long").write_pi_raw()#.write_pi_raw(iterate_time=True)
 # CGTM_Calculations("",1,"cg","active","long").write_pi_raw()#(iterate_time=True)
+ 
 
-# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()#.write_pi_raw(iterate_time=True)
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()#write_pi_eq()#(iterate_time=True)
-
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
-# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
+CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
+CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
 
 # plt.plot(np.linspace(0,50,len(d1)),d1)
 # plt.plot(np.linspace(0,50,len(d2)),d2)

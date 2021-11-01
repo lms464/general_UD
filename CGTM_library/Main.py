@@ -41,20 +41,20 @@ def ternary_CG():
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
     cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,1],initial="CG/data/init_raw_inactive_shortcg")
-    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[0,0])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_longcg","","CG/data/pi_raw_inactive_longcg",ax=ax[0,2])
+    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg","",ax=ax[0,0])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","","CG/data/pi_raw_inactive_shortcg",ax=ax[0,2])
     cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,1] ,initial="CG/data/init_raw_active_shortcg")
     uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,0], out=uot)
     # cgp.Ternary_Scatter(ax[1,2], "CG/data/pi_eq_active_shortcg")
-    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_longcg",ax=ax[1,2],out=oot)
+    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_shortcg",ax=ax[1,2],out=oot)
     cax = plt.axes([1, 0.25, 0.025, 0.5])
     plt.colorbar(sm2, cax=cax,format='%.3f')
     cax = plt.axes([0.15,-.025,0.45,0.025])
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
     # plt.show()
-    plt.savefig("CG_ternary_short-long.pdf",bbox_inches='tight')
-    plt.close()
+    # plt.savefig("CG_ternary_short-long.pdf",bbox_inches='tight')
+    # plt.close()
     # fig,ax = plt.subplots(2,4,figsize=(12,8))
     # i = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%chp.choose_path()[1],index_col=0).T
     # a = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%chp.choose_path()[1],index_col=0).T    
@@ -153,28 +153,44 @@ def tmp():
     import pandas as pd
     import matplotlib.pyplot as plt
     import numpy as np
-    alps = aps.all_possible_states()
-    act_pi = pd.read_csv("~/CG/data/pi_eq_active_shortcg.csv",index_col=0)
-    inact_pi = pd.read_csv("~/CG/data/pi_eq_inactive_shortcg.csv",index_col=0)
-    inact_raw = pd.read_csv("~/CG/data/pi_raw_inactive_shortcg.csv",index_col=0)
-    act_raw = pd.read_csv("~/CG/data/pi_raw_active_shortcg.csv",index_col=0)
     
-    ## make this part a function!
-    
-    for sysi, sys in enumerate([act_pi,inact_pi, inact_raw, act_raw]):
+    def make_same_len(sys,alps=aps.all_possible_states()):
         if len(sys.index) != len(alps) or len(sys.columns) != len(alps):
             sys_tmp = pd.DataFrame(columns=np.arange(0,len(alps)))
             sys_tmp[sys.index] = sys.T[sys.index]
             sys_tmp = sys_tmp.T.fillna(0)
             sys = sys_tmp.copy()
-            print()
+        return sys
+    
+    alps = aps.all_possible_states()
+    act_pi = pd.read_csv("~/UDel/CG/data/pi_eq_active_shortcg_tmp.csv",index_col=0)
+    act_pi = make_same_len(act_pi, alps)
+    inact_pi = pd.read_csv("~/UDel/CG/data/pi_eq_inactive_shortcg_tmp.csv",index_col=0)
+    inact_pi = make_same_len(inact_pi, alps)
+
+    inact_raw = pd.read_csv("~/UDel/CG/data/pi_raw_inactive_shortcg.csv",index_col=0)
+    act_raw = pd.read_csv("~/UDel/CG/data/pi_raw_active_shortcg.csv",index_col=0)
+    
+    ## make this part a function!
+    
+    # for sysi, sys in enumerate([act_pi,inact_pi, inact_raw, act_raw]):
+    #     if len(sys.index) != len(alps) or len(sys.columns) != len(alps):
+    #         sys_tmp = pd.DataFrame(columns=np.arange(0,len(alps)))
+    #         sys_tmp[sys.index] = sys.T[sys.index]
+    #         sys_tmp = sys_tmp.T.fillna(0)
+    #         sys = sys_tmp.copy()
+    #         print()
                 
     # Cause it'll break otherwise!
     
-    plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0])#-act_raw.T.values[0])
+    
+    
+    plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0])
+    plt.bar(np.arange(0,len(act_pi)),act_raw.T.values[0],alpha=.5)
     plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0]-act_raw.T.values[0])
-    plt.savefig("tmp.pdf")
-    plt.close()
+
+    # plt.savefig("tmp.pdf")
+    # plt.close()
 tmp()
 
 def state_iterative():
@@ -190,7 +206,7 @@ def state_iterative():
     long_act = pd.read_csv("%s/CG/data_dx2/pi_raw_active_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
     long_inact = pd.read_csv("%s/CG/data_dx2/pi_raw_inactive_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
     
-    dsi,dss = 0,0
+    # dsi,dss = 0,0
     
     for si in state_inact:
 
@@ -345,53 +361,68 @@ def network(leaflet=None, kind=None, act=None):
 def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
   
-# import numpy as np
-# # test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
+import numpy as np
+test1 = cgc.CGTM_Calculations("",1,"cg","active","short")#.sigConverge_time()
 # # # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
 # # # sig_conv(test1,test2,'cg')
 
-# test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
-# a = test1.build_CGTM()#write_pi_eq()
-# b = test1.build_raw()#write_pi_raw()
+def make_same_len(sys,alps=aps.all_possible_states()):
+    import pandas as pd
+    if len(sys.index) != len(alps) or len(sys.columns) != len(alps):
+        sys_tmp = pd.DataFrame(columns=np.arange(0,len(alps)))
+        sys_tmp[sys.index] = sys.T[sys.index]
+        sys_tmp = sys_tmp.T.fillna(0)
+        sys = sys_tmp.copy()
+    return sys
+    
 
-# pi_raw = b[0]
-# pi_eq = a[0]
-# cgtm = a[-1]
-# alps = aps.all_possible_states()
+# test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
+a = test1.build_CGTM()#write_pi_eq()
+b = test1.build_raw()#write_pi_raw()
+
+pi_raw = b[0]
+pi_eq = a[0]
+
+# pi_eq = make_same_len(pi_eq)
+cgtm = a[-1]
 # empt = []
 # for i in range(0,len(cgtm.values)):
 #     for j in range(0,len(cgtm.values)):
-#         if cgtm.values[i,j] == 0 or cgtm[j,i] == 0:
+#         if cgtm.values[i,j] == 0 or cgtm.values[j,i] == 0:
 #             continue
-#         if np.isclose(pi_eq[i] *cgtm.values[i,j],pi_eq[i] * cgtm.values[j,i])==True:
-#             empt.append([(i,j),pi_eq[i]*cgtm.values[i,j],pi_eq[i]*cgtm.values[j,i]])
-#         # else:
-#         #     empt.append([(i,j),0,0])
+#         if np.isclose(pi_eq.values[i] *cgtm.values[i,j],pi_eq.values[i] * cgtm.values[j,i])==True:
+#             empt.append([(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
+#         else:
+#             empt.append(["x",(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
 
 
 
 # # pi_rand = pi_raw.copy()
 # # pi_rand[pi_rand > 0] = 1
-# pi_rand = np.random.rand(len(pi_eq))*np.random.rand(len(pi_eq))
-# pi_rand = pi_rand / pi_rand.sum()
-# pi_rand_tmp = pi_rand.copy()
-# pi_rand_init = pi_rand.copy()
-
-# i = 1
-# while np.allclose(pi_rand, pi_eq) == False:
-#     plt.plot(i,pi_eq[27],'ko')
-#     plt.plot(i,pi_rand[27],'bo')
-#     plt.plot(i,pi_rand_tmp[27],'ro')
-#     pi_rand_tmp = pi_rand_tmp @ cgtm  
-#     pi_rand = pi_rand_tmp/pi_rand_tmp.sum()
-#     i = i + 1
-#     print(i,pi_rand_tmp.sum())
-# # plt.ylim([0,1.5])
-# plt.title("Markov 'simulation'")
-# plt.legend([r"max($\pi^{eq}$)","Same state Sim (Normalized)","Same state Sim Un-Normalized"])
-# plt.xlabel(r"Steps to converge to $\pi^{eq}$")
-# plt.ylabel("Sum of states (should be black line)")
-# plt.savefig("Markov_Sim.pdf")
+pi_rand = np.random.rand(len(pi_eq))*np.random.rand(len(pi_eq))
+pi_rand = pi_rand / pi_rand.sum()
+pi_rand_tmp = pi_rand.copy()
+pi_rand_init = pi_rand.copy()
+max_ind = np.where(pi_eq==pi_eq.max())[0][0]
+i = 1
+fig,ax = plt.subplots(1,2)
+while np.allclose(pi_rand, pi_eq) == False:
+    ax[0].plot(i,pi_eq.iloc[max_ind],'ko')
+    ax[0].plot(i,pi_rand[max_ind],'bo')
+    ax[0].plot(i,pi_rand_tmp[max_ind],'ro')
+    pi_rand_tmp = (pi_rand_tmp @ cgtm).values  
+    pi_rand = pi_rand_tmp/pi_rand_tmp.sum()
+    i = i + 1
+    print(i,pi_rand_tmp.sum())
+ax[1].imshow(cgtm)
+    
+# plt.ylim([0,1.5])
+ax[0].set_title("Markov 'simulation'")
+# ax[0].legend([r"max($\pi^{eq}$)","Same state Sim (Normalized)","Same state Sim Un-Normalized"])
+ax[0].set_xlabel(r"Steps to converge to $\pi^{eq}$")
+ax[0].set_ylim(-.001,.25)
+# ax[0].set_ylabel("Sum of states (should be black line)")
+# plt.savefig("Markov_Sim_non-Zero_CGTM_Sym.pdf")
 # plt.close()
 
     
