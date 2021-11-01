@@ -163,13 +163,13 @@ def tmp():
         return sys
     
     alps = aps.all_possible_states()
-    act_pi = pd.read_csv("~/UDel/CG/data/pi_eq_active_shortcg_tmp.csv",index_col=0)
+    act_pi = pd.read_csv("~//CG/data/pi_eq_active_shortcg_tmp.csv",index_col=0)
     act_pi = make_same_len(act_pi, alps)
-    inact_pi = pd.read_csv("~/UDel/CG/data/pi_eq_inactive_shortcg_tmp.csv",index_col=0)
+    inact_pi = pd.read_csv("~//CG/data/pi_eq_inactive_shortcg_tmp.csv",index_col=0)
     inact_pi = make_same_len(inact_pi, alps)
 
-    inact_raw = pd.read_csv("~/UDel/CG/data/pi_raw_inactive_shortcg.csv",index_col=0)
-    act_raw = pd.read_csv("~/UDel/CG/data/pi_raw_active_shortcg.csv",index_col=0)
+    inact_raw = pd.read_csv("~//CG/data/pi_raw_inactive_shortcg.csv",index_col=0)
+    act_raw = pd.read_csv("~//CG/data/pi_raw_active_shortcg.csv",index_col=0)
     
     ## make this part a function!
     
@@ -385,15 +385,15 @@ pi_eq = a[0]
 
 # pi_eq = make_same_len(pi_eq)
 cgtm = a[-1]
-# empt = []
-# for i in range(0,len(cgtm.values)):
-#     for j in range(0,len(cgtm.values)):
-#         if cgtm.values[i,j] == 0 or cgtm.values[j,i] == 0:
-#             continue
-#         if np.isclose(pi_eq.values[i] *cgtm.values[i,j],pi_eq.values[i] * cgtm.values[j,i])==True:
-#             empt.append([(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
-#         else:
-#             empt.append(["x",(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
+empt = []
+for i in range(0,len(cgtm.values)):
+    for j in range(0,len(cgtm.values)):
+        if cgtm.values[i,j] == 0 or cgtm.values[j,i] == 0:
+            continue
+        if np.isclose(pi_eq.values[i] *cgtm.values[i,j],pi_eq.values[i] * cgtm.values[j,i])==True:
+            empt.append([(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
+        else:
+            empt.append(["x",(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
 
 
 

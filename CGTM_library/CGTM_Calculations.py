@@ -169,10 +169,9 @@ class CGTM_Calculations:
         return np.array(out)
 
 ## CGTM and the likes   
-    def build_TM(self,states,overide=False):
+    def build_TM(self,states,overide=False,symitrize=False):
         all_states = aps.all_possible_states()
         TM_m = np.zeros((len(all_states),len(all_states)))
-        # norm_t = []
         
         # this isn't realy nessisary is it
         # good intial fail safe though.
@@ -180,45 +179,32 @@ class CGTM_Calculations:
             import os
             print("Your states matrix has one row. This does not work")
             os.exit()
-            # for si in range(1, len(states)):
-            #     TM_m[int(states[si]),int(states[si-1])] += 1 
         else:
             for S in states:
                 for si in range(1, len(states[S])):
                     # starts here int(states[S][si-1])
                     # ends here int(states[S][si])
-                    TM_m[int(states[S][si-1]),int(states[S][si])] += 1 
-        #TM_m = np.maximum(TM_m, TM_m.transpose())
-        # tm = []
-        # for i in TM_m:
-        #     if np.isclose(i.sum(),1) == False:
-        #         continue
-        #     else:
-        #         tm.append(i)
+                    TM_m[int(states[S][si-1]),int(states[S][si])] += 1
         TM_norm = np.zeros(np.shape(TM_m))
-        # TM_m = np.maximum(TM_m, TM_m.transpose()) # make symetric
         norm = TM_m.sum(axis=1)
 
-        # for i,j in enumerate(TM_m):
-        #     TM_norm[i] = j / norm[i]
-
-        # #TM_norm = np.divide(TM_m, norm)
-        # TM_norm = np.nan_to_num(TM_norm)
-        # TM_norm2 = np.zeros(np.shape(TM_m))
-
-        # TM_sym = np.maximum( TM_norm, TM_norm.transpose() )
         for i,j in enumerate(TM_m):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
-        # TM_test = np.nan_to_num(np.divide(TM_m, norm))
-        TM_norm = pd.DataFrame(TM_norm)
-        TM_tmp = TM_norm.loc[(TM_norm.sum(axis=1) != 0), (TM_norm.sum(axis=0) != 0)]
-        TM_index = TM_tmp.index.values
-        TM_cols = TM_tmp.columns.values
-        del TM_tmp
-        state_ind = [c for c in TM_cols]
-        state_ind = [c for c in TM_index]
-        state_ind = np.unique(state_ind)
-        TM_norm = TM_norm.iloc[state_ind,state_ind]
+        # Makes matrix symetrick (sp)
+        if symitrize == True:
+            TM_norm = (TM_norm + TM_norm.T)/2#np.maximum(TM_m, TM_m.transpose())
+        
+
+
+        # TM_norm = pd.DataFrame(TM_norm)
+        # TM_tmp = TM_norm.loc[(TM_norm.sum(axis=1) != 0), (TM_norm.sum(axis=0) != 0)]
+        # TM_index = TM_tmp.index.values
+        # TM_cols = TM_tmp.columns.values
+        # del TM_tmp
+        # state_ind = [c for c in TM_cols]
+        # state_ind = [c for c in TM_index]
+        # state_ind = np.unique(state_ind)
+        # TM_norm = TM_norm.iloc[state_ind,state_ind]
         return TM_norm    
 
 
@@ -244,7 +230,7 @@ class CGTM_Calculations:
         
         return pi_eg, np.linalg.eig(P.T)            
     
-    def build_CGTM(self):
+    def build_CGTM(self,symitrize):
         ''' 
         
         Built a testing funciton, use that please
@@ -271,7 +257,7 @@ class CGTM_Calculations:
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
             states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
-        TM_norm = self.build_TM(states.iloc[:,::self.dt])
+        TM_norm = self.build_TM(states.iloc[:,::self.dt],symitrize=symitrize)
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
         pi_eq = pd.Series(pi_eq,index=TM_norm.index)
         # A = get_A(TM_norm)
@@ -504,16 +490,23 @@ class CGTM_Calculations:
 
 
 
-# # import matplotlib.pyplot as plt
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw(iterate_time=True)
-# CGTM_Calculations("",1,"cg","active","short").write_pi_raw(iterate_time=True)
+# import matplotlib.pyplot as plt
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
+# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
 
-# CGTM_Calculations("",1,"cg","inactive","long").write_pi_raw()#.write_pi_raw(iterate_time=True)
-# CGTM_Calculations("",1,"cg","active","long").write_pi_raw()#(iterate_time=True)
- 
+test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=True)[0]#.write_pi_raw(iterate_time=True)
+# test2 = CGTM_Calculations("",1,"cg","inactive","short").build_raw()#(iterate_time=True)
+# # test1 = CGTM_Calculations("SU", 1, "sat",act=None).build_CGTM()[0]
+# # test2 = CGTM_Calculations("SU", 1, "sat",act=None).build_raw()
 
-CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
-CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
+# plt.bar(np.arange(0,len(test1.values)),test1.values)
+# plt.bar(np.arange(0,len(test1.values)),test2[0],alpha=.5)
+# plt.bar(np.arange(0,len(test1.values)),test1.values - test2[0])
+# plt.savefig("yarp.pdf")
+
+
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
+# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
 
 # plt.plot(np.linspace(0,50,len(d1)),d1)
 # plt.plot(np.linspace(0,50,len(d2)),d2)
