@@ -191,7 +191,7 @@ def tmp():
 
     # plt.savefig("tmp.pdf")
     # plt.close()
-tmp()
+# tmp()
 
 def state_iterative():
     
@@ -362,7 +362,7 @@ def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
   
 import numpy as np
-test1 = cgc.CGTM_Calculations("",1,"cg","active","short")#.sigConverge_time()
+test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
 # # # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
 # # # sig_conv(test1,test2,'cg')
 
@@ -377,7 +377,7 @@ def make_same_len(sys,alps=aps.all_possible_states()):
     
 
 # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
-a = test1.build_CGTM()#write_pi_eq()
+a = test1.build_CGTM(symitrize=True)#write_pi_eq()
 b = test1.build_raw()#write_pi_raw()
 
 pi_raw = b[0]
@@ -386,41 +386,44 @@ pi_eq = a[0]
 # pi_eq = make_same_len(pi_eq)
 cgtm = a[-1]
 empt = []
-for i in range(0,len(cgtm.values)):
-    for j in range(0,len(cgtm.values)):
-        if cgtm.values[i,j] == 0 or cgtm.values[j,i] == 0:
+for i in range(0,len(cgtm)):
+    for j in range(0,len(cgtm)):
+        if cgtm[i,j] == 0 or cgtm[j,i] == 0:
             continue
-        if np.isclose(pi_eq.values[i] *cgtm.values[i,j],pi_eq.values[i] * cgtm.values[j,i])==True:
-            empt.append([(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
+        dev = np.abs(pi_eq[i] *cgtm[i,j]-pi_eq[j] * cgtm[j,i]) / (0.5*pi_eq[i] *cgtm[i,j] + 0.5*pi_eq[i] * cgtm[j,i])
+        if np.isclose((pi_eq[i] *cgtm[i,j])/(pi_eq[j] * cgtm[j,i]),1)==True:#np.isclose(pi_eq[i] *cgtm[i,j],pi_eq[i] * cgtm[j,i])==True:
+            empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
+        elif dev <= 0.05:
+            empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
         else:
-            empt.append(["x",(i,j),pi_eq.values[i]*cgtm.values[i,j],pi_eq.values[i]*cgtm.values[j,i]])
+            empt.append(["x",(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
 
 
 
 # # pi_rand = pi_raw.copy()
 # # pi_rand[pi_rand > 0] = 1
-pi_rand = np.random.rand(len(pi_eq))*np.random.rand(len(pi_eq))
-pi_rand = pi_rand / pi_rand.sum()
-pi_rand_tmp = pi_rand.copy()
-pi_rand_init = pi_rand.copy()
-max_ind = np.where(pi_eq==pi_eq.max())[0][0]
-i = 1
-fig,ax = plt.subplots(1,2)
-while np.allclose(pi_rand, pi_eq) == False:
-    ax[0].plot(i,pi_eq.iloc[max_ind],'ko')
-    ax[0].plot(i,pi_rand[max_ind],'bo')
-    ax[0].plot(i,pi_rand_tmp[max_ind],'ro')
-    pi_rand_tmp = (pi_rand_tmp @ cgtm).values  
-    pi_rand = pi_rand_tmp/pi_rand_tmp.sum()
-    i = i + 1
-    print(i,pi_rand_tmp.sum())
-ax[1].imshow(cgtm)
+# pi_rand = np.random.rand(len(pi_eq))*np.random.rand(len(pi_eq))
+# pi_rand = pi_rand / pi_rand.sum()
+# pi_rand_tmp = pi_rand.copy()
+# pi_rand_init = pi_rand.copy()
+# max_ind = np.where(pi_eq==pi_eq.max())[0][0]
+# i = 1
+# fig,ax = plt.subplots(1,2)
+# while np.allclose(pi_rand, pi_eq) == False:
+#     ax[0].plot(i,pi_eq.iloc[max_ind],'ko')
+#     ax[0].plot(i,pi_rand[max_ind],'bo')
+#     ax[0].plot(i,pi_rand_tmp[max_ind],'ro')
+#     pi_rand_tmp = (pi_rand_tmp @ cgtm).values  
+#     pi_rand = pi_rand_tmp/pi_rand_tmp.sum()
+#     i = i + 1
+#     print(i,pi_rand_tmp.sum())
+# ax[1].imshow(cgtm)
     
-# plt.ylim([0,1.5])
-ax[0].set_title("Markov 'simulation'")
-# ax[0].legend([r"max($\pi^{eq}$)","Same state Sim (Normalized)","Same state Sim Un-Normalized"])
-ax[0].set_xlabel(r"Steps to converge to $\pi^{eq}$")
-ax[0].set_ylim(-.001,.25)
+# # plt.ylim([0,1.5])
+# ax[0].set_title("Markov 'simulation'")
+# # ax[0].legend([r"max($\pi^{eq}$)","Same state Sim (Normalized)","Same state Sim Un-Normalized"])
+# ax[0].set_xlabel(r"Steps to converge to $\pi^{eq}$")
+# ax[0].set_ylim(-.001,.25)
 # ax[0].set_ylabel("Sum of states (should be black line)")
 # plt.savefig("Markov_Sim_non-Zero_CGTM_Sym.pdf")
 # plt.close()

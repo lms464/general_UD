@@ -188,11 +188,13 @@ class CGTM_Calculations:
         TM_norm = np.zeros(np.shape(TM_m))
         norm = TM_m.sum(axis=1)
 
+        if symitrize == True:
+            TM_m = (TM_m + TM_m.T)/2#np.maximum(TM_m, TM_m.transpose())
+
         for i,j in enumerate(TM_m):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
         # Makes matrix symetrick (sp)
-        if symitrize == True:
-            TM_norm = (TM_norm + TM_norm.T)/2#np.maximum(TM_m, TM_m.transpose())
+
         
 
 
@@ -205,12 +207,12 @@ class CGTM_Calculations:
         # state_ind = [c for c in TM_index]
         # state_ind = np.unique(state_ind)
         # TM_norm = TM_norm.iloc[state_ind,state_ind]
-        return TM_norm    
+        return TM_norm   
 
 
     def solve_pi_eq(self, P):
         #We have to transpose so that Markov transitions correspond to right multiplying by a column vector.  np.linalg.eig finds right eigenvectors.
-        evals, evecs = sla.eigs(P.values.T, k = 1, which='LM')
+        evals, evecs = sla.eigs(P.T, k = 1, which='LM')
         evecs = np.real(evecs)
         evecs[np.abs(evecs) < 10**(-12)] = 0
         pi_eg = (evecs/evecs.sum()).real
@@ -230,7 +232,7 @@ class CGTM_Calculations:
         
         return pi_eg, np.linalg.eig(P.T)            
     
-    def build_CGTM(self,symitrize):
+    def build_CGTM(self,symitrize=False):
         ''' 
         
         Built a testing funciton, use that please
@@ -259,7 +261,7 @@ class CGTM_Calculations:
             states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
         TM_norm = self.build_TM(states.iloc[:,::self.dt],symitrize=symitrize)
         pi_eq, eigs = self.solve_pi_eq(TM_norm)
-        pi_eq = pd.Series(pi_eq,index=TM_norm.index)
+        #pi_eq = pd.Series(pi_eq,index=TM_norm.index)
         # A = get_A(TM_norm)
         # B = get_B(A)
         # pi_lin = LinSolve(A,B)
@@ -469,7 +471,7 @@ class CGTM_Calculations:
         else:
             pd.DataFrame(init_hist).to_csv("%s/CG/data/init_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
 
-    def write_pi_eq(self):
+    def write_pi_eq(self,symitrize=False):
         pi_eq = self.build_CGTM()[0]
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
@@ -494,7 +496,7 @@ class CGTM_Calculations:
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
 # CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
 
-test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=True)[0]#.write_pi_raw(iterate_time=True)
+# test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=True)[0]#.write_pi_raw(iterate_time=True)
 # test2 = CGTM_Calculations("",1,"cg","inactive","short").build_raw()#(iterate_time=True)
 # # test1 = CGTM_Calculations("SU", 1, "sat",act=None).build_CGTM()[0]
 # # test2 = CGTM_Calculations("SU", 1, "sat",act=None).build_raw()
