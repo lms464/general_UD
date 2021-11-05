@@ -14,6 +14,10 @@ import choose_path as chp
 class CGTM_Collect_Data:
     def __init__(self,start_sys, end_sys, ref_frame, counting, act=None, length=None):
         '''
+        This is really just a complex path chooser
+        and state organizer. That's all it does based
+        on initial inputs.
+        
         Parameters
         ----------
         start_sys : int
@@ -86,8 +90,9 @@ class CGTM_Collect_Data:
             Array of binned state concentrations.
 
         '''
-        #seems fine
+        # holds rmsd data
         holder = []
+        # iterates over possible states and index
         for pi, ps in enumerate(possible_states):
             
             rmsd = np.sqrt((data_frm - ps)**2)
@@ -95,6 +100,7 @@ class CGTM_Collect_Data:
     
         out = np.argmin(holder)
         try:
+            # old and can be removed
             fl_comp.write(str([possible_states[out],data_frm]))
         except:
             pass
@@ -113,6 +119,10 @@ class CGTM_Collect_Data:
             self.update_act("Active")
         elif self.act == "in" or self.act == "inact":
             self.update_act("Inactive")
+        # loads in state space
+        possible_states = aps.all_possible_states()
+        #holder for determined states
+        
         states = []
         for rep_ in range(self.start_sys,self.end_sys+1):
             fl = open ("%s/%s%i/borders.txt"%(self.path,self.act,rep_))
@@ -120,12 +130,14 @@ class CGTM_Collect_Data:
             fl.close()
             #lines = [int(l) for l in lines]
             shell = []
+            # leaflets don't mater, so it grabs the every 3rd line form 1
             for l in lines[1::3]:
-            	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+                shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+                if np.sum(int(l.split()[-3])+int(l.split()[-2])+int(l.split()[-1])) > 55:
+                    print("Unrealistic shell count. Confirm first shell is being analyzed")
+                    return None
+            #numpy for math
             shell_arr = np.array(shell)
-            
-            
-            possible_states = aps.all_possible_states()
             
             shell = np.array([shell_arr[:,0] / shell_arr.sum(axis=1),shell_arr[:,1] / shell_arr.sum(axis=1),shell_arr[:,2] / shell_arr.sum(axis=1)])
             shell = shell.T
@@ -155,24 +167,35 @@ class CGTM_Collect_Data:
         elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
             self.update_act("inactive")
         
+        # loads in state space
+        possible_states = aps.all_possible_states()
+        
+        # holder for states onse determined
         full_states = []
+        #iterates over each file
         for i in range(self.start_sys,self.end_sys):
             print("Running System %i..."%i)
-            fl = open ("%s/shot_%s%i/borders.txt"%(self.path,self.act,i))
+            fl = open ("%s/shot_%s%i/borders.txt"%("/home/liam/lms464",self.act,i))
             lines = fl.readlines()#.split()
             fl.close()
             #lines = [int(l) for l in lines]
             shell = []
+            # short, leaflet doesn't mater, gets first shell (every 3 lines form 1)
             for l in lines[1::3]:
-            	shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])])
+                shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])]) 
+                
+                # Sanitiy check. values should be below 45, allowing up to 55
+                if np.sum(int(l.split()[-3])+int(l.split()[-2])+int(l.split()[-1])) > 55:
+                    print("Unrealistic shell count. Confirm first shell is being analyzed")
+                    return None
+            # converts to numpy array for math
             shell_arr = np.array(shell)
             shell = np.array([shell_arr[:,0] / shell_arr.sum(axis=1),shell_arr[:,1] / shell_arr.sum(axis=1),shell_arr[:,2] / shell_arr.sum(axis=1)])
             shell = shell.T
-            possible_states = aps.all_possible_states()
-            
             states = []
             
             for s in shell:
+                # determines all states for a file
             	states.append(self.check_states(s,possible_states))
             full_states.append(states)
         pd.DataFrame(full_states).to_csv("%s/CG/data/states/%s_%s.csv"%(self.path, self.length, self.act))
@@ -504,8 +527,8 @@ class CGTM_Collect_Data:
 
 # build = CGTM_Collect_Data(1,2,[],"cg","act", "long")
 # build.build_cg_long_states()
-# build = CGTM_Collect_Data(1,3,[],"cg","act", "short")
-# build.build_cg_long_states()
+build = CGTM_Collect_Data(1,3,[],"cg","act", "short")
+build.build_cg_short_states()
 
 # build = CGTM_Collect_Data(1,3,[],"cg","inact", "short")
 # build.build_cg_long_states()

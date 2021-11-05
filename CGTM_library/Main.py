@@ -377,7 +377,7 @@ def make_same_len(sys,alps=aps.all_possible_states()):
     
 
 # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
-a = test1.build_CGTM(symitrize=True)#write_pi_eq()
+a = test1.build_CGTM(symitrize=False)#write_pi_eq()
 b = test1.build_raw()#write_pi_raw()
 
 pi_raw = b[0]
@@ -386,19 +386,37 @@ pi_eq = a[0]
 # pi_eq = make_same_len(pi_eq)
 cgtm = a[-1]
 empt = []
+hold = []
 for i in range(0,len(cgtm)):
     for j in range(0,len(cgtm)):
-        if cgtm[i,j] == 0 or cgtm[j,i] == 0:
+      
+        if cgtm[i,j] == 1 or  cgtm[j,i] == 1:
+            if cgtm[i,j] == 1 and  cgtm[j,i] == 1:
+                print("sink: ",i,j)
+            else:
+                print("check ",i,j)
+
+        if cgtm[i,j] == 0 and cgtm[j,i] == 0:
             continue
-        dev = np.abs(pi_eq[i] *cgtm[i,j]-pi_eq[j] * cgtm[j,i]) / (0.5*pi_eq[i] *cgtm[i,j] + 0.5*pi_eq[i] * cgtm[j,i])
-        if np.isclose((pi_eq[i] *cgtm[i,j])/(pi_eq[j] * cgtm[j,i]),1)==True:#np.isclose(pi_eq[i] *cgtm[i,j],pi_eq[i] * cgtm[j,i])==True:
-            empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
-        elif dev <= 0.05:
+        dev = np.sqrt(((pi_eq[i] *cgtm[i,j])-(pi_eq[j] * cgtm[j,i]))**2) / ((0.5*pi_eq[i] *cgtm[i,j]) + (0.5*pi_eq[j] * cgtm[j,i]))
+        hold.append([i,j,dev,pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
+       # if np.isclose((pi_eq[i] *cgtm[i,j])/(pi_eq[j] * cgtm[j,i]),1)==True:#np.isclose(pi_eq[i] *cgtm[i,j],pi_eq[i] * cgtm[j,i])==True:
+       #     empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
+        if dev <= 0.05:
             empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
         else:
             empt.append(["x",(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
 
+tmp_len = []
+[tmp_len.append(len(i)) for i in empt]
+h,e = np.histogram(tmp_len)
 
+if h[0] <= h[-1]:
+    print("pi_{eq} @ T = pi_{eq}: ",np.allclose(pi_eq@cgtm,pi_eq))
+plt.bar(e[:-1],h/h.sum())
+plt.xticks([3,4],["ratio reversable","ratio ireversable"])
+
+pi_mat = np.array([pi_eq]*len(pi_eq)).T
 
 # # pi_rand = pi_raw.copy()
 # # pi_rand[pi_rand > 0] = 1

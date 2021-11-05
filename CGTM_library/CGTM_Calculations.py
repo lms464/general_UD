@@ -190,13 +190,11 @@ class CGTM_Calculations:
 
         if symitrize == True:
             TM_m = (TM_m + TM_m.T)/2#np.maximum(TM_m, TM_m.transpose())
+            assert np.allclose(TM_m,TM_m.T), "Symitrize is not running"
 
         for i,j in enumerate(TM_m):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
         # Makes matrix symetrick (sp)
-
-        
-
 
         # TM_norm = pd.DataFrame(TM_norm)
         # TM_tmp = TM_norm.loc[(TM_norm.sum(axis=1) != 0), (TM_norm.sum(axis=0) != 0)]
