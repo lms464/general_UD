@@ -137,15 +137,15 @@ def ternary_iterative():
 
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
-    cgp.plot_state_dist("~//CG/data/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~//CG/data/pi_raw_inactive_shortcg",ax[0,1])
-    #cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg", ax[0,2])
-    cgp.plot_state_dist("~//CG/data/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~//CG/data/pi_raw_active_shortcg",ax[1,1])
-    #cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[0,0])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg_seed",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_eq_inactive_shortcg_seed", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,0])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg_seed",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_eq_active_shortcg_seed", ax[1,2])
     plt.tight_layout()
-    # plt.savefig("CG_state_dist_short-short.pdf")
-    # plt.close()
+    plt.savefig("CG_state_dist_short-short_seed.pdf")
+    plt.close()
 # states_CG()
 
 
@@ -360,63 +360,162 @@ def network(leaflet=None, kind=None, act=None):
 
 def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
-  
+
 import numpy as np
-test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
-# # # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
-# # # sig_conv(test1,test2,'cg')
+# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
+# a = test1.build_CGTM(symitrize=False)#write_pi_eq()
+# b = test1.build_raw()#write_pi_raw()
+# pi_raw = b[0]
+# pi_eq = a[0]
+# cgtm = a[-1].values
 
-def make_same_len(sys,alps=aps.all_possible_states()):
-    import pandas as pd
-    if len(sys.index) != len(alps) or len(sys.columns) != len(alps):
-        sys_tmp = pd.DataFrame(columns=np.arange(0,len(alps)))
-        sys_tmp[sys.index] = sys.T[sys.index]
-        sys_tmp = sys_tmp.T.fillna(0)
-        sys = sys_tmp.copy()
-    return sys
+# X = []
+# for i in range(0,len(pi_raw)):
+#     xi = []
+#     for j in range(0,len(pi_raw)):
+#         xi.append(pi_eq[i]*cgtm[i,j])
+#     X.append(xi)
+
+# X = np.array(X)
+# assert np.allclose(X.sum(axis=1),pi_eq,1E-2,1E-10) or np.abs(X.sum(axis=1)-pi_eq).mean()<1E-4, "pi_eq and X_i should the equal"
+# assert np.all(X.sum(axis=1) >= 0 ), "X_i is less than 0"
+# assert np.any(X[X<0])==False, "Negative values detected"
+
+# tmp = []
+# tmp2 = []
+# for i in range(0,len(pi_raw)):
+#     tmp_i = []
+#     tmp_j= []
+#     for j in range(0,len(pi_raw)):
+#         if cgtm[i,j] == 0: 
+#             tmp_i.append(0)
+#             tmp_j.append(0)
+#             continue
+#         heh=X[i,j]/X[i].sum()
+#         tmp_i.append(cgtm[i,j] * np.log(heh))
+#         tmp_j.append((cgtm[i,j]+cgtm[i,j])/X[i,j] - cgtm[i].sum()/X[i].sum() - cgtm[j].sum()/X[j].sum())
+#     tmp2.append(tmp_j)
+#     tmp.append(tmp_i)
     
+# P_rev = []
+# for i in range(0,len(pi_raw)):
+#     P_tmp = []
+#     for j in range(0,len(pi_raw)):
+#         if cgtm[i,j] == 0:
+#             P_tmp.append(0)
+#             continue
+#         P_tmp.append((cgtm[i,j] + cgtm[j,i])*pi_eq[j] / (cgtm[i].sum()*pi_eq[j] + cgtm[j].sum()*pi_eq[i]))
+#     P_rev.append(P_tmp)
+# P_rev = np.array(P_rev)
 
-# test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
-a = test1.build_CGTM(symitrize=False)#write_pi_eq()
-b = test1.build_raw()#write_pi_raw()
+# tmp = np.sum(tmp)
+# tmp2 = np.array(tmp2)
+# print(np.sqrt(np.abs(tmp2@tmp2)).mean())
+# tmp2[tmp2==0] = np.nan
+# plt.pcolormesh(tmp2,vmax=5,vmin=-5)
+# plt.colorbar()
 
-pi_raw = b[0]
-pi_eq = a[0]
+def IDK():
 
-# pi_eq = make_same_len(pi_eq)
-cgtm = a[-1]
-empt = []
-hold = []
-for i in range(0,len(cgtm)):
-    for j in range(0,len(cgtm)):
-      
-        if cgtm[i,j] == 1 or  cgtm[j,i] == 1:
-            if cgtm[i,j] == 1 and  cgtm[j,i] == 1:
-                print("sink: ",i,j)
-            else:
-                print("check ",i,j)
+    import numpy as np
+    test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
+    # # # test2 = cgc.CGTM_Calculations("",1,"cg","inactive","short").sigConverge_simulations()
+    # # # sig_conv(test1,test2,'cg')
+    
+    def make_same_len(sys,alps=aps.all_possible_states()):
+        import pandas as pd
+        if len(sys.index) != len(alps) or len(sys.columns) != len(alps):
+            sys_tmp = pd.DataFrame(columns=np.arange(0,len(alps)))
+            sys_tmp[sys.index] = sys.T[sys.index]
+            sys_tmp = sys_tmp.T.fillna(0)
+            sys = sys_tmp.copy()
+        return sys
+        
+    
+    # # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
+    a = test1.build_CGTM(symitrize=False)#write_pi_eq()
+    b = test1.build_raw()#write_pi_raw()
+    
+    pi_raw = b[0]
+    pi_eq = a[0]
+    
+    # pi_eq = make_same_len(pi_eq)
+    cgtm = a[-1]
+    hold = []
+    alps = aps.all_possible_states()
+    DEV = []
+    dev_thresh = [0,0.05,0.1,.15,0.2,0.25,1]
+    fig,ax = plt.subplots(2,len(dev_thresh)+1,figsize=(5*len(dev_thresh),7.5))
+    for ti, dt in enumerate(dev_thresh):
+        empt = []
+    
+        f = open("inactive%.2f.dat"%dt,'w')
+        for i in range(0,len(cgtm)):
+            for j in range(0,len(cgtm)):
+        
+                if cgtm.iloc[i,j] == 0 and cgtm.iloc[j,i] == 0:
+                    continue        
+        
+                if cgtm.iloc[i,j] == 1 or  cgtm.iloc[j,i] == 1:
+                    if cgtm.iloc[i,j] == 1 and  cgtm.iloc[j,i] == 1:
+                        print("sink: ",i,j)
+                    else:
+                        print("state ",cgtm.index[i],alps[cgtm.index[i]],cgtm.iloc[i,j], "-> states ",cgtm.index[j],alps[cgtm.index[j]])
+        
+        
+                dev = np.sqrt(((pi_eq[i] *cgtm.iloc[i,j])-(pi_eq[j] * cgtm.iloc[j,i]))**2) / ((0.5*pi_eq[i] *cgtm.iloc[i,j]) + (0.5*pi_eq[j] * cgtm.iloc[j,i]))
+                DEV.append(dev)
+                hold.append([i,j,dev,pi_eq[i]*cgtm.iloc[i,j],pi_eq[j]*cgtm.iloc[j,i]])
+                # if np.isclose((pi_eq[i] *cgtm[i,j])/(pi_eq[j] * cgtm[j,i]),1)==True:#np.isclose(pi_eq[i] *cgtm[i,j],pi_eq[i] * cgtm[j,i])==True:
+                #     empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
+                if dev <= dt:
+                    empt.append([(i,j),pi_eq[i]*cgtm.iloc[i,j],pi_eq[j]*cgtm.iloc[j,i]])
+                else:
+                    empt.append(["x",(i,j),pi_eq[i]*cgtm.iloc[i,j],pi_eq[j]*cgtm.iloc[j,i]])
+                    f.write("state %s:%s (%s) <-> (%s) states:%s:%s  \n"%(str(cgtm.index[i]),str(alps[cgtm.index[i]]),str(pi_eq[i]*cgtm.iloc[i,j]),str(pi_eq[j]*cgtm.T.iloc[i,j]),str(cgtm.index[j]),str(alps[cgtm.index[j]])))
+    
+        f.close()
+    
+        tmp_len = []
+        [tmp_len.append(len(i)) for i in empt]
+        h,e = np.histogram(tmp_len,range=(3,4))
+    
+        if h[0] <= h[-1]:
+            print("pi_{eq} @ T = pi_{eq}: ",np.allclose(pi_eq@cgtm,pi_eq))
+        ax[1,ti].bar(e[:-1],h/h.sum())
+        ax[1,ti].set_xticks([3,4],["ratio reversable","ratio ireversable"])
+        
+    
+    
+    
+        cgtm_mod = np.zeros_like(cgtm)
+        for i in range(0,len(cgtm)):
+            for j in range(0,len(cgtm)):
+                #if i==j: continue
+                dev = np.sqrt(((pi_eq[i] *cgtm.iloc[i,j])-(pi_eq[j] * cgtm.iloc[j,i]))**2) / ((0.5*pi_eq[i] *cgtm.iloc[i,j]) + (0.5*pi_eq[j] * cgtm.iloc[j,i]))
+                if dev <= dt:
+                    cgtm_mod[i,j] = 5
+                elif dev > dt and dev < 1 and dev < 1:
+                    cgtm_mod[i,j] = 2.5
+                elif dev >= 1:
+                    cgtm_mod[i,j] = 0
+                else:
+                    cgtm_mod[i,j] = np.nan
+        ax[0,ti].pcolormesh(cgtm_mod)
+        ax[0,ti].set_title("deviation=%0.2f"%dt)
+    
+    # ax[2].pcolormesh(-np.log(cgtm))
+    cgtm[cgtm == 0] = np.nan
+    # ax[0,0].pcolormesh(np.log(cgtm))#,cmap="plasma_r")
+    ax[0,0].set_title("CGTM")
+    ax[0,0].pcolormesh(cgtm)
+    plt.tight_layout()
+    plt.savefig("cgtm_dev_seed_default.pdf")
+    plt.close()
 
-        if cgtm[i,j] == 0 and cgtm[j,i] == 0:
-            continue
-        dev = np.sqrt(((pi_eq[i] *cgtm[i,j])-(pi_eq[j] * cgtm[j,i]))**2) / ((0.5*pi_eq[i] *cgtm[i,j]) + (0.5*pi_eq[j] * cgtm[j,i]))
-        hold.append([i,j,dev,pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
-       # if np.isclose((pi_eq[i] *cgtm[i,j])/(pi_eq[j] * cgtm[j,i]),1)==True:#np.isclose(pi_eq[i] *cgtm[i,j],pi_eq[i] * cgtm[j,i])==True:
-       #     empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
-        if dev <= 0.05:
-            empt.append([(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
-        else:
-            empt.append(["x",(i,j),pi_eq[i]*cgtm[i,j],pi_eq[j]*cgtm[j,i]])
+IDK()
 
-tmp_len = []
-[tmp_len.append(len(i)) for i in empt]
-h,e = np.histogram(tmp_len)
 
-if h[0] <= h[-1]:
-    print("pi_{eq} @ T = pi_{eq}: ",np.allclose(pi_eq@cgtm,pi_eq))
-plt.bar(e[:-1],h/h.sum())
-plt.xticks([3,4],["ratio reversable","ratio ireversable"])
-
-pi_mat = np.array([pi_eq]*len(pi_eq)).T
 
 # # pi_rand = pi_raw.copy()
 # # pi_rand[pi_rand > 0] = 1

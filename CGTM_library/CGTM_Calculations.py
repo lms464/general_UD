@@ -132,7 +132,7 @@ class CGTM_Calculations:
         if self.act is None:
             states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         else:
-            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T   
+            states = pd.read_csv("%s/CG/data/states/%s_%s_seed.csv"%(self.path,self.length,self.act),index_col=0).T   
         
         if iterate_sims == False and iterate_time == True:
             hist = []
@@ -171,7 +171,7 @@ class CGTM_Calculations:
 ## CGTM and the likes   
     def build_TM(self,states,overide=False,symitrize=False):
         all_states = aps.all_possible_states()
-        TM_m = np.zeros((len(all_states),len(all_states)))
+        C = np.zeros((len(all_states),len(all_states)))
         
         # this isn't realy nessisary is it
         # good intial fail safe though.
@@ -184,19 +184,20 @@ class CGTM_Calculations:
                 for si in range(1, len(states[S])):
                     # starts here int(states[S][si-1])
                     # ends here int(states[S][si])
-                    TM_m[int(states[S][si-1]),int(states[S][si])] += 1
-        TM_norm = np.zeros(np.shape(TM_m))
-        norm = TM_m.sum(axis=1)
+                    C[int(states[S][si-1]),int(states[S][si])] += 1
+        C[C<=0] = 0
+        TM_norm = np.zeros(np.shape(C))
+        norm = C.sum(axis=1)
 
         if symitrize == True:
-            TM_m = (TM_m + TM_m.T)/2#np.maximum(TM_m, TM_m.transpose())
-            assert np.allclose(TM_m,TM_m.T), "Symitrize is not running"
+            C = (C + C.T)/2#np.maximum(TM_m, TM_m.transpose())
+            assert np.allclose(C,C.T), "Symitrize is not running"
 
-        for i,j in enumerate(TM_m):
+        for i,j in enumerate(C):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
         # Makes matrix symetrick (sp)
 
-        # TM_norm = pd.DataFrame(TM_norm)
+        TM_norm = pd.DataFrame(TM_norm)
         # TM_tmp = TM_norm.loc[(TM_norm.sum(axis=1) != 0), (TM_norm.sum(axis=0) != 0)]
         # TM_index = TM_tmp.index.values
         # TM_cols = TM_tmp.columns.values
@@ -205,7 +206,7 @@ class CGTM_Calculations:
         # state_ind = [c for c in TM_index]
         # state_ind = np.unique(state_ind)
         # TM_norm = TM_norm.iloc[state_ind,state_ind]
-        return TM_norm   
+        return TM_norm
 
 
     def solve_pi_eq(self, P):
@@ -256,9 +257,9 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0).T
+            states = pd.read_csv("%s/CG/data/states/%s_%s_2.csv"%(self.path,self.length,self.act),index_col=0).T
         TM_norm = self.build_TM(states.iloc[:,::self.dt],symitrize=symitrize)
-        pi_eq, eigs = self.solve_pi_eq(TM_norm)
+        pi_eq, eigs = self.solve_pi_eq(TM_norm.values)
         #pi_eq = pd.Series(pi_eq,index=TM_norm.index)
         # A = get_A(TM_norm)
         # B = get_B(A)
@@ -474,7 +475,7 @@ class CGTM_Calculations:
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s_tmp.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s2.csv"%(self.path,self.act,self.length,self.kind))
         
     def write_pi_raw(self,iterate_time=False, iterate_sims=False):
         pi_raw = self.build_raw(iterate_time=iterate_time,iterate_sims=iterate_sims)[0]
@@ -486,15 +487,18 @@ class CGTM_Calculations:
         if self.act == None:
             pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,it_val))
         else:
-            pd.DataFrame(pi_raw).to_csv("%s/UDel/CG/data/pi_raw_%s_%s%s%s_upd.csv"%(self.path,self.act,self.length,self.kind,it_val))
+            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s%s_seed.csv"%(self.path,self.act,self.length,self.kind,it_val))
 
 
 
 # import matplotlib.pyplot as plt
-# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
-# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
+# import matplotlib.colors as mcol
 
-# test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=True)[0]#.write_pi_raw(iterate_time=True)
+
+CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
+CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
+
+# test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=False)[0]#.write_pi_raw(iterate_time=True)
 # test2 = CGTM_Calculations("",1,"cg","inactive","short").build_raw()#(iterate_time=True)
 # # test1 = CGTM_Calculations("SU", 1, "sat",act=None).build_CGTM()[0]
 # # test2 = CGTM_Calculations("SU", 1, "sat",act=None).build_raw()
