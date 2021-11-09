@@ -40,13 +40,13 @@ def ternary_CG():
     uot = 0
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","",ax=ax[0,1],initial="CG/data/init_raw_inactive_shortcg")
-    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg","",ax=ax[0,0])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg","","CG/data/pi_raw_inactive_shortcg",ax=ax[0,2])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","",ax=ax[1,1] ,initial="CG/data/init_raw_active_shortcg")
-    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_shortcg","",ax=ax[1,0], out=uot)
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg_seed","",ax=ax[0,1])#,initial="CG/data/init_raw_inactive_shortcg")
+    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg_seed","",ax=ax[0,0])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg_seed","","CG/data/pi_raw_inactive_shortcg_seed",ax=ax[0,2])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg_seed","",ax=ax[1,1])# ,initial="CG/data/init_raw_active_shortcg")
+    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg_seed","",ax=ax[1,0], out=uot)
     # cgp.Ternary_Scatter(ax[1,2], "CG/data/pi_eq_active_shortcg")
-    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg","","CG/data/pi_raw_active_shortcg",ax=ax[1,2],out=oot)
+    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg_seed","","CG/data/pi_raw_active_shortcg_seed",ax=ax[1,2],out=oot)
     cax = plt.axes([1, 0.25, 0.025, 0.5])
     plt.colorbar(sm2, cax=cax,format='%.3f')
     cax = plt.axes([0.15,-.025,0.45,0.025])
@@ -77,8 +77,8 @@ def ternary_CG():
     # cax = plt.axes([0.15,-.025,0.45,0.025])
     # plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     # plt.tight_layout()
-    # plt.savefig("CG_ternary_long-long.pdf",bbox_inches='tight')
-    # plt.close()
+    plt.savefig("CG_ternary_seed-seed.pdf",bbox_inches='tight')
+    plt.close()
 
 # ternary_CG() 
 
@@ -137,16 +137,16 @@ def ternary_iterative():
 
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg_seed",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_eq_inactive_shortcg_seed", ax[0,2])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg_seed",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_eq_active_shortcg_seed", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg",ax[0,0])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg_seed",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_raw_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg_seed", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_shortcg",ax[1,0])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_shortcg_seed",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_raw_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg_seed", ax[1,2])
     plt.tight_layout()
-    plt.savefig("CG_state_dist_short-short_seed.pdf")
+    plt.savefig("CG_raw_state_dist_short-seed_seed.pdf")
     plt.close()
-# states_CG()
+states_CG()
 
 
 def tmp():
@@ -433,7 +433,7 @@ def IDK():
         
     
     # # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
-    a = test1.build_CGTM(symitrize=False)#write_pi_eq()
+    a = test1.build_CGTM(symitrize=True)#write_pi_eq()
     b = test1.build_raw()#write_pi_raw()
     
     pi_raw = b[0]
@@ -445,7 +445,7 @@ def IDK():
     alps = aps.all_possible_states()
     DEV = []
     dev_thresh = [0,0.05,0.1,.15,0.2,0.25,1]
-    fig,ax = plt.subplots(2,len(dev_thresh)+1,figsize=(5*len(dev_thresh),7.5))
+    fig,ax = plt.subplots(2,len(dev_thresh),figsize=(5*len(dev_thresh),7.5))
     for ti, dt in enumerate(dev_thresh):
         empt = []
     
@@ -510,10 +510,10 @@ def IDK():
     ax[0,0].set_title("CGTM")
     ax[0,0].pcolormesh(cgtm)
     plt.tight_layout()
-    plt.savefig("cgtm_dev_seed_default.pdf")
+    plt.savefig("cgtm_dev_seed_sym.pdf")
     plt.close()
 
-IDK()
+# IDK()
 
 
 

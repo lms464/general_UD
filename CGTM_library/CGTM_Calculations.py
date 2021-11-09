@@ -186,6 +186,7 @@ class CGTM_Calculations:
                     # ends here int(states[S][si])
                     C[int(states[S][si-1]),int(states[S][si])] += 1
         C[C<=0] = 0
+        # C = C + C.T
         TM_norm = np.zeros(np.shape(C))
         norm = C.sum(axis=1)
 
@@ -257,7 +258,7 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data/states/%s_%s_2.csv"%(self.path,self.length,self.act),index_col=0).T
+            states = pd.read_csv("%s/CG/data/states/%s_%s_seed.csv"%(self.path,self.length,self.act),index_col=0).T
         TM_norm = self.build_TM(states.iloc[:,::self.dt],symitrize=symitrize)
         pi_eq, eigs = self.solve_pi_eq(TM_norm.values)
         #pi_eq = pd.Series(pi_eq,index=TM_norm.index)
@@ -475,7 +476,7 @@ class CGTM_Calculations:
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s2.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s_seed.csv"%(self.path,self.act,self.length,self.kind))
         
     def write_pi_raw(self,iterate_time=False, iterate_sims=False):
         pi_raw = self.build_raw(iterate_time=iterate_time,iterate_sims=iterate_sims)[0]
@@ -495,8 +496,8 @@ class CGTM_Calculations:
 # import matplotlib.colors as mcol
 
 
-CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
-CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
+CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
+CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
 
 # test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=False)[0]#.write_pi_raw(iterate_time=True)
 # test2 = CGTM_Calculations("",1,"cg","inactive","short").build_raw()#(iterate_time=True)
