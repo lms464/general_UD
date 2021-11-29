@@ -173,9 +173,9 @@ class CGTM_Collect_Data:
         # holder for states onse determined
         full_states = []
         #iterates over each file
-        for i in range(self.start_sys,self.end_sys):
+        for i in range(self.start_sys,self.end_sys+1):
             print("Running System %i..."%i)
-            fl = open ("%s/shot_%s%i/borders.txt"%("/home/liam/lms464",self.act,i))
+            fl = open ("%s/shot_%s%i/borders.txt"%(self.path,self.act,i))
             lines = fl.readlines()#.split()
             fl.close()
             #lines = [int(l) for l in lines]
@@ -525,9 +525,14 @@ class CGTM_Collect_Data:
 # build = CGTM_Collect_Data(0,8,[100,105],"charge")
 # build.build_simplified()
 
-# build = CGTM_Collect_Data(1,2,[],"cg","act", "long")
-# build.build_cg_long_states()
-build = CGTM_Collect_Data(1,3,[],"cg","act", "short")
+build = CGTM_Collect_Data(1,2,[],"cg","act", "long")
+build.build_cg_long_states()
+build = CGTM_Collect_Data(1,51,[],"cg","act", "short")
+build.build_cg_short_states()
+
+build = CGTM_Collect_Data(1,2,[],"cg","inact", "long")
+build.build_cg_long_states()
+build = CGTM_Collect_Data(1,51,[],"cg","inact", "short")
 build.build_cg_short_states()
 
 # build = CGTM_Collect_Data(1,3,[],"cg","inact", "short")

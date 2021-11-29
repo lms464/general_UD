@@ -10,26 +10,28 @@ def long_state_diff():
     import pandas as pd
     import numpy as np
     
-    i = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%chp.choose_path()[1],index_col=0).T
-    a = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%chp.choose_path()[1],index_col=0).T    
-    act = pd.read_csv("%s/CG/data/pi_raw_active_longcg_time.csv"%chp.choose_path()[1],index_col=0).T
-    inact = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg_time.csv"%chp.choose_path()[1],index_col=0).T
-    in_data = tmp = pd.DataFrame([i.values[0],inact[0],inact[1],inact[2]]).T
-    act_data = tmp = pd.DataFrame([a.values[0],act[0],act[1],act[2]]).T
-    fig,ax = plt.subplots(2,4,sharey=True,sharex=True)
+    i = pd.read_csv("%s/CG/data/pi_raw_inactive_shortcg.csv"%chp.choose_path()[1],index_col=0).T
+    a = pd.read_csv("%s/CG/data/pi_raw_active_shortcg.csv"%chp.choose_path()[1],index_col=0).T    
+    act = pd.read_csv("%s/CG/data/pi_raw_active_shortcg_time.csv"%chp.choose_path()[1],index_col=0).T
+    inact = pd.read_csv("%s/CG/data/pi_raw_inactive_shortcg_time.csv"%chp.choose_path()[1],index_col=0).T
+    in_data = pd.DataFrame([i.values[0],inact[0],inact[1],inact[2]]).T
+    act_data = pd.DataFrame([a.values[0],act[0],act[1],act[2]]).T
+    fig,ax = plt.subplots(2,3,sharey=True,sharex=True)
     ax[0,0].bar(i.columns,in_data[0])
 
-    ax[0,1].bar(np.arange(0,len(inact)),in_data[0]-in_data[1])
-    ax[0,2].bar(np.arange(0,len(inact)),in_data[0]-in_data[2])
-    ax[0,3].bar(np.arange(0,len(inact)),in_data[0]-in_data[3])
+    # ax[0,1].bar(np.arange(0,len(inact)),in_data[0]-in_data[1])
+    ax[0,1].bar(np.arange(0,len(inact)),in_data[1])
+    ax[0,2].bar(np.arange(0,len(inact)),in_data[0]-in_data[1])
+    
     #ax[0,3].bar(np.arange(0,len(inact)),inact.mean(axis=1) - ((inact[1]-inact[2])+(inact[0]-inact[1])+(inact[0]-inact[2])))
     ax[1,0].bar(a.columns,a.values[0])
-    ax[1,1].bar(np.arange(0,len(act)),act_data[0]-act_data[1])
-    ax[1,2].bar(np.arange(0,len(act)),act_data[0]-act_data[2])
-    ax[1,3].bar(np.arange(0,len(act)),act_data[0]-act_data[3])
+    # ax[1,1].bar(np.arange(0,len(act)),act_data[0]-act_data[1])
+    ax[1,1].bar(np.arange(0,len(act)),act_data[1])
+    ax[1,2].bar(np.arange(0,len(act)),act_data[0]-act_data[1])
     #ax[1,3].bar(np.arange(0,len(act)),act.mean(axis=1) - ((act[1]-act[2])+(act[0]-act[1])+(act[0]-act[2])))
     plt.tight_layout()
-    plt.savefig("States_Long_Iterative_dif.pdf")
+    # plt.show()
+    plt.savefig("./PDF/States_Long_Iterative_dif_2.pdf")
     plt.close()
     
 # long_state_diff()
@@ -40,13 +42,13 @@ def ternary_CG():
     uot = 0
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg_seed","",ax=ax[0,1])#,initial="CG/data/init_raw_inactive_shortcg")
-    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_shortcg_seed","",ax=ax[0,0])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_inactive_shortcg_seed","","CG/data/pi_raw_inactive_shortcg_seed",ax=ax[0,2])
-    cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg_seed","",ax=ax[1,1])# ,initial="CG/data/init_raw_active_shortcg")
-    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg_seed","",ax=ax[1,0], out=uot)
+    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","",ax=ax[0,1])#,initial="CG/data/init_raw_inactive_shortcg")
+    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg_1","",ax=ax[0,0])
+    cgp.Ternary_Heat_Map("CG/data/pi_raw_inactive_longcg","","CG/data/pi_raw_inactive_longcg_1",ax=ax[0,2])
+    cgp.Ternary_Heat_Map("CG/data/pi_raw_active_longcg","",ax=ax[1,1])# ,initial="CG/data/init_raw_active_shortcg")
+    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_longcg_1","",ax=ax[1,0], out=uot)
     # cgp.Ternary_Scatter(ax[1,2], "CG/data/pi_eq_active_shortcg")
-    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_active_shortcg_seed","","CG/data/pi_raw_active_shortcg_seed",ax=ax[1,2],out=oot)
+    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_raw_active_longcg","","CG/data/pi_raw_active_longcg_1",ax=ax[1,2],out=oot)
     cax = plt.axes([1, 0.25, 0.025, 0.5])
     plt.colorbar(sm2, cax=cax,format='%.3f')
     cax = plt.axes([0.15,-.025,0.45,0.025])
@@ -76,8 +78,8 @@ def ternary_CG():
     # plt.colorbar(sm2, cax=cax,format='%.3f')
     # cax = plt.axes([0.15,-.025,0.45,0.025])
     # plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
-    # plt.tight_layout()
-    plt.savefig("CG_ternary_seed-seed.pdf",bbox_inches='tight')
+    plt.tight_layout()
+    plt.savefig("./PDF/CG_ternary_long-long.pdf",bbox_inches='tight')
     plt.close()
 
 # ternary_CG() 
@@ -130,23 +132,24 @@ def ternary_iterative():
         # # plt.show()
         # plt.savefig("ternary_short-short_gif%i.png"%si)
         # plt.close()
-    plt.savefig("mean_diff_short-short.pdf")
+    plt.savefig("mean_diff_short-short.png")
     plt.close()
 
 # ternary_iterative()
 
 def states_CG():
     fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg",ax[0,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg_seed",ax[0,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_raw_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg_seed", ax[0,2])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_shortcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_shortcg_seed",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_raw_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg_seed", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg_seed",ax[0,0])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg_seed",ax[0,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg_seed","~/UDel/CG/data/pi_raw_inactive_shortcg_seed", ax[0,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_longcg",ax[1,0])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg", ax[1,2])
     plt.tight_layout()
-    plt.savefig("CG_raw_state_dist_short-seed_seed.pdf")
+
+    plt.savefig("./PDF/CG_state_dist_short-short.pdf")
     plt.close()
-states_CG()
+# states_CG()
 
 
 def tmp():
@@ -163,13 +166,13 @@ def tmp():
         return sys
     
     alps = aps.all_possible_states()
-    act_pi = pd.read_csv("~//CG/data/pi_eq_active_shortcg_tmp.csv",index_col=0)
+    act_pi = pd.read_csv("/home/liam/UDel/CG/data/pi_eq_active_longcg.csv",index_col=0)
     act_pi = make_same_len(act_pi, alps)
-    inact_pi = pd.read_csv("~//CG/data/pi_eq_inactive_shortcg_tmp.csv",index_col=0)
+    inact_pi = pd.read_csv("/home/liam/UDel/CG/data/pi_eq_inactive_longcg.csv",index_col=0)
     inact_pi = make_same_len(inact_pi, alps)
 
-    inact_raw = pd.read_csv("~//CG/data/pi_raw_inactive_shortcg.csv",index_col=0)
-    act_raw = pd.read_csv("~//CG/data/pi_raw_active_shortcg.csv",index_col=0)
+    inact_raw = pd.read_csv("/home/liam/UDel/CG/data/pi_raw_inactive_longcg.csv",index_col=0)
+    act_raw = pd.read_csv("/home/liam/UDel/CG/data/pi_raw_active_longcg.csv",index_col=0)
     
     ## make this part a function!
     
@@ -181,16 +184,16 @@ def tmp():
     #         sys = sys_tmp.copy()
     #         print()
                 
-    # Cause it'll break otherwise!
+    # Cause it'll break otherwise! 
     
     
     
     plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0])
     plt.bar(np.arange(0,len(act_pi)),act_raw.T.values[0],alpha=.5)
-    plt.bar(np.arange(0,len(act_pi)),act_pi.T.values[0]-act_raw.T.values[0])
+    plt.bar(np.arange(0,len(act_pi)),(act_raw.T.values[0]-act_pi.T.values[0]))
 
-    # plt.savefig("tmp.pdf")
-    # plt.close()
+    plt.savefig("tmp_long.pdf")
+    plt.close()
 # tmp()
 
 def state_iterative():
@@ -199,16 +202,16 @@ def state_iterative():
     import pandas as pd
     import numpy as np
 
-    state_act = pd.read_csv("%s/CG/data_dx2/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
-    state_inact = pd.read_csv("%s/CG/data_dx2/inact_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    # state_act = pd.read_csv("%s/CG/data_dx2/act_short_binned_time_pi.csv"%(chp.choose_path()[1]),index_col=0).T
+    state_inact = pd.read_csv("%s/CG/data/pi_raw_inactive_shortcg_time_seed.csv"%(chp.choose_path()[1]),index_col=0).T
     
     
-    long_act = pd.read_csv("%s/CG/data_dx2/pi_raw_active_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
-    long_inact = pd.read_csv("%s/CG/data_dx2/pi_raw_inactive_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
+    # long_act = pd.read_csv("%s/CG/data_dx2/pi_raw_active_shortcg_time.csv"%(chp.choose_path()[1]),index_col=0).T
+    long_inact = pd.read_csv("%s/CG/data/pi_eq_inactive_shortcg_time_seed.csv"%(chp.choose_path()[1]),index_col=0).T
     
     # dsi,dss = 0,0
     
-    for si in state_inact:
+    for si in long_inact:
 
         fig, ax = plt.subplots(2,3,figsize=(8,6),sharey=True,sharex=True)
         left = .0
@@ -220,35 +223,35 @@ def state_iterative():
             transform=ax[0,0].transAxes
         )
 
-        txt = '(0.55:0.15:0.30 DPPC:DOPC:Chol) Martini FF. 50 simulations for 50 ns\nStepsize between Frames: .4 ns. The stepsize between states: 2%'
+        # txt = '(0.55:0.15:0.30 DPPC:DOPC:Chol) Martini FF. 50 simulations for 50 ns\nStepsize between Frames: .4 ns. The stepsize between states: 2%'
         # fig.text(.5, -.05, txt, ha='center')
-        dsi = np.mean(long_inact.iloc[:,:2+si],axis=1).values - state_inact[si].values
-        
-        a=ax[0,0].bar(state_inact.index,np.mean(long_inact.iloc[:,:2+si],axis=1))
-        b=ax[0,1].bar(state_inact.index, state_inact[si].values)
+        dsi = long_inact[si].values - state_inact[si].values
+        # dsi = pd.DataFrame(dsi)
+        a=ax[0,0].bar(state_inact.index,long_inact[si])
+        b=ax[0,1].bar(state_inact.index, state_inact[si])
         c=ax[0,2].bar(state_inact.index, dsi)
-        ax[0,0].set_title("Raw From Sim")
+        ax[0,1].set_title("Raw From Sim")
         ax[0,0].set_ylabel("Inactive")
-        ax[1,0].set_ylabel("Active")
-        ax[0,1].set_title("Pi_eq CGTM")
+        # ax[1,0].set_ylabel("Active")
+        ax[0,0].set_title("Pi_eq CGTM")
         ax[0,2].set_title("difference")
-        dss = np.mean(long_act.iloc[:,:2+si],axis=1).values - state_act[si].values
+        # dss = np.mean(long_act.iloc[:,:2+si],axis=1).values - state_act[si].values
 
-        a=ax[1,0].bar(state_act.index,np.mean(long_act.iloc[:,:2+si],axis=1))
-        b=ax[1,1].bar(state_act.index, state_act[si].values)
-        c=ax[1,2].bar(state_act.index, dss)
+        # a=ax[1,0].bar(state_act.index,np.mean(long_act.iloc[:,:2+si],axis=1))
+        # b=ax[1,1].bar(state_act.index, state_act[si].values)
+        # c=ax[1,2].bar(state_act.index, dss)
         del a
         del b
         del c
         dss,dsi = 0,0
-        plt.ylim(-.075,.075)
+        plt.ylim(-.225,1.001)
         plt.tight_layout()
-        plt.savefig("dx2_state-short-short_frame%s_2.pdf"%si)
+        plt.savefig("state-short-short_frame%s_seed-moving.pdf"%si)
         plt.close()
     # return dsi,dss
             
-# o = state_iterative()
-# del o
+o = state_iterative()
+del o
 
 def over_lapped_state_network() :
     
@@ -415,6 +418,16 @@ import numpy as np
 # plt.pcolormesh(tmp2,vmax=5,vmin=-5)
 # plt.colorbar()
 
+def make_same_len(sys,alps=aps.all_possible_states()):
+    import pandas as pd
+    if len(sys.index) != len(alps) or len(sys.columns) != len(alps):
+        sys_tmp = pd.DataFrame(columns=np.arange(0,len(alps)))
+        sys_tmp[sys.index] = sys.T[sys.index]
+        sys_tmp = sys_tmp.T.fillna(0)
+        sys = sys_tmp.copy()
+    return sys
+        
+
 def IDK():
 
     import numpy as np
@@ -433,7 +446,7 @@ def IDK():
         
     
     # # test1 = cgc.CGTM_Calculations("SU", 1, "chg",act=None)#.sigConverge_time()
-    a = test1.build_CGTM(symitrize=True)#write_pi_eq()
+    a = test1.build_CGTM(symitrize=False)#write_pi_eq()
     b = test1.build_raw()#write_pi_raw()
     
     pi_raw = b[0]
@@ -510,8 +523,8 @@ def IDK():
     ax[0,0].set_title("CGTM")
     ax[0,0].pcolormesh(cgtm)
     plt.tight_layout()
-    plt.savefig("cgtm_dev_seed_sym.pdf")
-    plt.close()
+    # plt.savefig("cgtm_dev_sym.pdf")
+    # plt.close()
 
 # IDK()
 

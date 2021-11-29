@@ -13,7 +13,7 @@ import choose_path as chp
 
 
 class CGTM_Calculations:
-    def __init__(self, leaflet_in, dt, kind, act=None, length=None):
+    def __init__(self, leaflet_in, dt, kind, act=None, length=None,seed=None):
         
         assert dt > 0, "dt MUST be greater than 0"
         
@@ -23,6 +23,11 @@ class CGTM_Calculations:
         self.path = chp.choose_path()
         self.act = act
         self.length = length
+        self.seed = None
+        if seed is not None:
+            self.seed="_seed"
+        else:
+            self.seed = ''
         
         if self.act is not None:
             if self.length is None:
@@ -77,7 +82,7 @@ class CGTM_Calculations:
             print("DOPC:  %f"%(pi_eq * aps.all_possible_states()[:,1]).sum())
             print("CHOL:  %f\n\n"%(pi_eq * aps.all_possible_states()[:,2]).sum())
             
-            hist,edge = np.histogram(states_use,bins=len(aps.all_possible_states()),normed=None,range=(0,len(aps.all_possible_states())))
+            hist,edge = np.histogram(states_use,bins=len(aps.all_possible_states()),range=(0,len(aps.all_possible_states())))
             print("DPPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,0]).sum())
             print("DOPC:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,1]).sum())
             print("CHOL:  %f"%(hist/hist.sum() * aps.all_possible_states()[:,2]).sum())        
@@ -132,23 +137,30 @@ class CGTM_Calculations:
         if self.act is None:
             states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T   
         else:
-            states = pd.read_csv("%s/CG/data/states/%s_%s_seed.csv"%(self.path,self.length,self.act),index_col=0).T   
+            states = pd.read_csv("%s/CG/data/states/%s_%s%s.csv"%(self.path,self.length,self.act,self.seed),index_col=0).T   
         
         if iterate_sims == False and iterate_time == True:
             hist = []
             states = states.T
             for i in states:
-                hist_tmp,edge = np.histogram(states[i],bins=len(aps.all_possible_states()),normed=True,range=(0,len(aps.all_possible_states())))
+                hist_tmp,edge = np.histogram(states.iloc[:,:int(i)+1],bins=len(aps.all_possible_states()),range=(0,len(aps.all_possible_states())))
+                hist_tmp = hist_tmp / hist_tmp.sum()
+                assert np.isclose(hist_tmp.sum() , 1), "Distribution does not sum to 1"
                 hist.append(hist_tmp)
             hist = np.array(hist)
         elif iterate_time == False and iterate_sims == True:
             hist = []
-            for i in states:
-                hist_tmp,edge = np.histogram(states[i],bins=len(aps.all_possible_states()),normed=True,range=(0,len(aps.all_possible_states())))
+            for i in states.columns+1:
+                hist_tmp,edge = np.histogram(states.iloc[:,:int(i)],bins=len(aps.all_possible_states()),range=(0,len(aps.all_possible_states())))
+                hist_tmp = hist_tmp / hist_tmp.sum()
+                assert np.isclose(hist_tmp.sum() , 1), "Distribution does not sum to 1"
+                if i % 10 == 0: 
+                    print("%i of %i"%(int(i),int(len(states.T))))
                 hist.append(hist_tmp)
             hist = np.array(hist)
         else:
-            hist,edge = np.histogram(states[states.columns[:]],bins=len(aps.all_possible_states()),normed=True,range=(0,len(aps.all_possible_states())))
+            hist,edge = np.histogram(states[states.columns[:]],bins=len(aps.all_possible_states()),range=(0,len(aps.all_possible_states())))
+            hist = hist/np.sum(hist)
         # plt.bar(edge[:-1],hist/hist.sum())
         # plt.savefig("%s_state_raw_%s.pdf"%(nm,kind))
         # plt.close()
@@ -158,7 +170,7 @@ class CGTM_Calculations:
         
         out = []
         
-        states = pd.read_csv("%s/states/%s%s.csv"%(self.path,self.leaflet_in,self.kind),index_col=0).T[sel_frm]
+        states = pd.read_csv("%s/states/%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,self.seed),index_col=0).T[sel_frm]
         all_states = aps.all_possible_states()
         for s in states:
             out.append(all_states[s])
@@ -170,6 +182,11 @@ class CGTM_Calculations:
 
 ## CGTM and the likes   
     def build_TM(self,states,overide=False,symitrize=False):
+        
+        if symitrize==True:
+            print("This is not recomended. While the matrix will be easier to work with")
+            print("results may vary from observed.")
+        
         all_states = aps.all_possible_states()
         C = np.zeros((len(all_states),len(all_states)))
         
@@ -179,34 +196,26 @@ class CGTM_Calculations:
             import os
             print("Your states matrix has one row. This does not work")
             os.exit()
+            
         else:
             for S in states:
                 for si in range(1, len(states[S])):
                     # starts here int(states[S][si-1])
                     # ends here int(states[S][si])
                     C[int(states[S][si-1]),int(states[S][si])] += 1
-        C[C<=0] = 0
-        # C = C + C.T
-        TM_norm = np.zeros(np.shape(C))
+        TM_norm = np.zeros_like(C)
         norm = C.sum(axis=1)
 
         if symitrize == True:
+            # Makes matrix symetrick (sp)
+            # not recomended to be used
             C = (C + C.T)/2#np.maximum(TM_m, TM_m.transpose())
             assert np.allclose(C,C.T), "Symitrize is not running"
 
         for i,j in enumerate(C):
             TM_norm[i] = np.divide(j , norm[i], out=np.zeros_like(j),where=norm[i]!=0)
-        # Makes matrix symetrick (sp)
 
         TM_norm = pd.DataFrame(TM_norm)
-        # TM_tmp = TM_norm.loc[(TM_norm.sum(axis=1) != 0), (TM_norm.sum(axis=0) != 0)]
-        # TM_index = TM_tmp.index.values
-        # TM_cols = TM_tmp.columns.values
-        # del TM_tmp
-        # state_ind = [c for c in TM_cols]
-        # state_ind = [c for c in TM_index]
-        # state_ind = np.unique(state_ind)
-        # TM_norm = TM_norm.iloc[state_ind,state_ind]
         return TM_norm
 
 
@@ -258,10 +267,10 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data/states/%s_%s_seed.csv"%(self.path,self.length,self.act),index_col=0).T
+            states = pd.read_csv("%s/CG/data/states/%s_%s%s.csv"%(self.path,self.length,self.act,self.seed),index_col=0).T
         TM_norm = self.build_TM(states.iloc[:,::self.dt],symitrize=symitrize)
         pi_eq, eigs = self.solve_pi_eq(TM_norm.values)
-        #pi_eq = pd.Series(pi_eq,index=TM_norm.index)
+        pi_eq = pd.Series(pi_eq,index=TM_norm.index)
         # A = get_A(TM_norm)
         # B = get_B(A)
         # pi_lin = LinSolve(A,B)
@@ -303,7 +312,7 @@ class CGTM_Calculations:
                 self.update_act("inactive")
             states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
-        pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
+        pi_eq_ref, eigs = self.solve_pi_eq(TM_norm.values) 
         pi_sig = []
         sim_list = []
         if self.act is None:
@@ -312,7 +321,7 @@ class CGTM_Calculations:
             sim_list = states.columns
         for nset in sim_list[2:]:
             TM_norm = self. build_TM(states.iloc[::self.dt,:int(nset)]) #switch these axis for sims
-            pi_eq, eigs = self.solve_pi_eq(TM_norm)
+            pi_eq, eigs = self.solve_pi_eq(TM_norm.values)
             pi_sig.append(pi_eq)
         sig_ = []#self.sig(pi_eq_ref,pi_sig,sim_list)
         return sig_,pi_sig#[1:]
@@ -334,7 +343,7 @@ class CGTM_Calculations:
                 self.update_act("inactive")
             states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
         state_shape = np.shape(states)
-        pi_eq_ref = np.histogram(states_ref,bins=len(aps.all_possible_states()),normed=True,range=(0,len(aps.all_possible_states())))[0]
+        pi_eq_ref = np.histogram(states_ref,bins=len(aps.all_possible_states()),range=(0,len(aps.all_possible_states())))[0]
         # pi_eq_ref, eigs = self.solve_pi_eq(TM_norm) 
         pi_sig = []
         sim_list = []
@@ -469,14 +478,14 @@ class CGTM_Calculations:
         if self.act==None:
             pd.DataFrame(init_hist).to_csv("%s/init_raw_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(init_hist).to_csv("%s/CG/data/init_raw_%s_%s%s.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(init_hist).to_csv("%s/CG/data/init_raw_%s_%s%s%s.csv"%(self.path,self.act,self.length,self.kind,self.seed))
 
     def write_pi_eq(self,symitrize=False):
-        pi_eq = self.build_CGTM()[0]
+        pi_eq = self.build_CGTM(symitrize=symitrize)[0]
         if self.act==None:
             pd.DataFrame(pi_eq).to_csv("%s/pi_eq_%s%s.csv"%(self.path,self.leaflet_in,self.kind))
         else:
-            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s_seed.csv"%(self.path,self.act,self.length,self.kind))
+            pd.DataFrame(pi_eq).to_csv("%s/CG/data/pi_eq_%s_%s%s%s.csv"%(self.path,self.act,self.length,self.kind,self.seed))
         
     def write_pi_raw(self,iterate_time=False, iterate_sims=False):
         pi_raw = self.build_raw(iterate_time=iterate_time,iterate_sims=iterate_sims)[0]
@@ -488,7 +497,7 @@ class CGTM_Calculations:
         if self.act == None:
             pd.DataFrame(pi_raw).to_csv("%s/pi_raw_%s%s%s.csv"%(self.path,self.leaflet_in,self.kind,it_val))
         else:
-            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s%s_seed.csv"%(self.path,self.act,self.length,self.kind,it_val))
+            pd.DataFrame(pi_raw).to_csv("%s/CG/data/pi_raw_%s_%s%s%s%s.csv"%(self.path,self.act,self.length,self.kind,it_val,self.seed))
 
 
 
@@ -496,18 +505,31 @@ class CGTM_Calculations:
 # import matplotlib.colors as mcol
 
 
-CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
-CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
+# d = CGTM_Calculations("",1,"cg","inactive","short",seed=True)
+# # d.write_pi_raw()#False,True)
+# # d.write_pi_raw(False,True)
+# d.write_pi_raw(True,False)
 
-# test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=False)[0]#.write_pi_raw(iterate_time=True)
-# test2 = CGTM_Calculations("",1,"cg","inactive","short").build_raw()#(iterate_time=True)
-# # test1 = CGTM_Calculations("SU", 1, "sat",act=None).build_CGTM()[0]
-# # test2 = CGTM_Calculations("SU", 1, "sat",act=None).build_raw()
+# data = d.sigConverge_simulations()[1]
+# pd.DataFrame(data).to_csv("pi_eq_seed_time.csv")
+# CGTM_Calculations("",1,"cg","active","long").write_pi_raw()
+
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_raw()
+# CGTM_Calculations("",1,"cg","active","short").write_pi_raw()
+
+# CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()
+# CGTM_Calculations("",1,"cg","active","short").write_pi_eq()
+
+# # test1 = CGTM_Calculations("",1,"cg","inactive","short").build_CGTM(symitrize=False)[0]#.write_pi_raw(iterate_time=True)
+# test2 = CGTM_Calculations("",1,"cg","active","long").write_pi_raw(iterate_time=True)
+# test1 = CGTM_Calculations("SU", 1, "charge",act=None).build_CGTM()[0]
+# test2 = CGTM_Calculations("SU", 1, "charge",act=None).build_raw()
 
 # plt.bar(np.arange(0,len(test1.values)),test1.values)
 # plt.bar(np.arange(0,len(test1.values)),test2[0],alpha=.5)
 # plt.bar(np.arange(0,len(test1.values)),test1.values - test2[0])
 # plt.savefig("yarp.pdf")
+# plt.close()
 
 
 # CGTM_Calculations("",1,"cg","inactive","short").write_pi_eq()

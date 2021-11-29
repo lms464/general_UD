@@ -43,6 +43,7 @@ def diff_plot(pi_eq_file,pi_raw_file, ax):
     pi = pd.read_csv("%s.csv"%pi_eq_file,index_col=0).T
     raw = pd.read_csv("%s.csv"%pi_raw_file,index_col=0).T
     dpi = pi.values[0] - raw.values[0]
+    print(np.abs(dpi).sum())
     line = ax.bar(np.arange(0,len(aps.all_possible_states())), dpi)
     ax.set_ylabel(r"$\Delta$ Prob of State")
     ax.set_xlabel("State")
@@ -183,10 +184,17 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         T = tri.Triangulation(x,y)
         
         # # plot the contour
-        if out == None:
-            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
-        else:
-            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
+        try:
+            if out == None:
+                ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
+            else:
+                out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
+        except:
+            v = hist.values.T[0]
+            if out == None:
+                ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
+            else:
+                out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)            
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
@@ -268,9 +276,14 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         
         T = tri.Triangulation(x,y)
-
-        out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2,extend='both',levels=100)
         
+        try:
+            out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2,extend='both',levels=100)
+    
+        except:
+            v = (hist1 - hist2.T.values).values[0]
+            out = ax.tricontourf(x,y,T.triangles,v.T,cmap='PuOr',norm=norm2,extend='both',levels=100)
+
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
         triangle = tri.Triangulation(corners[:, 0], corners[:, 1])
