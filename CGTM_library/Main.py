@@ -142,13 +142,13 @@ def states_CG():
     cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg_seed",ax[0,0])
     cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg_seed",ax[0,1])
     cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg_seed","~/UDel/CG/data/pi_raw_inactive_shortcg_seed", ax[0,2])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_active_longcg",ax[1,0])
-    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_active_shortcg",ax[1,1])
-    cgp.diff_plot("~/UDel/CG/data/pi_eq_active_shortcg","~/UDel/CG/data/pi_raw_active_shortcg", ax[1,2])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_raw_inactive_shortcg_seed",ax[1,0])
+    cgp.plot_state_dist("~/UDel/CG/data/pi_eq_inactive_shortcg",ax[1,1])
+    cgp.diff_plot("~/UDel/CG/data/pi_eq_inactive_shortcg","~/UDel/CG/data/pi_raw_inactive_shortcg_seed", ax[1,2])
     plt.tight_layout()
 
-    plt.savefig("./PDF/CG_state_dist_short-short.pdf")
-    plt.close()
+    # plt.savefig("./PDF/CG_state_dist_short-short.pdf")
+    # plt.close()
 # states_CG()
 
 
@@ -244,9 +244,9 @@ def state_iterative():
         del b
         del c
         dss,dsi = 0,0
-        plt.ylim(-.225,1.001)
+        plt.ylim(-.25,.25)
         plt.tight_layout()
-        plt.savefig("state-short-short_frame%s_seed-moving.pdf"%si)
+        plt.savefig("state-short-short_frame%s_seed-moving2.pdf"%si)
         plt.close()
     # return dsi,dss
             

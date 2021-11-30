@@ -310,7 +310,7 @@ class CGTM_Calculations:
                 self.update_act("active")
             elif self.act == "in" or self.act == "inact" or self.act=="Inactive":
                 self.update_act("inactive")
-            states = pd.read_csv("%s/CG/data/states/%s_%s.csv"%(self.path,self.length,self.act),index_col=0) 
+            states = pd.read_csv("%s/CG/data/states/%s_%s%s.csv"%(self.path,self.length,self.act,self.seed),index_col=0) 
         TM_norm = self.build_TM(states.iloc[:,::self.dt])
         pi_eq_ref, eigs = self.solve_pi_eq(TM_norm.values) 
         pi_sig = []
@@ -506,9 +506,9 @@ class CGTM_Calculations:
 
 
 # d = CGTM_Calculations("",1,"cg","inactive","short",seed=True)
-# # d.write_pi_raw()#False,True)
-# # d.write_pi_raw(False,True)
-# d.write_pi_raw(True,False)
+# # # d.write_pi_raw()#False,True)
+# # # d.write_pi_raw(False,True)
+# # d.write_pi_raw(True,False)
 
 # data = d.sigConverge_simulations()[1]
 # pd.DataFrame(data).to_csv("pi_eq_seed_time.csv")
