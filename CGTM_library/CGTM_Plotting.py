@@ -30,8 +30,11 @@ class MidpointNormalize(mcol.Normalize):
 		x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
 		return np.ma.masked_array(np.interp(value, x, y), np.isnan(value))
 
+
+
 def plot_state_dist(pi_eq_file,ax):
     pi_eq = pd.read_csv("%s.csv"%pi_eq_file,index_col=0).T
+    print(pi_eq.sum().sum())
     ax.bar(np.arange(0,len(pi_eq.values[0])),pi_eq.values[0])
     ax.set_ylabel("Prob of State")
     ax.set_xlabel("State")
@@ -142,7 +145,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         n = 4
         tick_size = 0.1
         margin = 0.05
-        norm2 = MidpointNormalize(0,0.12,0.06)
+        norm2 = MidpointNormalize(0,0.07,0.035)
 
         # define corners of triangle    
         left = np.r_[0, 0]
@@ -155,12 +158,22 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         right_tick = 0.8264*tick_size * (top - left) / n
         left_tick = 0.8264*tick_size * (left - right) / n
         
-        hist = 0
-        states = 0
+        hist = None
+        states = None
 
         # elif pi_eq == True:
-        state = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state),index_col=0).T
-        states, hist = aps.all_possible_states(), state  
+        # map_state=None
+        # if 'eq' in state:
+        #     map_state = state.split("eq_")[-1].split("cgtmp")[0]
+        # else:
+        #     map_state = state.split("raw_")[-1].split("cgtmp")[0]
+        map_pi = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state),index_col=0)
+        states = map_pi[["0","1","2"]].values
+        hist = map_pi["3"].values
+        # states = pd.read_csv("/home/sharplm/CG/data/%smap.csv"%(map_state),index_col=0).values
+
+        # hist = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],state),index_col=0).T
+        
 
         # Note that the ordering from start to stop is important for the tick labels
         plot_ticks(right, left, bottom_tick, n, offset=(0, -0.06))
@@ -172,7 +185,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         c = states[:,2]
         
         # # values is stored in the last column
-        v = hist.values[0]
+        v = hist
         
         # # translate the data to cartesian corrds
         x = 0.5 * ( 2.*b+c ) / ( a+b+c )
@@ -184,9 +197,9 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         # # plot the contour
         if out == None:
-            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
+            ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=50)
         else:
-            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=100)
+            out = ax.tricontourf(x,y,T.triangles,v,cmap='RdBu_r',norm=norm2,levels=50)
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
@@ -198,12 +211,26 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         tern = ax.triplot(trimesh,'--',color='grey')
         
         if initial is not None:
+            # if initial.find('long') > 0:
+            #     hist_mod = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],initial),index_col=0,header=0).T
+            # else:
             hist_mod = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],initial),index_col=0,header=0)
     
             a1,b1,c1 = hist_mod.iloc[:,0], hist_mod.iloc[:,1], hist_mod.iloc[:,2]
+            tmpa,tmpb,tmpc =[],[],[]
             a1 = a1[a1>0].values
             b1 = b1[b1>0].values
             c1 = c1[c1>0].values
+            for A,B,C in zip(a1,b1,c1):
+                if A>0 or B>0 or C>0:
+                    tmpa.append(A),tmpb.append(B),tmpc.append(C)
+                elif (A>0 or B>0) and C ==0: 
+                    tmpa.append(A),tmpb.append(B),tmpc.append(C)
+            a1 = np.array(tmpa)
+            b1 = np.array(tmpb)
+            c1 = np.array(tmpc)
+            # if len(c1) < len(a1):
+            #     c1 = np.append(c1,0)
             x = 0.5 * ( 2.*b1+c1 ) / ( a1+b1+c1 )
             y = 0.5*np.sqrt(3) * c1 / (a1+b1+c1)
             # points = np.array([a,b,c]).T
@@ -217,7 +244,8 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
             return
         else:
             sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
-            return out,sm        
+            return out,sm  
+        
     def run_ternary_diff(statem,staten,ax,out):
         import matplotlib.colors as mcolors
         n = 4
@@ -242,11 +270,13 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         #     states, hist = run_raw(state)    
         
         # elif pi_eq == True:
-        state1 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],statem),index_col=0).T
-        states, hist1 = aps.all_possible_states(), state1  
-
-        state2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],staten),index_col=0).T
-        states, hist2 = aps.all_possible_states(), state2  
+        map_pi1 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],statem),index_col=0)
+        #states, hist1 = aps.all_possible_states(), state1  
+        states1 = map_pi1[["0","1","2"]].values
+        hist1 = map_pi1["3"].values
+        map_pi2 = pd.read_csv("%s/%s.csv"%(chp.choose_path()[1],staten),index_col=0)
+        states = map_pi2[["0","1","2"]].values
+        hist2 = map_pi2["3"].values 
 
         #Define twin axis
         # Note that the ordering from start to stop is important for the tick labels
@@ -260,7 +290,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         # # values is stored in the last column
         v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
-        norm2 = MidpointNormalize(midpoint=0,vmin=-1E-1,vmax=1E-1)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
+        norm2 = MidpointNormalize(midpoint=0,vmin=-4E-2,vmax=4E-2)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
         
         # # translate the data to cartesian corrds
         x = 0.5 * ( 2.*b+c ) / ( a+b+c )
@@ -269,7 +299,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
         
         T = tri.Triangulation(x,y)
 
-        out = ax.tricontourf(x,y,T.triangles,v.T['0'],cmap='PuOr',norm=norm2,extend='both',levels=100)
+        out = ax.tricontourf(x,y,T.triangles,v,cmap='PuOr',norm=norm2,extend='both',levels=50)
         
         # create the grid
         corners = np.array([[0, 0], [1, 0], [0.5,  np.sqrt(2.3)*0.576]])
@@ -356,7 +386,8 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
                 return
             else:
                 sm = plt.cm.ScalarMappable(norm=norm2, cmap = out.cmap)
-                return out,sm       
+                return out,sm   
+            
     def run_ternary_diff_iter(state1,state2,ax,out):
             import matplotlib.colors as mcolors
             n = 4
@@ -397,6 +428,7 @@ def Ternary_Heat_Map(leaflet_in,fl_name,leaflet_in2=None,ax=None,out=None,initia
             
             # # values is stored in the last column
             v = (hist1 - hist2) #/ np.sum((hist1.T['0']- hist2.T['0'])) 
+            print(np.abs(v).sum())
             norm2 = MidpointNormalize(midpoint=0,vmin=-1E-1,vmax=1E-1)#(vmin=v.values[0].min(),vmax=v.values[0].max(),midpoint=(v.values[0].max()+v.values[0].min())/2)
             
             # # translate the data to cartesian corrds
