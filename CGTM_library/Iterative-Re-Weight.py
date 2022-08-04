@@ -192,19 +192,19 @@ def test_block():
     out2 = []
     # for it in its: 
     kl_list = []
-    for tau in np.arange(1,201,1):
-        reweighted_distributions, reweighted_matrices, eign = ta.optimized_resliced_voelz(
-            trj[:,::tau],
-            its,
-            stps,
-            n_states,
-            return_eig=True,
-            # _initial_weights=weight,
-            return_matrices=True
-        )
-        out2.append(eign)
-        reweight_mean = np.mean(reweighted_distributions,axis=0)
-        kl_list.append(KL(reweight_mean,hist))
+    # for tau in np.arange(1,201,1):
+    reweighted_distributions, reweighted_matrices, eign = ta.optimized_resliced_voelz(
+        trj[:,::45],
+        its,
+        stps,
+        n_states,
+        return_eig=True,
+        # _initial_weights=weight,
+        return_matrices=True
+    )
+    out2.append(eign)
+    reweight_mean = np.mean(reweighted_distributions,axis=0)
+    kl_list.append(KL(reweight_mean,hist))
         # for rw_i in range(1,len(reweighted_distributions)-1):
         #     if np.allclose(reweighted_distributions[rw_i],reweighted_distributions[rw_i-1])==True:
         #         out2.append(rw_i)
@@ -224,7 +224,8 @@ def test_block():
         # plt.savefig("tau_%i.pdf"%tau)
         # plt.close()
     # print( np.sqrt((hist-reweight_mean)**2).sum())
-    # # pd.DataFrame(reweight_mean).to_csv("~/CG/data/pi_eq_low_inactive_long_cgtmp.csv")
+    pd.DataFrame(reweight_mean).to_csv("~/lms464/CG/data/pi_eq_low_inactive_short_cgtmpNEW.csv")
+    
     # alps = aps.all_possible_states()
     # alps_re_map = []
     # kl = KL(reweight_mean, hist)
@@ -473,6 +474,6 @@ def KL_Analysis():
         # surf = ax.plot_surface(X, Y, dat.values.T)
         # plt.savefig("LK_3Space.pdf")
         # plt.close()
-KL_Analysis() 
+# KL_Analysis() 
 
 # truth = np.array(pd.read_csv("~/CG/data/pi_raw_low_inactive_long_cg.csv",index_col=0).values).T
