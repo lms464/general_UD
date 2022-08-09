@@ -2,7 +2,7 @@ import sys
 
 import pandas as pd
 import numpy as np
-# from itertools import permutations
+from itertools import permutations
 
 print(sys.argv)
 
@@ -238,13 +238,13 @@ def rewrite_angle(inptBonds,inputitp):
         update_bonds["ind3"][k] = inputitp.query("ind == '%s'"%bk)["atom"].values[0]
     return update_bonds
 
-def rewrite_dihedral(inptBonds,inputitp):
+def rewrite_dihedral(inptBonds,inputitp,col):
     update_bonds = inptBonds.copy()
     for k,(bi,bj,bk,bl) in enumerate(zip(inptBonds["ind1"],inptBonds['ind2'],inptBonds['ind3'],inptBonds['ind4'])):
-        update_bonds["ind1"][k] = inputitp.query("ind == '%s'"%bi)["atom"].values[0]
-        update_bonds["ind2"][k] = inputitp.query("ind == '%s'"%bj)["atom"].values[0]
-        update_bonds["ind3"][k] = inputitp.query("ind == '%s'"%bk)["atom"].values[0]
-        update_bonds["ind4"][k] = inputitp.query("ind == '%s'"%bl)["atom"].values[0]
+        update_bonds["ind1"][k] = inputitp.query("ind == '%s'"%bi)[col].values[0]
+        update_bonds["ind2"][k] = inputitp.query("ind == '%s'"%bj)[col].values[0]
+        update_bonds["ind3"][k] = inputitp.query("ind == '%s'"%bk)[col].values[0]
+        update_bonds["ind4"][k] = inputitp.query("ind == '%s'"%bl)[col].values[0]
     return update_bonds
 
 #####################################
@@ -304,9 +304,9 @@ def check_force_fields_angles(ff_ang1, ff_angs):
 def check_force_fields_dihedral(ff_ang1, ff_angs):
     
     def bondcompareD (inpt1,inpt_ref,D_list):
-        # for a in permutations(inpt1):
-        if (inpt1[0] == inpt_ref[0] and inpt1[1] == inpt_ref[1] and inpt1[2] == inpt_ref[2] and inpt1[3] == inpt_ref[3]) or (inpt1[3] == inpt_ref[0] and inpt1[2] == inpt_ref[1] and inpt1[1] == inpt_ref[2] and inpt1[0] == inpt_ref[3]):
-           D_list.append(inpt_ref)
+        for a in permutations(inpt1):
+            if (a[0] == inpt_ref[0] and a[1] == inpt_ref[1] and a[2] == inpt_ref[2] and a[3] == inpt_ref[3]):
+               D_list.append(inpt_ref)
         return D_list
         
     angs = []
@@ -343,26 +343,37 @@ def compare_dihydrals(dyhedral_in,dih_1, mol1): #, dih_2, mol2):
         dihds.append(check_force_fields_dihedral(mol1.T[ad[:-1]].T['AtomType'].tolist(),dyhedral_in)) #,mol2.T[al[:-1]].T['AtomType'].tolist(),dyhedral_in))
     dihds_final = []
     for d,d1 in zip(dihds,dih_1.values):
-        if len(d)>1:
-            dihds_final.append([d1[:-1].tolist(),d[0][-3:]])
-        elif len(d)<1:
-            continue
-        else:
-            dihds_final.append([d1[:-1].tolist(),d[0][-3:]])
+        if len(d)<1:
+            dtmp = []
+            check = 0
+            for di in d1:
+                if di.startswith("H"):
+                    check = 1
+            if check == 0:
+                dihds_final.append(d1)
     return dihds_final
+    #     if len(d)>1:
+    #         dihds_final.append([d1[:-1].tolist(),d[0][-3:]])
+    #     elif len(d)<1:
+    #         continue
+    #     else:
+    #         dihds_final.append([d1[:-1].tolist(),d[0][-3:]])
+    # return dihds_final
             
 ###############
 ### RUN
 ##############
 bonded_ff = parse_ff("ffbonded.itp")#/home/liam/Downloads/charmm-gui-5955053520/gromacs/toppar/forcefield.itp")
     #"/home/sharplm/Programs/gromacs-2021.4/share/top/charmm36-jul2021.ff/ffbonded.itp")#(
-
-Lanterol =  get_atom_map('LANO.itp')
-lanterol_bnds = get_bonds_itp('LANO.itp')
-# lanterol_dih = get_dihyd_itp('LANO.itp')
-lanterol_bnds = rewrite_bonds(lanterol_bnds,Lanterol)
-# lanterol_dih = rewrite_dihedral(lanterol_dih,Lanterol)
-# lanterol_ang = get_angles_itp("LANO.itp")
+sterl1 = "LANO.itp"
+Lanterol =  get_atom_map(sterl1)
+# lanterol_bnds = get_bonds_itp()
+lanterol_dih = get_dihyd_itp(sterl1)
+lan_dih = lanterol_dih.copy()
+# lanterol_bnds = rewrite_bonds(lanterol_bnds,Lanterol)
+lanterol_dih = rewrite_dihedral(lanterol_dih,Lanterol,'atom')
+lan_dih = rewrite_dihedral(lan_dih,Lanterol,'AtomType')
+# lanterol_ang = get_angles_itp("CHL1.itp")
 # lanterol_ang = rewrite_angle(lanterol_ang, Lanterol)
 # # carbon_l = Lanterol["atom"].str.startswith("C")[Lanterol["atom"].str.startswith("C")].index.values
 
@@ -370,15 +381,15 @@ ff_dih = parse_ff_dihedral(bonded_ff)
 ff_ang = parse_ff_angles(bonded_ff)
 ff_bond = parse_ff_bonds(bonded_ff)
 
-diplop = get_atom_map('DPOP.itp')
-# diplop_dih = get_dihyd_itp('DPOP.itp')
-# diplop_dih = rewrite_dihedral(diplop_dih,diplop)
+# diplop = get_atom_map('DPOP.itp')
+# # diplop_dih = get_dihyd_itp('DPOP.itp')
+# # diplop_dih = rewrite_dihedral(diplop_dih,diplop)
 
 
-diplop_bonds = get_bonds_itp('DPOP.itp')
-diplop_bonds = rewrite_bonds(diplop_bonds,diplop)
-dip_bond = compare_bonds(ff_bond,diplop_bonds,diplop)
-lan_bond = compare_bonds(ff_bond,lanterol_bnds,Lanterol)
+# diplop_bonds = get_bonds_itp('DPOP.itp')
+# diplop_bonds = rewrite_bonds(diplop_bonds,diplop)
+# dip_bond = compare_bonds(ff_bond,diplop_bonds,diplop)
+# lan_bond = compare_bonds(ff_bond,lanterol_bnds,Lanterol)
 
 # diplop_ang = get_angles_itp('DPOP.itp')
 # diplop_ang = rewrite_angle(diplop_ang,diplop)
@@ -387,32 +398,32 @@ lan_bond = compare_bonds(ff_bond,lanterol_bnds,Lanterol)
 # lan_a = compare_angles(ff_ang,lanterol_ang,Lanterol)
 # dip_a = compare_angles(ff_ang,diplop_ang,diplop)
 
-# lan_d = compare_dihydrals(ff_dih,lanterol_dih,Lanterol)
+lan_d = compare_dihydrals(ff_dih,lanterol_dih,Lanterol)
 
-dpl_di = open("Bond_DPOP.bnd",'w')
-for d in dip_bond:
-    tmp_txt = ''
-    for d1 in d[0]:
-        tmp_txt = tmp_txt+d1+' '
-    for d1 in d[1]:
-        tmp_txt = tmp_txt+d1+' '
-    tmp_txt = tmp_txt+'\n'
-    dpl_di.write(tmp_txt)
-dpl_di.close()
+# dpl_di = open("Bond_DPOP.bnd",'w')
+# for d in dip_bond:
+#     tmp_txt = ''
+#     for d1 in d[0]:
+#         tmp_txt = tmp_txt+d1+' '
+#     for d1 in d[1]:
+#         tmp_txt = tmp_txt+d1+' '
+#     tmp_txt = tmp_txt+'\n'
+#     dpl_di.write(tmp_txt)
+# dpl_di.close()
 
-lan_di = open("Bond_LANO.bnd",'w')
-for d in lan_bond:
-    tmp_txt = ''
-    for d1 in d[0]:
-        tmp_txt = tmp_txt+d1+' '
-    for d1 in d[1]:
-        tmp_txt = tmp_txt+d1+' '
-    tmp_txt = tmp_txt+'\n'
-    lan_di.write(tmp_txt)
-lan_di.close()
+# lan_di = open("Dihed_LANO.dhd",'w')
+# for d in lan_d:
+#     tmp_txt = ''
+#     for d1 in d[0]:
+#         tmp_txt = tmp_txt+d1+' '
+#     for d1 in d[1]:
+#         tmp_txt = tmp_txt+d1+' '
+#     tmp_txt = tmp_txt+'\n'
+#     lan_di.write(tmp_txt)
+# lan_di.close()
 
-# print("angles")
-# compare_angles(ff_ang,diplop_ang,diplop_ang)
+# # print("angles")
+# # compare_angles(ff_ang,diplop_ang,diplop_ang)
 
 # if __name__ == "__main__":
 # in1,in2= sys.argv[0],sys.argv[1]
