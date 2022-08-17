@@ -69,14 +69,14 @@ def ternary_CG_leaflet(leaf):
     oot = 0
     fig,ax = plt.subplots(2,3,figsize=(12,8))
     uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_eq_%s_inactive_short_cgtmpNEW"%(leaf),"",ax=ax[0,1],out=uot)#,initial="CG/data/init_raw_%s_inactive_titrate_shortcg"%(leaf))
-    cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_short_map"%(leaf),"",ax=ax[0,0])#,initial="CG/data/init_raw_%s_inactive_longcg"%(leaf))
-    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_%s_inactive_short_map"%(leaf),"","CG/data/pi_eq_%s_inactive_short_cgtmpNEW"%(leaf),ax=ax[0,2])
+    cgp.Ternary_Heat_Map("CG/data/pi_eq_%s_inactive_short_cgtmp_iter"%(leaf),"",ax=ax[0,0])#,initial="CG/data/init_raw_%s_inactive_longcg"%(leaf))
+    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_short_cgtmp_iter"%(leaf),"","CG/data/pi_eq_%s_inactive_short_cgtmpNEW"%(leaf),ax=ax[0,2])
+    
     cgp.Ternary_Heat_Map("CG/data/pi_eq_%s_inactive_short_cgtmpNEW"%(leaf),"",ax=ax[1,1])#,initial="CG/data/init_raw_%s_inactive_shortcg"%(leaf))
-    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_long_map.csv"%(leaf),"",ax=ax[1,0], out=uot)#,initial="CG/data/pi_eq_%s_inactive_titrate_short_cgtmp"%(leaf))
-    # cgp.Ternary_Scatter(ax[1,1], "CG/data/pi_slope")
-    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_eq_%s_inactive_short_cgtmpNEW"%(leaf),"","CG/data/pi_raw_%s_inactive_long_map.csv"%(leaf),ax=ax[1,2],out=oot)
-    # cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_titrate_short_cgtmp"%(leaf),"","CG/data/pi_raw_%s_inactive_long_cg"%(leaf),ax=ax[2,0],out=oot)
-    # cgp.Ternary_Heat_Map("CG/data/pi_eq_%s_inactive_titrate_short_cgtmp"%(leaf),"","CG/data/pi_raw_%s_inactive_short_cg"%(leaf),ax=ax[2,1],out=oot)
+    uot,sm1 = cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_long_cgtmpNEW"%(leaf),"",ax=ax[1,0], out=uot)#,initial="CG/data/pi_eq_%s_inactive_titrate_short_cgtmp"%(leaf))
+    oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_long_cgtmpNEW"%(leaf),"","CG/data/pi_raw_%s_inactive_short_cgtmpNEW"%(leaf),ax=ax[1,2],out=oot)
+    # oot,sm2 = cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_short_cgtmpNEW"%(leaf),"","CG/data/pi_raw_%s_inactive_long_cgtmpNEW"%(leaf),ax=ax[2,0],out=oot)
+    # cgp.Ternary_Heat_Map("CG/data/pi_raw_%s_inactive_short_cgtmpNEW"%(leaf),"","CG/data/pi_raw_%s_inactive_long_cgtmpNEW"%(leaf),ax=ax[2,1])
 
     cax = plt.axes([1, 0.25, 0.025, 0.5])
     plt.colorbar(sm2, cax=cax,format='%.3f')
@@ -84,8 +84,8 @@ def ternary_CG_leaflet(leaf):
     plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     plt.tight_layout()
     # plt.show()
-    # plt.savefig("CG_ternary_short-long.pdf",bbox_inches='tight')
-    # plt.close()
+    plt.savefig("CG_ternary_short-long.pdf",bbox_inches='tight')
+    plt.close()
     # fig,ax = plt.subplots(2,4,figsize=(12,8))
     # i = pd.read_csv("%s/CG/data/pi_raw_inactive_longcg.csv"%chp.choose_path()[1],index_col=0).T
     # a = pd.read_csv("%s/CG/data/pi_raw_active_longcg.csv"%chp.choose_path()[1],index_col=0).T    
@@ -109,7 +109,7 @@ def ternary_CG_leaflet(leaf):
     # plt.colorbar(sm1,cax=cax,format="%.3f",orientation="horizontal")
     # plt.tight_layout()
     # plt.show()
-    # plt.savefig("Extended_Short_%s.pdf"%leaf,bbox_inches='tight')
+    # plt.savefig("Extended_Short_%sNEWWTF.pdf"%leaf,bbox_inches='tight')
     # plt.close()
 
 ternary_CG_leaflet("low") 
@@ -445,13 +445,13 @@ def network(leaflet=None, kind=None, act=None):
 def sig_conv(SL,SU,kind):
     cgp.plot_sigConverge(SL,SU,kind)
 
-import numpy as np
-test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
-a = test1.build_CGTM(symitrize=False)#write_pi_eq()
-b = test1.build_raw()#write_pi_raw()
-pi_raw = b[0]
-pi_eq = a[0]
-cgtm = a[-1].values
+# import numpy as np
+# test1 = cgc.CGTM_Calculations("",1,"cg","inactive","short")#.sigConverge_time()
+# a = test1.build_CGTM(symitrize=False)#write_pi_eq()
+# b = test1.build_raw()#write_pi_raw()
+# pi_raw = b[0]
+# pi_eq = a[0]
+# cgtm = a[-1].values
 
 # X = []
 # for i in range(0,len(pi_raw)):
