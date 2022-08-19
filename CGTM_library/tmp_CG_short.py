@@ -265,8 +265,8 @@ class CGTM_Collect_Data:
         #iterates over each file
         states_u, states_l = [],[]
         
-        for i in range(1,len(glob.glob("%s/titrate*.35"%self.path))+1):
-            for j in [".4",".45",".5",".55",".6",".65",".7",".75"]:#glob.glob("%s/titration1-10/inactive%i/DOPC*"%(self.path,i)):
+        for i in range(1,2):#len(glob.glob("%s/CG/data/shells/titrate*.35*"%self.path))+1):
+            for j in [".35"]:#,".4",".45",".5",".55",".6",".65",".7",".75"]:#glob.glob("%s/titration1-10/inactive%i/DOPC*"%(self.path,i)):
                 print("Running System %s-%s..."%(i,j))
                 try: 
                     # up = np.loadtxt("%s/CG/data/resids/upp2_titrate_%i_%s.dat"%(self.path,i,j))
@@ -275,7 +275,7 @@ class CGTM_Collect_Data:
                     up_list = []
                     lo_list = []
                     
-                    leaflet =  np.loadtxt("%s/CG/data/resids/leaflet_%s%i%s.txt"%(self.path,self.act,i,j),dtype=int)
+                    leaflet =  np.loadtxt("%s/CG/data/resids/leaflet_%s%i%s_titrate.txt"%(self.path,self.act,i,j),dtype=int)
                     
                     for li in leaflet:
                         lo = []
@@ -296,81 +296,82 @@ class CGTM_Collect_Data:
                             np.loadtxt('%s/CG/data/resids/DOPC_titrate_%i_%s.dat'%(self.path,i,j),dtype='int')]
                 except:
                     print("failed at resid load")
-                try:
-                    upp_1 = pd.DataFrame(columns=["DPPC","CHOL","DOPC"], index=np.arange(0,121,1)).fillna(0) #what will index be?
-                    low_1 = pd.DataFrame(columns=["DPPC","CHOL","DOPC"], index=np.arange(0,121,1)).fillna(0) #double check lipid order
-                    fl = open("%s/titration1-10/inactive%s/DOPC%s/borders2.txt"%(self.path,4,j))
-                    lines = fl.readlines()#.split()
-                    fl.close()
-                    #lines = [int(l) for l in lines]
-                    shell = []
-                    
-                    upp2 = upp_1.copy()
-                    low2 = low_1.copy()
-                    
-                    n_res = []
-                    for frm, (dr,v_shell) in enumerate(zip(lines[::3],lines[1::3])):
-                        v_shell = [int(v) for v in v_shell.split(":")[1].split("\n")[0].split(" ")[-3:]]
-                        tmp_res = 0
-                        res = dr.split()[1::2]
-                        shell = dr.split()[0::2]
-                        for r,s in zip(res,shell):
-                            s = int(s)
-                            r = int(r)
-                            if s==1:
-                                tmp_res = tmp_res + 1
-                                #if lip in ["neutral","pl","sm"]:
-                                    # resids[0] ONLY contain DPPC
-                                    # 1 for CHOL and 2 for DOPC
-                                    # lo are resids in the upper leaflet (sim is upside down)
-                                    # and up is the lwoer leaflet
-                                if r in resids[0]:
-                                    if r in lo:
-                                        low_1["DPPC"][frm] += 1
-                                    elif r in up:
-                                        upp_1["DPPC"][frm] += 1
-                                    else:
-                                        logging.debug("There is no DPPC %i"%r)
-                                elif r in resids[1]:
-                                    if r in lo:
-                                        low_1["CHOL"][frm] += 1
-                                    elif r in up:
-                                        upp_1["CHOL"][frm] += 1
-                                    else:
-                                        logging.debug("There is no CHOL %i"%r)
+                # try:
+                upp_1 = pd.DataFrame(columns=["DPPC","CHOL","DOPC"], index=np.arange(0,len(leaflet),1)).fillna(0) #what will index be?
+                low_1 = pd.DataFrame(columns=["DPPC","CHOL","DOPC"], index=np.arange(0,len(leaflet),1)).fillna(0) #double check lipid order
+                fl = open("%s/CG/data/shells/titrate_inactive_shell%i%s.txt"%(self.path,i,j))
+                lines = fl.readlines()#.split()
+                fl.close()
+                #lines = [int(l) for l in lines]
+                shell = []
+                
+                upp2 = upp_1.copy()
+                low2 = low_1.copy()
+                
+                n_res = []
+                for frm, (dr,v_shell) in enumerate(zip(lines[::3],lines[1::3])):
+                    v_shell = [int(v) for v in v_shell.split(":")[1].split("\n")[0].split(" ")[-3:]]
+                    tmp_res = 0
+                    res = dr.split()[1::2]
+                    shell = dr.split()[0::2]
+                    for r,s in zip(res,shell):
+                        s = int(s)
+                        r = int(r)
+                        if s==1:
+                            tmp_res = tmp_res + 1
+                            #if lip in ["neutral","pl","sm"]:
+                                # resids[0] ONLY contain DPPC
+                                # 1 for CHOL and 2 for DOPC
+                                # lo are resids in the upper leaflet (sim is upside down)
+                                # and up is the lwoer leaflet
+                            if r in resids[0]:
+                                if r in lo:
+                                    low_1["DPPC"][frm] += 1
+                                elif r in up:
+                                    upp_1["DPPC"][frm] += 1
+                                else:
+                                    logging.debug("There is no DPPC %i"%r)
+                            elif r in resids[1]:
+                                if r in lo:
+                                    low_1["CHOL"][frm] += 1
+                                elif r in up:
+                                    upp_1["CHOL"][frm] += 1
+                                else:
+                                    logging.debug("There is no CHOL %i"%r)
 
-                                elif r in resids[2]:
-                                    if r in lo:
-                                        low_1["DOPC"][frm] += 1
-                                    elif r in up:
-                                        upp_1["DOPC"][frm] += 1
-                                    else:
-                                        logging.debug("There is no DOPC %i"%r)
+                            elif r in resids[2]:
+                                if r in lo:
+                                    low_1["DOPC"][frm] += 1
+                                elif r in up:
+                                    upp_1["DOPC"][frm] += 1
+                                else:
+                                    logging.debug("There is no DOPC %i"%r)
 
-                                        
-                                if (low_1 - low2).sum().sum()>1 or (upp_1 - upp2).sum().sum()>1:                                   
-                                    print(frm)
-                                upp2 = upp_1.copy()
-                                low2 = low_1.copy()
-                        n_res.append(tmp_res)
-                        if (low_1.T[frm]+upp_1.T[frm])["DPPC"] != v_shell[0] or (low_1.T[frm]+upp_1.T[frm])["DOPC"] != v_shell[2]:
-                            logging.debug("\nSys: %s%s\nFrame %i\n\n"%(i,j,frm))
-                            logging.debug(low_1.T[frm]+upp_1.T[frm].T.values)
-                            logging.debug(v_shell)
-                        else:
-                            logging.debug("all good")
+                                    
+                            if (low_1 - low2).sum().sum()>1 or (upp_1 - upp2).sum().sum()>1:                                   
+                                print(frm)
+                            upp2 = upp_1.copy()
+                            low2 = low_1.copy()
+                    n_res.append(tmp_res)
+                    if (low_1.T[frm]+upp_1.T[frm])["DPPC"] != v_shell[0] or (low_1.T[frm]+upp_1.T[frm])["DOPC"] != v_shell[2]:
+                        logging.debug("\nSys: %s%s\nFrame %i\n\n"%(i,j,frm))
+                        logging.debug(low_1.T[frm]+upp_1.T[frm].T.values)
+                        logging.debug(v_shell)
+                    else:
+                        logging.debug("all good")
 
-                    tmp_u = []
-                    tmp_l = []
-                    for frm_id in upp_1.index:
-                        #upp_1.iloc[frm,:].divide(upp_1.iloc[frm,:].sum())
-                        # TODO this term here isn't behaving as I thought it should....
-                        tmp_u.append(self.check_states(upp_1.iloc[frm_id,:].divide(upp_1.iloc[frm_id,:].sum())
-                                                , possible_states))
-                        tmp_l.append(self.check_states(low_1.iloc[frm_id,:].divide(low_1.iloc[frm_id,:].sum())
-                                                , possible_states))
-                    states_u.append(tmp_u)
-                    states_l.append(tmp_l)
+                tmp_u = []
+                tmp_l = []
+                for frm_id in upp_1.index:
+                    print(frm_id)
+                    #upp_1.iloc[frm,:].divide(upp_1.iloc[frm,:].sum())
+                    # TODO this term here isn't behaving as I thought it should....
+                    tmp_u.append(self.check_states(upp_1.iloc[frm_id,:].divide(upp_1.iloc[frm_id,:].sum())
+                                            , possible_states))
+                    tmp_l.append(self.check_states(low_1.iloc[frm_id,:].divide(low_1.iloc[frm_id,:].sum())
+                                            , possible_states))
+                states_u.append(tmp_u)
+                states_l.append(tmp_l)
                 # short, leaflet doesn't mater, gets first shell (every 3 lines form 1)
     #             for l in lines[1::3]:
     #                 shell.append([int(l.split()[-3]),int(l.split()[-2]),int(l.split()[-1])]) 
@@ -388,8 +389,8 @@ class CGTM_Collect_Data:
     #                 # determines all states for a file
     #             	states.append(self.check_states(s,possible_states))
     #             full_states.append(states)
-                except:
-                    print("Empty: %s-%s"%(i,j))
+                # except:
+                #     print("Empty: %s-%s"%(i,j))
        
         ###############################
         pd.DataFrame(states_l).to_csv("%s/CG/data/states/low_%s_%s_titrate_tmpN.csv"%(self.path, self.length, self.act))
