@@ -265,7 +265,7 @@ class CGTM_Collect_Data:
         #iterates over each file
         states_u, states_l = [],[]
         
-        for i in range(1,len(glob.glob("%s/CG/data/shells/titrate*.35*%s.txt"%self.path,self.length))+1):
+        for i in range(1,len(glob.glob("%s/CG/data/shells/titrate*.35*%s.txt"%(self.path,self.length)))+1):
             for j in [".35",".4",".45",".5",".55",".6",".65",".7",".75"]:#glob.glob("%s/titration1-10/inactive%i/DOPC*"%(self.path,i)):
                 print("Running System %s-%s..."%(i,j))
                 try: 
