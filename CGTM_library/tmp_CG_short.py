@@ -265,8 +265,8 @@ class CGTM_Collect_Data:
         #iterates over each file
         states_u, states_l = [],[]
         
-        for i in range(1,len(glob.glob("%s/CG/data/shells/titrate*.35*%s.txt"%(self.path,self.length)))+1):
-            for j in [".35",".4",".45",".5",".55",".6",".65",".7",".75"]:#glob.glob("%s/titration1-10/inactive%i/DOPC*"%(self.path,i)):
+        for i in range(1,len(glob.glob("%s/CG/data/shells/titrate*.4*%s.txt"%(self.path,self.length)))+1):
+            for j in [".4",".45",".5",".55",".6",".65",".7",".75"]:#glob.glob("%s/titration1-10/inactive%i/DOPC*"%(self.path,i)):
                 print("Running System %s-%s..."%(i,j))
                 try: 
                     # up = np.loadtxt("%s/CG/data/resids/upp2_titrate_%i_%s.dat"%(self.path,i,j))
@@ -511,6 +511,6 @@ class CGTM_Collect_Data:
         pd.DataFrame(states_u).to_csv("%s/CG/data/states/long_upp_%s_%sN.csv"%(self.path, self.length, self.act))
 
 
-lower = build = CGTM_Collect_Data(1,1,[],"cg","inact", "short",titrate='t').build_cg_short_titrate()
+lower = build = CGTM_Collect_Data(1,50,[],"cg","inact", "short").build_cg_short_states()
 
 # CGTM_Collect_Data(1,3,[],"cg","in", "long").build_cg_long_states()
