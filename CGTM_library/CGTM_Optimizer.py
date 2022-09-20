@@ -41,7 +41,7 @@ def power_law(x, a, b):
 
 def lag_time_analysis(lagmin,lagmax,lim=200,eig=False):
     import matplotlib.pyplot as plt
-    data = pd.read_csv("/home/liam/lms464/CG/data/states/low_short_inactive_tmpNEW.csv",index_col=0)#low_long_inactive_tmpNEW.csv",index_col=0)#"~/CG/data/states/low_short_inactive_tmp.csv",index_col=0)
+    data = pd.read_csv("/home/liam/lms464/CG/data/states/low_short_inactive_tmpNEW3.csv",index_col=0)#low_long_inactive_tmpNEW.csv",index_col=0)#"~/CG/data/states/low_short_inactive_tmp.csv",index_col=0)
     dat_ind = ["%i"%i for i in range(int(len(data.T)/2),len(data.T))]
     dat_ind = ["0"] + dat_ind
     trj,n_states,remp = ta.remap_trajs(data[dat_ind].values)
@@ -92,7 +92,7 @@ def lag_time_analysis(lagmin,lagmax,lim=200,eig=False):
         plt.scatter(np.arange(lagmin,lagmax,1),diff)
         plt.show()
         np.savetxt("CGTM_Lag_OG2.dat",np.array([np.arange(lagmin,lagmax,1),cum_diff_Short,cum_diff_Long]).T)
-        return np.where(diff == diff[diff>np.min(cum_diff_Short)].min())[0][0]+lagmin+1
+        return np.where(diff == diff[diff>np.min(cum_diff_Short)].min())[0][0]+lagmin
 def analyze_eigen():
 
     def smooth(y, box_pts):
@@ -144,7 +144,7 @@ def analyze_eigen():
     return [out.min(),out.max()]
 
 def Get_Lag_data(tau,stps):
-    data = pd.read_csv("/home/liam/lms464/CG/data/states/low_short_inactive_titrate_tmpN.csv",index_col=0)#low_long_inactive_tmpNEW.csv",index_col=0)#"~/CG/data/states/low_short_inactive_tmp.csv",index_col=0)
+    data = pd.read_csv("/home/liam/lms464/CG/data/states/low_short_inactive_tmpNEW3.csv",index_col=0)#low_long_inactive_tmpNEW.csv",index_col=0)#"~/CG/data/states/low_short_inactive_tmp.csv",index_col=0)
     dat_ind = ["%i"%i for i in range(int(len(data.T)/2),len(data.T))]
     dat_ind = ["0"] + dat_ind
     trj,n_states,remp = ta.remap_trajs(data[dat_ind].values)
@@ -169,13 +169,19 @@ def Get_Lag_data(tau,stps):
     hist_map = unmap(remp,hist,231)
     print(cummulative_difference(hist_map,reweight_map))
     print(cummulative_difference(true_hist,reweight_map))
+    plt.ylim(-0.06,0.06)
+    plt.title(r"$\tau$ %i"%tau)
     plt.bar(np.arange(0,231),hist_map-reweight_map)
     plt.bar(np.arange(0,231),true_hist-reweight_map,alpha=.5)
-    plt.show()
+    plt.savefig("Tau_diff_%i.png"%tau)
+    plt.close()
+    #plt.show()
 
 
-lag_time_analysis(1,200,lim=350,eig=True)
+lag_time_analysis(1,200,lim=400,eig=True)
 
 tau_min,tau_max = analyze_eigen()
 lag = lag_time_analysis(tau_min,tau_max)
-Get_Lag_data(lag,1)
+print(lag)
+for t in range(tau_min,tau_max+1):
+    Get_Lag_data(t,1)
